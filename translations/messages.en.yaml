@@ -1,0 +1,22 @@
+menu:
+    home: "Home"
+    calendar: "Calendar"
+    my_reservations: "My reservations"
+    admin: "Administration"
+    profile: "My Profile"
+    logout: "Log out"
+    login: "Log in"
+
+profile:
+    title: "My Account"
+    description: "Manage your personal information and preferences."
+    success: "Your information has been successfully updated."
+    save: "Save changes"
+
+login:
+    title: "Log in"
+    email: "Email"
+    password: "Password"
+    remember_me: "Remember me"
+    sign_in: "Sign in"
+    sso_google: "Sign in with Google"

@@ -7,5 +7,3 @@ import './bootstrap.js';
  * auto-initialized components see the final DOM only once.
  */
 import './styles/app.css';
-import './styles/dsfr/dist/dsfr/dsfr.min.css';
-import './styles/dsfr/dist/utility/utility.min.css';

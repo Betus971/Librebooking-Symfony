@@ -1,180 +1,64 @@
 {% set route = app.request.attributes.get('_route') %}
 
-{# --- 1. HEADER (Partie visible tout le temps) --- #}
-<header role="banner" class="fr-header">
-    <div class="fr-header__body">
-        <div class="fr-container">
-            <div class="fr-header__body-row">
-
-                {# A. LA MARQUE (Logo + Titre) #}
-                <div class="fr-header__brand fr-enlarge-link">
-                    <div class="fr-header__brand-top">
-                        <div class="fr-header__logo">
-                            <p class="fr-logo">République<br>Française</p>
-                        </div>
-                        <div class="fr-header__navbar">
-                            <button data-fr-opened="false" aria-controls="modal-mainmenu" title="Menu" type="button" id="btn-mainmenu" class="fr-btn--menu fr-btn">Menu</button>
-                        </div>
-                    </div>
-                    <div class="fr-header__service">
-                        <a href="{{ path('app_home') }}" title="Accueil - Accueil & Réservation">
-                            <p class="fr-header__service-title">Accueil & Réservation</p>
-                        </a>
-                        <p class="fr-header__service-tagline">DGGN</p>
-                    </div>
+<nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-50 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ path('app_home') }}" class="text-2xl font-bold text-indigo-600 tracking-tight flex items-center gap-2">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Librebooking
+                    </a>
+                </div>
+                
+                <div class="hidden sm:-my-px sm:ml-8 sm:flex sm:space-x-8">
+                    <a href="{{ path('app_home') }}" class="{% if route == 'app_home' %}border-indigo-500 text-slate-900 dark:text-white{% else %}border-transparent text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">{{ 'menu.home'|trans }}</a>
+                    
+                    {% if app.user %}
+                        <a href="{{ path('app_calendar') }}" class="border-transparent text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">{{ 'menu.calendar'|trans }}</a>
+                        <a href="{{ path('reservation_mine') }}" class="border-transparent text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">{{ 'menu.my_reservations'|trans }}</a>
+                        
+                        {% if is_granted('ROLE_ADMIN_RESSOURCE') %}
+                            <a href="{{ path('admin') }}" class="border-transparent text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+                                {{ 'menu.admin'|trans }}
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
+                {# Language Switcher (simple links for now) #}
+                <div class="flex items-center space-x-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <a href="?_locale=fr" class="hover:text-indigo-600 dark:hover:text-indigo-400 {% if app.request.locale == 'fr' %}text-indigo-600 dark:text-indigo-400 underline{% endif %}">FR</a>
+                    <span>|</span>
+                    <a href="?_locale=en" class="hover:text-indigo-600 dark:hover:text-indigo-400 {% if app.request.locale == 'en' %}text-indigo-600 dark:text-indigo-400 underline{% endif %}">EN</a>
                 </div>
 
-                {# B. LES OUTILS (Connexion / Déconnexion) #}
-                <div class="fr-header__tools">
-                    <div class="fr-header__tools-links">
-                        <ul class="fr-btns-group">
-                            <li>
-                                <button id="theme-toggle" class="fr-btn fr-icon-moon-line" title="Basculer le thème" type="button" aria-label="Basculer le thème sombre"></button>
-                            </li>
-                            {% if app.user %}
-                                <li>
-                                    <a class="fr-btn fr-icon-account-circle-line" href="#">
-                                        {{ app.user.fname ?? app.user.email }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="fr-btn fr-icon-logout-box-r-line" href="{{ path('app_logout') }}">
-                                        Déconnexion
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li>
-                                    <a class="fr-btn fr-icon-lock-line" href="{{ path('app_login') }}">
-                                        Se connecter
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                        <script>
-                            (function() {
-                                const html = document.documentElement;
-                                const btn = document.getElementById('theme-toggle');
-                                const stored = localStorage.getItem('fr-scheme');
-                                const scheme = stored || 'system';
-                                html.setAttribute('data-fr-scheme', scheme);
+                <button type="button" data-controller="darkmode" data-action="click->darkmode#toggle" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2.5">
+                    <svg data-darkmode-target="iconDark" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg data-darkmode-target="iconLight" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
 
-                                function updateIcon() {
-                                    const current = html.getAttribute('data-fr-scheme');
-                                    btn.classList.toggle('fr-icon-moon-line', current !== 'dark');
-                                    btn.classList.toggle('fr-icon-sun-line', current === 'dark');
-                                }
-                                updateIcon();
-
-                                btn.addEventListener('click', function() {
-                                    const current = html.getAttribute('data-fr-scheme');
-                                    const next = current === 'dark' ? 'light' : 'dark';
-                                    html.setAttribute('data-fr-scheme', next);
-                                    localStorage.setItem('fr-scheme', next);
-                                    updateIcon();
-                                });
-                            })();
-                        </script>
+                {% if app.user %}
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-sm">
+                            {{ app.user.email|slice(0, 1)|upper }}
+                        </div>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ app.user.email }}</span>
                     </div>
-                </div>
-
+                    <a href="{{ path('app_profile') }}" class="ml-4 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        {{ 'menu.profile'|trans }}
+                    </a>
+                    <a href="{{ path('app_logout') }}" class="ml-2 inline-flex items-center px-4 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm">
+                        {{ 'menu.logout'|trans }}
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm">
+                        {{ 'menu.login'|trans }}
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
-
-    {# --- 2. LE MENU (Partie cachée qui s'ouvre) --- #}
-    <div class="fr-header__menu fr-modal" id="modal-mainmenu" aria-labelledby="btn-mainmenu">
-        <div class="fr-container">
-            <button aria-controls="modal-mainmenu" title="Fermer" type="button" id="btn-closemenu" class="fr-btn--close fr-btn">Fermer</button>
-            <div class="fr-header__menu-links"></div>
-
-            <nav class="fr-nav" id="navigation-main" role="navigation" aria-label="Menu principal">
-                <ul class="fr-nav__list">
-
-                    {# LIEN 1 : ACCUEIL #}
-                    <li class="fr-nav__item">
-                        <a href="{{ path('app_home') }}" class="fr-nav__link" {% if route == 'app_home' %}aria-current="page"{% endif %}>Accueil</a>
-                    </li>
-
-                    {% if app.user %}
-                        {# LIEN 2 : VISITEURS #}
-                        <li class="fr-nav__item">
-                            <button class="fr-nav__btn" aria-expanded="false" aria-controls="menu-visiteurs">Visiteurs</button>
-                            <div class="fr-collapse fr-menu" id="menu-visiteurs">
-                                <ul class="fr-menu__list">
-                                    <li><a class="fr-nav__link" href="{{ path('app_visiteur_new') }}">Déclarer un visiteur</a></li>
-                                    <li><a class="fr-nav__link" href="{{ path('app_visiteur_groupe') }}">Déclaration groupée (délégation)</a></li>
-                                    <li><a class="fr-nav__link" href="{{ path('app_visiteur_index') }}">Mes visiteurs</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-                        {# LIEN 3 : RÉSERVATIONS (Mis à jour) #}
-                        <li class="fr-nav__item">
-                            <button class="fr-nav__btn" aria-expanded="false" aria-controls="menu-reservations">Réservations</button>
-                            <div class="fr-collapse fr-menu" id="menu-reservations">
-                                <ul class="fr-menu__list">
-                                    {# On a retiré "Nouvelle réservation" pour forcer à passer par le calendrier #}
-                                    <li><a class="fr-nav__link" href="{{ path('app_calendar') }}">Calendrier</a></li>
-                                    <li><a class="fr-nav__link" href="{{ path('app_calendar_v2') }}">Calendrier V2</a></li>
-                                    <li><a class="fr-nav__link" href="{{ path('app_availability') }}">Disponibilités</a></li>
-                                    <li><a class="fr-nav__link" href="{{ path('reservation_mine') }}">Mes réservations</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-                        {# LIEN 4 : SÉCURITÉ #}
-                        {% if is_granted('ROLE_AGENT_ACCUEIL') %}
-                            <li class="fr-nav__item">
-                                <button class="fr-nav__btn" aria-expanded="false" aria-controls="menu-secu">Sécurité / Accueil</button>
-                                <div class="fr-collapse fr-menu" id="menu-secu">
-                                    <ul class="fr-menu__list">
-                                        <li><a class="fr-nav__link" href="{{ path('app_gestion_visiteur') }}">Gestion des visiteurs </a></li>
-                                        <li><a class="fr-nav__link" href="{{ path('app_badge_attribution_index') }}">Gestion attribution </a></li>
-                                        {% if is_granted('ROLE_ADMIN_BADGE') %}
-                                            <li><a class="fr-nav__link" href="{{ path('app_badge_index') }}">Gestion Badges</a></li>
-                                            <li><a class="fr-nav__link" href="{{ path('app_badge_type_index') }}">Types de badges</a></li>
-                                            <li><a class="fr-nav__link" href="{{ path('app_ifpr_index') }}">Fichier IFPR</a></li>
-                                            <li><a class="fr-nav__link" href="{{ path('app_statistique') }}">Statistique des visites </a></li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endif %}
-
-                        {# LIEN 5 : ADMIN RESSOURCE #}
-                        {% if is_granted('ROLE_ADMIN_RESSOURCE') %}
-                            <li class="fr-nav__item">
-                                <button class="fr-nav__btn" aria-expanded="false" aria-controls="menu-admin">Gestion / Ressource</button>
-                                <div class="fr-collapse fr-menu" id="menu-admin">
-                                    <ul class="fr-menu__list">
-                                        <li><a class="fr-nav__link" href="{{ path('admin_reservation_pending') }}">Validations en attente</a></li>
-                                        <li><a class="fr-nav__link" href="{{ path('admin_reservation_index') }}">Historique</a></li>
-                                        <li><a class="fr-nav__link" href="{{ path('app_resource_index') }}">Salles </a></li>
-                                        <li><a class="fr-nav__link" href="{{ path('app_resource_category_index') }}">Catégories</a></li>  {# ← AJOUTÉ #}
-                                        <li><a class="fr-nav__link" href="{{ path('app_schedule_index') }}">Plannings</a></li>
-                                        <li><a class="fr-nav__link" href="{{ path('app_announcement_index') }}">Annonces</a></li>
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endif %}
-
-                        {# LIEN 6 : SUPER ADMIN (Mis à jour) #}
-                        {% if is_granted('ROLE_SUPER_ADMIN') %}
-                            <li class="fr-nav__item">
-                                <button class="fr-nav__btn" aria-expanded="false" aria-controls="menu-superadmin">Super Admin</button>
-                                <div class="fr-collapse fr-menu" id="menu-superadmin">
-                                    <ul class="fr-menu__list">
-                                        <li><a class="fr-nav__link" href="{{ path('app_admin_user') }}">Utilisateurs & Rôles</a></li>
-                                        {# NOUVEAU LIEN POUR GERER LES GROUPES : #}
-                                        <li><a class="fr-nav__link" href="{{ path('app_resource_group_index') }}">Équipes / Groupes</a></li>
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-
-                </ul>
-            </nav>
-        </div>
-    </div>
-</header>
+</nav>

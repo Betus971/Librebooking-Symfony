@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Repository\ResourceRepository;
-use App\Repository\VisitorRepository;
 use App\Util\WeekHelper;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -102,44 +101,23 @@ final class CalendarController extends AbstractController
         ]);
     }
     /**
-     * Flux ICS pour Thunderbird / Outlook / Google Calendar
-     * Affiche les Visiteurs ET les Ressources
+     * ICS Feed for Thunderbird / Outlook / Google Calendar
+     * Displays Resources/Reservations
      */
     #[Route('/calendar/feed.ics', name: 'app_calendar_feed', methods: ['GET'])]
     public function feed(
-        VisitorRepository $visitorRepository,
         ResourceRepository $resourceRepository
         // ReservationRepository $reservationRepository // <-- Injection du repo de réservations
     ): Response
     {
         $icsContent = "BEGIN:VCALENDAR\r\n";
         $icsContent .= "VERSION:2.0\r\n";
-        $icsContent .= "PRODID:-//MonApp//GestionRessources//FR\r\n";
+        $icsContent .= "PRODID:-//Librebooking//FR\r\n";
         $icsContent .= "CALSCALE:GREGORIAN\r\n";
         $icsContent .= "METHOD:PUBLISH\r\n";
 
         // ==========================================
-        // 1. GESTION DES VISITEURS
-        // ==========================================
-        $visiteurs = $visitorRepository->findAll();
-
-        foreach ($visiteurs as $visiteur) {
-            if (!$visiteur->getDateArrivee() || !$visiteur->getDateDepart()) { continue; }
-
-            // Titre : "Visite : NOM Prénom"
-            $summary = "Visite: " . strtoupper($visiteur->getNom()) . " " . $visiteur->getPrenom();
-
-            $icsContent .= $this->createIcsEvent(
-                'visiteur-' . $visiteur->getId(),
-                $visiteur->getDateArrivee(),
-                $visiteur->getDateDepart(),
-                $summary,
-                "Société: " . ($visiteur->getSociete() ?? 'N/A')
-            );
-        }
-
-        // ==========================================
-        // 2. GESTION DES RESSOURCES (Salles, etc.)
+        // 1. GESTION DES RESSOURCES (Salles, etc.)
         // ==========================================
         // Si vous avez une entité 'Reservation' liée à une 'Resource'
         /*
@@ -200,11 +178,10 @@ final class CalendarController extends AbstractController
 
     private function escapeIcs(string $string): string
     {
-        // P1.7 — Échappement RFC 5545 robuste contre l'injection CRLF.
-        // L'ordre est important : on traite d'abord le backslash, puis les
-        // séquences de fin de ligne (CRLF/CR/LF → littéral "\n"), puis , et ;.
-        // L'ancienne version transformait \r en chaîne vide, ce qui permettait
-        // d'injecter une nouvelle ligne dans le flux ICS via un nom de visiteur.
+        // P1.7 — Robust RFC 5545 escaping against CRLF injection.
+        // Order is important: we treat backslash first, then
+        // CRLF/CR/LF -> "\n", then , and ;.
+        // The old version replaced \r with empty strings.
         return str_replace(
             ['\\',   "\r\n", "\r",  "\n",  ',',   ';'],
             ['\\\\', '\\n',  '\\n', '\\n', '\\,', '\\;'],

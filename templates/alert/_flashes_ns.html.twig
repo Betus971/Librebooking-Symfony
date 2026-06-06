@@ -12,7 +12,7 @@
         <div class="fr-alert fr-alert--{{ variant }} fr-mb-3w" role="status">
             <p class="fr-alert__title">{{ title[variant] }}</p>
             {# P0.7 — Pas de |raw : un message de flash peut contenir des données
-               saisies par l'utilisateur (titre de réservation, nom de visiteur…).
+               saisies par l'utilisateur (titre de réservation…).
                Le |raw permettait une XSS stockée. Twig échappe désormais le message. #}
             <p>{{ message }}</p>
             <button class="fr-btn fr-btn--close" type="button" title="Masquer"

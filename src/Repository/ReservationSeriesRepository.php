@@ -19,16 +19,14 @@ class ReservationSeriesRepository extends ServiceEntityRepository
      *
      * Une série est visible par un gestionnaire si AU MOINS une de ses
      * ressources :
-     *   (a) porte le même code unité que lui (couche SSO automatique), OU
-     *   (b) appartient à un de ses ResourceGroup (couche manuelle d'exception).
+     *   (a) appartient à un de ses ResourceGroup (couche manuelle d'exception).
      *
      * Sémantique des filtres passés par le contrôleur :
      *   - $f['scoped'] absent/false  => super-admin : AUCUNE restriction.
      *   - $f['scoped'] === true      => gestionnaire : on restreint.
      *       $f['resourceGroupIds'] : int[]  (groupes de l'utilisateur)
-     *       $f['scopeCodeUnite']   : ?int   (code unité de l'utilisateur)
      *
-     * Si le gestionnaire n'a ni groupe ni code unité, il ne voit rien
+     * Si le gestionnaire n'a ni groupe, il ne voit rien
      * (sécurité par défaut : `1 = 0`).
      *
      * @param string $resourceAlias alias DQL de la ressource (ex. 'r', 'r2')
@@ -42,18 +40,14 @@ class ReservationSeriesRepository extends ServiceEntityRepository
         $groupIds = (isset($f['resourceGroupIds']) && is_array($f['resourceGroupIds']))
             ? $f['resourceGroupIds']
             : [];
-        $unite = $f['scopeCodeUnite'] ?? null;
 
         $conds = [];
         if (!empty($groupIds)) {
             $conds[] = sprintf('IDENTITY(%s.resourceGroup) IN (:scopeGroupIds)', $resourceAlias);
         }
-        if (null !== $unite) {
-            $conds[] = sprintf('%s.codeUnite = :scopeUnite', $resourceAlias);
-        }
 
         if ([] === $conds) {
-            // Ni groupe ni unité connue : ne rien retourner.
+            // Ni groupe connue : ne rien retourner.
             $qb->andWhere('1 = 0');
             return;
         }
@@ -61,9 +55,6 @@ class ReservationSeriesRepository extends ServiceEntityRepository
         $qb->andWhere('(' . implode(' OR ', $conds) . ')');
         if (!empty($groupIds)) {
             $qb->setParameter('scopeGroupIds', $groupIds);
-        }
-        if (null !== $unite) {
-            $qb->setParameter('scopeUnite', $unite);
         }
     }
 

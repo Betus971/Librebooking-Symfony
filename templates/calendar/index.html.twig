@@ -1,24 +1,74 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Planning{% endblock %}
+{% block title %}Planning - Librebooking{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
         #calendar { max-width: 1200px; margin: 0 auto; }
+        
+        /* Personnalisation Tailwind pour FullCalendar */
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: #e2e8f0;
+        }
+        .fc .fc-button-primary {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        .fc .fc-button-primary:hover {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+        .fc .fc-button-primary:disabled {
+            background-color: #818cf8;
+            border-color: #818cf8;
+        }
+        .fc .fc-button-primary:not(:disabled):active, .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #3730a3;
+            border-color: #3730a3;
+        }
+        .fc .fc-button-primary:not(:disabled):focus, .fc .fc-button-primary:not(:disabled).fc-button-active:focus {
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.5);
+        }
+        .fc .fc-today-button {
+            text-transform: capitalize;
+        }
+        .fc-toolbar-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #0f172a;
+        }
+        .fc-theme-standard .fc-scrollgrid {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border-color: #e2e8f0;
+        }
+        .fc-day-today {
+            background-color: #f8fafc !important;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="fr-container fr-my-4w">
-        <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mb-3w">
-            <div class="fr-col-12 fr-col-md-6">
-                <h1 class="fr-h3 fr-mb-1w">{{ pageTitle }}</h1>
-            </div>
-            <div class="fr-col-12 fr-col-md-6 fr-text--right">
-                <div class="fr-select-group fr-mb-0">
-                    <label class="fr-label" for="resource-select">Filtrer par ressource</label>
-                    <select class="fr-select" id="resource-select">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="flex-1 min-w-0">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                {{ pageTitle }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Consultez la disponibilité des ressources en temps réel.
+            </p>
+        </div>
+        
+        <div class="mt-4 md:mt-0 flex">
+            <div class="w-full sm:w-auto">
+                <label for="resource-select" class="sr-only">Filtrer par ressource</label>
+                <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    </div>
+                    <select id="resource-select" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-slate-300 rounded-md py-2 pr-10 border bg-white">
                         <option value="" {{ currentResourceId is null ? 'selected' : '' }}>Toutes les ressources</option>
                         {% for res in resources %}
                             <option value="{{ res.id }}" {{ currentResourceId == res.id ? 'selected' : '' }}>{{ res.name }}</option>
@@ -27,104 +77,127 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="bg-white shadow-xl shadow-slate-200/50 rounded-2xl p-4 sm:p-6 border border-slate-100">
         <div id="calendar"
              data-resource-id="{{ resourceId is not null ? resourceId : '' }}"
              data-week-start="{{ weekStart }}"
              data-new-url="{{ path('reservation_new') }}"
-             data-events-url="/fc-load-events"></div>
+             data-events-url="/fc-load-events"
+             class="min-h-[600px]"></div>
     </div>
+</div>
 
-    {{ include('components/_fullcalendar_lib.html.twig') }}
-    <script>
-        (function() {
-            // IIFE → aucune variable ne fuit dans le global, pas de double-init entre deux pages.
-            let fc = null;
-            let initialized = false;
+{{ include('components/_fullcalendar_lib.html.twig') }}
+<script>
+    (function() {
+        // IIFE → aucune variable ne fuit dans le global, pas de double-init entre deux pages.
+        let fc = null;
+        let initialized = false;
 
-            function destroyFc() {
-                if (fc) {
-                    try { fc.destroy(); } catch (_) {}
-                    fc = null;
-                }
-                const el = document.getElementById('calendar');
-                if (el) el.innerHTML = '';
+        function destroyFc() {
+            if (fc) {
+                try { fc.destroy(); } catch (_) {}
+                fc = null;
             }
+            const el = document.getElementById('calendar');
+            if (el) el.innerHTML = '';
+        }
 
-            function initFc() {
-                if (initialized) return;            // garde-fou contre DOMContentLoaded + turbo:load
-                const el = document.getElementById('calendar');
-                if (!el || typeof FullCalendar === 'undefined') return;
+        function initFc() {
+            if (initialized) return;            // garde-fou contre DOMContentLoaded + turbo:load
+            const el = document.getElementById('calendar');
+            if (!el || typeof FullCalendar === 'undefined') return;
 
-                destroyFc();
+            destroyFc();
 
-                const resourceIdAttr = el.dataset.resourceId;
-                const resourceId = resourceIdAttr === '' ? null : parseInt(resourceIdAttr, 10);
-                const weekStart  = el.dataset.weekStart;
-                const newUrl     = el.dataset.newUrl;
-                const eventsUrl  = el.dataset.eventsUrl;
+            const resourceIdAttr = el.dataset.resourceId;
+            const resourceId = resourceIdAttr === '' ? null : parseInt(resourceIdAttr, 10);
+            const weekStart  = el.dataset.weekStart;
+            const newUrl     = el.dataset.newUrl;
+            const eventsUrl  = el.dataset.eventsUrl;
 
-                fc = new FullCalendar.Calendar(el, {
-                    initialView: 'timeGridWeek',
-                    initialDate: weekStart,
-                    locale: 'fr',
-                    timeZone: 'Europe/Paris',
-                    firstDay: 1,
-                    nowIndicator: true,
-                    expandRows: true,
-                    slotMinTime: '07:00:00',
-                    slotMaxTime: '21:00:00',
-                    slotDuration: '00:30:00',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    },
-                    buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', day: 'Jour' },
-                    events: {
-                        url: eventsUrl,
-                        method: 'POST',
-                        extraParams: { filters: JSON.stringify({ resourceId: resourceId }) }
-                    },
-                    eventClassNames: (arg) => arg.event.extendedProps.classNames || [],
-                    dateClick: function(info) {
-                        let url = newUrl + '?date=' + info.dateStr;
-                        if (resourceId !== null) url += '&resource=' + resourceId;
-                        window.location.href = url;
-                    },
-                    eventClick: function(info) {
-                        info.jsEvent.preventDefault();
-                        if (info.event.id) {
-                            window.location.href = '/reservation/' + info.event.id + '/';
-                        }
+            // Détection de la largeur de l'écran pour adapter la vue par défaut
+            const isMobile = window.innerWidth < 768;
+            
+            fc = new FullCalendar.Calendar(el, {
+                initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+                initialDate: weekStart,
+                locale: 'fr',
+                timeZone: 'Europe/Paris',
+                firstDay: 1,
+                nowIndicator: true,
+                expandRows: true,
+                height: 'auto',
+                stickyHeaderDates: true,
+                slotMinTime: '07:00:00',
+                slotMaxTime: '21:00:00',
+                slotDuration: '00:30:00',
+                headerToolbar: {
+                    left: isMobile ? 'prev,next' : 'prev,next today',
+                    center: 'title',
+                    right: isMobile ? 'timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', day: 'Jour' },
+                events: {
+                    url: eventsUrl,
+                    method: 'POST',
+                    extraParams: { filters: JSON.stringify({ resourceId: resourceId }) }
+                },
+                eventClassNames: (arg) => arg.event.extendedProps.classNames || [],
+                dateClick: function(info) {
+                    let url = newUrl + '?date=' + info.dateStr;
+                    if (resourceId !== null) url += '&resource=' + resourceId;
+                    window.location.href = url;
+                },
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    if (info.event.id) {
+                        window.location.href = '/reservation/' + info.event.id + '/';
                     }
-                });
+                }
+            });
 
-                fc.render();
-                initialized = true;
+            fc.render();
+            initialized = true;
+        }
+
+        // Changement de ressource : navigation Turbo-friendly (window.location gère tout seul)
+        const select = document.getElementById('resource-select');
+        if (select) {
+            select.addEventListener('change', (e) => {
+                const v = e.target.value;
+                window.location.href = v ? ('/calendar/' + v) : '/calendar';
+            });
+        }
+
+        // Gestion du redimensionnement (pour basculer de vue sur mobile)
+        window.addEventListener('resize', function() {
+            if (fc) {
+                const isMobile = window.innerWidth < 768;
+                const currentView = fc.view.type;
+                
+                if (isMobile && currentView !== 'timeGridDay' && currentView !== 'listWeek') {
+                    fc.changeView('timeGridDay');
+                } else if (!isMobile && currentView === 'timeGridDay') {
+                    fc.changeView('timeGridWeek');
+                }
             }
+        });
 
-            // Changement de ressource : navigation Turbo-friendly (window.location gère tout seul)
-            const select = document.getElementById('resource-select');
-            if (select) {
-                select.addEventListener('change', (e) => {
-                    const v = e.target.value;
-                    window.location.href = v ? ('/calendar/' + v) : '/calendar';
-                });
-            }
+        // Cycle de vie :
+        // - Premier chargement classique : on init dès que le DOM est prêt
+        // - Navigation Turbo : turbo:before-cache → detruit, turbo:load → re-init
+        // Le flag `initialized` empêche les doubles-inits si les deux events tirent.
+        if (document.readyState !== 'loading') {
+            initFc();
+        } else {
+            document.addEventListener('DOMContentLoaded', initFc, { once: true });
+        }
 
-            // Cycle de vie :
-            // - Premier chargement classique : on init dès que le DOM est prêt
-            // - Navigation Turbo : turbo:before-cache → detruit, turbo:load → re-init
-            // Le flag `initialized` empêche les doubles-inits si les deux events tirent.
-            if (document.readyState !== 'loading') {
-                initFc();
-            } else {
-                document.addEventListener('DOMContentLoaded', initFc, { once: true });
-            }
-
-            document.addEventListener('turbo:load', () => { initialized = false; initFc(); });
-            document.addEventListener('turbo:before-cache', () => { destroyFc(); initialized = false; });
-        })();
-    </script>
+        document.addEventListener('turbo:load', () => { initialized = false; initFc(); });
+        document.addEventListener('turbo:before-cache', () => { destroyFc(); initialized = false; });
+    })();
+</script>
 {% endblock %}

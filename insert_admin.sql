@@ -1,0 +1,1 @@
+INSERT INTO users (email, password, roles, fname, lname) VALUES ('admin@example.com', '$2y$13$OfYoBvIfnqLW4waXLviDl.vyb4vJ3CsCAECG2e9yyvr0rTEL/G4Ay', '["ROLE_ADMIN", "ROLE_ADMIN_RESSOURCE"]', 'Admin', 'System');

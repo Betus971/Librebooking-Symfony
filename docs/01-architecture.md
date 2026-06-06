@@ -1,133 +1,116 @@
-# booking-D — Architecture & vue d'ensemble
+# Librebooking — Architecture & Overview
 
-> **Public visé** : développeurs de la DGGN, chefs de projet, hiérarchie technique.
-> **Dernière mise à jour** : 2026-04-21
-> **Statut** : document vivant, toute évolution structurelle doit y être reflétée avant merge.
-
----
-
-## 1. À quoi sert `booking-D`
-
-`booking-D` est l'application de **réservation de ressources matérielles** de la DGGN. Elle remplace et consolide plusieurs fichiers Excel, mails et calendriers partagés qui servaient à réserver des **salles**, des **amphis**, des **véhicules** et, à terme, toute autre ressource matérielle dont l'allocation pose problème quand plusieurs personnes la veulent au même moment.
-
-Ce qui relève de `booking-D` :
-
-- Déclarer une ressource physique (salle, véhicule, etc.), la rattacher à un groupe, lui associer des créneaux d'ouverture, des plans/agencements (layouts), des règles d'approbation.
-- Permettre à un agent de **demander** un créneau sur une ou plusieurs ressources, éventuellement de façon récurrente, avec pièces jointes.
-- Faire **valider ou refuser** la demande par un gestionnaire de la ressource, de façon scopée (un gestionnaire d'amphis ne voit ni ne touche aux demandes de véhicules).
-- Gérer les **visiteurs** (déclaration, attribution de badge, fiche IFPR) et produire des **statistiques** de fréquentation.
-
-Ce qui **ne relève pas** de `booking-D` — et ce point est volontairement cadré : voir ADR `02-adr-separation-prestation-reservation.md`.
+> **Target Audience**: Developers, Project Managers, Technical Leads.
+> **Status**: Living document. Any structural evolution must be reflected here before merging.
 
 ---
 
-## 2. Origine du modèle de données
+## 1. Purpose of Librebooking
 
-Le schéma de base de données de `booking-D` **n'a pas été conçu de zéro** : il est repris du projet open-source **LibreBooking** (ex-phpScheduleIt / Booked), outil PHP de réservation de salles largement utilisé dans le monde universitaire et associatif. L'équipe a :
+`Librebooking` is a **physical resource reservation** application. It replaces and consolidates spreadsheets, emails, and shared calendars historically used to book **meeting rooms**, **amphitheaters**, **vehicles**, and any other physical resource where concurrent allocation is an issue.
 
-- extrait la structure des tables de LibreBooking (`reservation_series`, `reservation_instances`, `reservation_resources`, `reservation_statuses`, etc.) ;
-- l'a **ré-implémentée en PostgreSQL** (LibreBooking cible historiquement MySQL) ;
-- l'a **mappée en entités Doctrine** pour intégration Symfony 7.3 ;
-- l'a étendue avec des spécificités DGGN : `ResourceGroup`, scope par groupe, pièces jointes, audit log, blackouts, visiteurs/badges, IFPR.
+What falls under `Librebooking`:
 
-**Conséquences pratiques à connaître :**
-
-- Certains champs sont hérités et portent la marque de l'origine : la propriété `legacyid` de `ReservationSeries` sert à retrouver une ligne migrée depuis une instance LibreBooking historique. Elle est `nullable` et peut rester vide pour toute série créée nativement dans `booking-D`.
-- Les **IDs de `ReservationStatus`** (1/2/3/4) sont des valeurs **stables** reprises du modèle LibreBooking. Les modifier casserait la compatibilité de données migrées et les constantes PHP qui les référencent.
-- Le vocabulaire (`Series`, `Instance`, `Resource`) reflète la terminologie LibreBooking, d'où l'importance du glossaire `docs/03-glossaire.md` : on a gardé le vocabulaire d'origine pour limiter la surface de réécriture, au prix d'une petite courbe d'apprentissage pour le nouveau dev.
-- Certains choix d'implémentation portent la mention *"LibraBooking-friendly"* dans le code (ex: le motif de refus n'est pas persisté sur la série elle-même mais dans l'audit log, ce qui reste compatible avec le schéma d'origine).
-
-**Pourquoi c'est important pour l'évolution du produit.** Le schéma a été pensé par une communauté avec une logique précise : réservation de ressources matérielles allouées sur créneaux. Le tordre pour y faire entrer un domaine différent (cf. Prestation, ADR 001) reviendrait à jeter la cohérence métier qui a fait la solidité de LibreBooking depuis plus de 15 ans. Toute évolution doit **prolonger** la logique LibreBooking, pas la contredire.
+- Declaring a physical resource (room, vehicle, etc.), attaching it to a group, associating it with opening slots, layouts, and approval rules.
+- Allowing a user to **request** a slot for one or multiple resources, optionally on a recurring basis, with file attachments.
+- Allowing a resource manager to **approve or reject** the request, within their specific scope (an amphitheater manager neither sees nor touches vehicle requests).
 
 ---
 
-## 3. Contraintes structurantes
+## 2. Origin of the Data Model
 
-Plusieurs contraintes conditionnent tous les choix qui suivent. Elles doivent être gardées à l'esprit avant de proposer une évolution :
+The database schema of `Librebooking` **was not designed from scratch**: it is based on the legacy open-source project **phpScheduleIt / Booked**, a PHP room reservation tool widely used in universities and associations. The team has:
 
-**Environnement fermé.** Le serveur de production est sur un réseau interne de la gendarmerie, sans accès Internet sortant. Les dépendances doivent être vendorées, les assets compilés en local, le déploiement se fait par `rsync` / `scp` depuis un poste de build. Aucune CDN publique n'est atteignable à l'exécution.
+- Extracted the core table structures (`reservation_series`, `reservation_instances`, `reservation_resources`, `reservation_statuses`, etc.).
+- **Re-implemented it in PostgreSQL** (Librebooking historically targeted MySQL).
+- **Mapped it into Doctrine entities** for Symfony 7 integration.
+- Extended it with new features: `ResourceGroup`, group-based scoping, attachments, audit logs, and blackout periods.
 
-**SSO obligatoire.** L'authentification passe par **LemonLDAP::NG** (portail SSO interne). L'application ne gère ni inscription, ni mot de passe, ni reset. Un `LemonLdapAuthenticator` custom récupère les en-têtes HTTP positionnés par le proxy LemonLDAP et instancie l'utilisateur correspondant.
+**Practical consequences to know:**
 
-**DSFR.** L'interface respecte le Système de Design de l'État Français. Les composants (alertes, formulaires, boutons, tableaux) sont fournis par le bundle `radicaldingos/dsfr-form-theme-bundle` et la CSS DSFR. Éviter de réinventer des composants hors DSFR : cela casse l'homogénéité attendue par les services de l'État.
-
-**Turbo Drive actif.** La navigation utilise Turbo (`symfony/ux-turbo`). Cela a deux conséquences concrètes :
-
-- Les formulaires qui retournent des erreurs de validation doivent répondre en **HTTP 422**, sinon Turbo ignore le corps de la réponse.
-- Les scripts qui manipulent le DOM (ex. FullCalendar) doivent vivre dans le `body` et s'accrocher aux événements `turbo:load` / `turbo:before-cache` pour survivre aux navigations.
-
-**PostgreSQL.** La base de production est PostgreSQL 17/18. Le schéma est géré par Doctrine Migrations, jamais par `doctrine:schema:update`. Certaines données de référence (statuts, types) ne sont pas dans les migrations et doivent être seedées manuellement au déploiement (cf. `requet.start.txt`).
+- Some fields are inherited: the `legacyid` property of `ReservationSeries` is used to find a migrated row from a historical Librebooking instance. It is `nullable` and can remain empty for natively created series.
+- **IDs for `ReservationStatus`** (1/2/3/4) are **stable** values taken from the legacy model. Modifying them would break compatibility.
+- Vocabulary (`Series`, `Instance`, `Resource`) reflects the original terminology.
+- The schema was designed with a specific logic: reservation of physical resources allocated over time slots. Modifying it to fit an entirely different domain would break its consistency.
 
 ---
 
-## 4. Stack technique
+## 3. Structural Constraints
 
-| Couche | Choix | Version | Justification |
+Several constraints govern all subsequent choices:
+
+**SSO Authentication.** Authentication is handled via **Google OAuth2 SSO**. The application does not manage local sign-ups or passwords.
+
+**Tailwind CSS.** The interface uses **Tailwind CSS v4** to ensure a modern, responsive, and easily maintainable design, fully supporting Dark Mode.
+
+**Turbo Drive active.** Navigation uses Turbo (`symfony/ux-turbo`). This has two concrete consequences:
+- Forms that return validation errors must respond with **HTTP 422**, otherwise Turbo ignores the response body.
+- Scripts manipulating the DOM (e.g. FullCalendar) must live in the `body` and hook onto `turbo:load` / `turbo:before-cache` events to survive navigations.
+
+**PostgreSQL.** The production database is PostgreSQL 16+. The schema is managed by Doctrine Migrations.
+
+---
+
+## 4. Technical Stack
+
+| Layer | Choice | Version | Justification |
 |---|---|---|---|
-| Langage | PHP | 8.3 | Requis par Symfony 7.4 ; types natifs, readonly properties, attributs. |
-| Framework | Symfony | 7.4.* (LTS) | Version LTS officielle — bug fixes jusqu'en novembre 2028, correctifs de sécurité jusqu'en novembre 2029. Écosystème stable, conformité État. |
-| ORM | Doctrine ORM | 3.6 | Standard Symfony, migrations, QueryBuilder. |
-| SGBD | PostgreSQL | 17/18 | Fiabilité, contraintes d'intégrité, support des transactions longues. |
-| SSO | LemonLDAP::NG | — | Imposé par l'environnement DGGN. |
-| Front | Twig + Turbo + Stimulus | Turbo 2.35 | Navigation fluide, peu de JS, rendu serveur. |
-| Design | DSFR | — | Obligation État. |
-| Calendrier | FullCalendar + tattali/calendar-bundle | 7.0 | Rendu interactif, déjà intégré. |
-| PDF | DomPDF | 3.1 | Génération de badges, attestations. |
-| Uploads | VichUploader | 2.9 | Pièces jointes de réservation. |
-| Tests | PHPUnit | 12.5 | Tests unitaires et fonctionnels. |
-
-Les dépendances complètes sont figées dans `composer.lock` et `package-lock.json`.
+| Language | PHP | 8.4+ | Required by Symfony 7.4; native types, readonly properties, attributes. |
+| Framework | Symfony | 7.4.* (LTS) | Official LTS version. Stable ecosystem. |
+| ORM | Doctrine ORM | 3.6 | Symfony standard, migrations, QueryBuilder. |
+| DBMS | PostgreSQL | 16+ | Reliability, integrity constraints, transaction support. |
+| SSO | Google OAuth2 | — | Standard OAuth2 integration via KnpUOAuth2ClientBundle. |
+| Front | Twig + Turbo + Stimulus | Turbo 2 | Fluid navigation, minimal JS, server-side rendering. |
+| Design | Tailwind CSS | v4 | Modern styling, dark mode, responsive. |
+| Calendar | FullCalendar | 6+ | Interactive rendering. |
 
 ---
 
-## 5. Vue d'ensemble
+## 5. Overview
 
 ```mermaid
 flowchart LR
-    subgraph Client["Navigateur agent DGGN"]
-        UI[UI Twig + DSFR + Turbo]
+    subgraph Client["User Browser"]
+        UI[Twig UI + Tailwind + Turbo]
     end
 
-    subgraph Proxy["Proxy interne"]
-        LL[LemonLDAP::NG SSO]
+    subgraph Auth["Identity Provider"]
+        SSO[Google SSO]
     end
 
-    subgraph App["Serveur Symfony 7.3"]
+    subgraph App["Symfony 7 Server"]
         FW[Firewall + Voters]
         CTRL[Controllers]
-        DOM[Domaine Reservation]
-        REPO[Repositories Doctrine]
+        DOM[Reservation Domain]
+        REPO[Doctrine Repositories]
     end
 
     DB[(PostgreSQL)]
-    FS[(Filesystem pièces jointes)]
-    SMTP[[SMTP interne]]
+    FS[(Filesystem Attachments)]
 
-    UI -- HTTPS --> LL
-    LL -- En-têtes SSO --> FW
+    UI -- HTTPS --> SSO
+    SSO -- OAuth Token --> FW
     FW --> CTRL
     CTRL --> DOM
     CTRL --> REPO
     DOM --> REPO
     REPO --> DB
     CTRL --> FS
-    CTRL --> SMTP
 ```
 
-L'application n'expose aucune API publique. Les endpoints `/api/*` existants sont réservés à des appels AJAX internes (calendrier, disponibilité).
+The application exposes no public API. Existing `/api/*` endpoints are reserved for internal AJAX calls (calendar, availability).
 
 ---
 
-## 6. Modèle de domaine
+## 6. Domain Model
 
-Le domaine est découpé en plusieurs **contextes bornés** (bounded contexts au sens DDD) :
+The domain is divided into several **bounded contexts**:
 
-- **Réservation** : demander et valider l'usage d'une ressource sur un créneau.
-- **Ressource** : catalogue des salles, véhicules, etc., avec leurs groupes, leurs catégories, leurs plans.
-- **Accueil / Visiteurs** : déclaration de visiteurs, IFPR, badges.
-- **Utilisateurs & rôles** : vue mince, l'identité vient de LemonLDAP.
+- **Reservation**: Requesting and approving the use of a resource over a time slot.
+- **Resource**: Catalog of rooms, vehicles, etc., with their groups, categories, and layouts.
+- **Users & Roles**: Lightweight view, identity comes from Google SSO.
 
-### 6.1 Contexte Réservation
+### 6.1 Reservation Context
 
 ```mermaid
 classDiagram
@@ -176,8 +159,8 @@ classDiagram
         CANCELLED = 4
     }
 
-    ReservationSeries "1" --> "*" ReservationInstance : créneaux
-    ReservationSeries "1" --> "*" ReservationResource : ressources
+    ReservationSeries "1" --> "*" ReservationInstance : slots
+    ReservationSeries "1" --> "*" ReservationResource : resources
     ReservationResource "*" --> "1" Resource
     ReservationSeries "1" --> "*" ReservationAttachment
     ReservationSeries "1" --> "*" ReservationAuditLog
@@ -185,11 +168,11 @@ classDiagram
     Resource "*" --> "1" ResourceGroup
 ```
 
-**Clé de lecture** : une **Series** est UNE demande. Les **Instances** sont les créneaux concrets (une résa hebdomadaire sur 10 semaines = 10 instances). Les **ReservationResource** sont la table de jointure vers les ressources réservées. Le statut est porté au niveau de la Series (pas de l'instance) — on valide ou on refuse l'ensemble.
+**Key concept**: A **Series** is ONE request. **Instances** are the concrete time slots (a weekly reservation over 10 weeks = 10 instances). **ReservationResource** is the join table to the reserved resources. The status is held at the Series level (not the instance) — the entire request is approved or rejected as a whole.
 
-**Règle métier confirmée** : une Series porte sur des ressources **d'un seul et même groupe** (pas de mix amphi + véhicule dans une même demande). Cette règle simplifie les voters et doit être préservée.
+**Business rule**: A Series targets resources **from a single group** (no mixing amphitheaters and vehicles in the same request). This rule simplifies voters and must be preserved.
 
-### 6.2 Contexte Ressource
+### 6.2 Resource Context
 
 ```mermaid
 classDiagram
@@ -233,158 +216,68 @@ classDiagram
     Resource "1" --> "*" Schedule
     Schedule "1" --> "*" TimeBlock
     Resource "1" --> "*" BlackoutSeries
-    ResourceGroup "*" <--> "*" User : gestionnaires
+    ResourceGroup "*" <--> "*" User : managers
 ```
 
-**Clé de lecture** : `ResourceGroup` est le pivot du **scope** administratif. Un utilisateur avec `ROLE_ADMIN_RESSOURCE` peut gérer uniquement les ressources des groupes auxquels il est rattaché. C'est ce qui permet de distinguer l'admin "amphis" de l'admin "véhicules".
-
-### 6.3 Contexte Accueil
-
-```mermaid
-classDiagram
-    class Visitor {
-        +int id
-        +string fname
-        +string lname
-    }
-    class VisitorCategory {
-        +int id
-        +string label
-    }
-    class Ifpr {
-        +int id
-        +string niveau
-    }
-    class Badge {
-        +int id
-    }
-    class BadgeType {
-        +int id
-        +string label
-    }
-    class BadgeAttribution {
-        +int id
-        +DateTime given
-        +DateTime returned
-    }
-
-    Visitor "*" --> "1" VisitorCategory
-    Visitor "1" --> "0..1" Ifpr
-    BadgeAttribution "*" --> "1" Visitor
-    BadgeAttribution "*" --> "1" Badge
-    Badge "*" --> "1" BadgeType
-```
-
-Ce contexte est **indépendant** de la réservation : aucun lien direct entre un `Visitor` et une `ReservationSeries`. Un visiteur peut venir sans qu'aucune salle ne soit réservée (rendez-vous d'accueil, convocation, etc.).
+**Key concept**: `ResourceGroup` is the pivot for administrative **scope**. A user with `ROLE_ADMIN_RESSOURCE` can only manage resources belonging to groups they are attached to. This allows separating "room" admins from "vehicle" admins.
 
 ---
 
-## 7. Rôles et autorisations
+## 7. Roles and Authorizations
 
-### 7.1 Hiérarchie des rôles
+### 7.1 Role Hierarchy
 
-Définie dans `config/packages/security.yaml` :
+Defined in `config/packages/security.yaml`:
 
 ```yaml
 role_hierarchy:
-    ROLE_AGENT_ACCUEIL:   [ ]                        # Donne/Reprend badge
-    ROLE_ADMIN_RESSOURCE: [ ]                        # Gère SES ressources
-    ROLE_ADMIN_BADGE:     [ ROLE_AGENT_ACCUEIL ]     # Crée les badges + hérite accueil
+    ROLE_ADMIN_RESSOURCE: [ ]                        # Manages THEIR resources
     ROLE_SUPER_ADMIN:
         - ROLE_ADMIN
         - ROLE_ADMIN_RESSOURCE
-        - ROLE_ADMIN_BADGE
         - ROLE_ALLOWED_TO_SWITCH
 ```
 
-Deux observations structurantes :
+`ROLE_ADMIN_RESSOURCE` **does not inherit** from `ROLE_ADMIN`: this is intentional. This prevents a room manager from accessing the user list or global configuration.
 
-`ROLE_ADMIN_RESSOURCE` **n'hérite pas** de `ROLE_ADMIN` : c'est voulu. Les contrôleurs admin legacy restent protégés par `ROLE_ADMIN` ; le nouveau monde scopé utilise `ROLE_ADMIN_RESSOURCE` + voters. Cette séparation évite qu'un gestionnaire de salles ait accès à la liste des utilisateurs ou à la configuration globale.
+### 7.2 Two Layers of Defense
 
-`ROLE_ADMIN_BADGE` hérite de `ROLE_AGENT_ACCUEIL` : un admin badge peut physiquement remettre un badge, c'est normal.
+The project systematically applies **two independent guards**:
 
-**Retrait du `ROLE_ADMIN_PRESTA` (avril 2026).** Le rôle a été **physiquement supprimé** de `security.yaml` et de `UserRoleType`. Il n'existait que pour préparer une future application Prestations que ce dépôt ne portera **jamais** (voir ADR `02`). Le garder "en dormance" aurait été mensonger : `booking-D` n'est techniquement pas conçu pour les prestations à la personne (pas de grille tarifaire, pas de confidentialité médicale RGPD renforcée, pas de gestion de praticien). L'application Prestations, si elle voit le jour, sera un produit indépendant qui déclarera **son propre** rôle, sans compromis hérité.
+**Layer 1 — Firewall / `access_control`**: Broad, at the URL level. Prevents an unauthenticated user or a user with insufficient roles from reaching the route. Configured in `security.yaml`.
 
-### 7.2 Matrice d'accès par module
-
-| Module / action | USER | AGENT_ACCUEIL | ADMIN_BADGE | ADMIN_RESSOURCE (scopé) | SUPER_ADMIN |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Voir le calendrier public | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Déclarer une réservation | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Voir SES propres réservations | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Voir détail d'une résa (autre owner) | ❌ | ❌ | ❌ | ✅ si groupe | ✅ |
-| Approuver / refuser / annuler | ❌ | ❌ | ❌ | ✅ si groupe | ✅ |
-| Gérer les ressources / groupes | ❌ | ❌ | ❌ | ✅ si groupe | ✅ |
-| Consulter IFPR | ❌ | ✅ | ✅ | ❌ | ✅ |
-| Créer / modifier IFPR | ❌ | ❌ | ✅ | ❌ | ✅ |
-| Attribuer un badge | ❌ | ✅ | ✅ | ❌ | ✅ |
-| Configurer les types de badge | ❌ | ❌ | ✅ | ❌ | ✅ |
-| Statistiques visiteurs | ❌ | ✅ | ✅ | ❌ | ✅ |
-| Gérer les utilisateurs | ❌ | ❌ | ❌ | ❌ | ✅ |
-
-**"Scopé"** signifie : l'utilisateur ne voit et ne peut agir que sur les ressources appartenant à un `ResourceGroup` dont il est membre. Détail technique en section 8.
-
-### 7.3 Deux couches de défense
-
-Le projet applique systématiquement **deux gardes** indépendantes :
-
-**Couche 1 — Firewall / `access_control`** : grossière, au niveau URL. Empêche un non-authentifié ou un rôle trop faible d'approcher la route. Configurée dans `security.yaml`.
-
-**Couche 2 — Voters applicatifs** : fine, au niveau de l'objet. Une fois la route atteinte, le voter tranche sur l'instance précise (cette série, cette ressource). Localisés dans `src/Security/Voter/`.
-
-Cette redondance est volontaire : si un développeur oublie de déclarer un `access_control` sur une nouvelle route, le voter rattrape sur l'action sensible. Inversement, si un voter est mal invoqué, le firewall évite au moins le pire.
+**Layer 2 — Application Voters**: Fine-grained, at the object level. Once the route is reached, the voter decides on the specific instance (e.g., "Can this user manage this specific reservation series?"). Located in `src/Security/Voter/`.
 
 ---
 
-## 8. Scope par `ResourceGroup` — l'invariant
+## 8. Scope via `ResourceGroup` — The Invariant
 
-C'est le mécanisme qui fait qu'un gestionnaire d'amphis ne peut pas approuver de demande véhicule. Il s'appuie sur la relation `ManyToMany` existante entre `User` et `ResourceGroup`.
+This is the mechanism ensuring an amphitheater manager cannot approve a vehicle request. It relies on the existing `ManyToMany` relationship between `User` and `ResourceGroup`.
 
-### 8.1 Lecture (listings)
+### 8.1 Read (Listings)
 
-Dans les méthodes d'index et de file d'attente du `AdminReservationController`, on calcule l'ensemble des identifiants de groupes de l'utilisateur via `scopedGroupIds()` :
+In the index and pending queue methods of the `AdminReservationController`, the set of group IDs for the user is calculated via `scopedGroupIds()`:
 
-- retourne `null` pour un `ROLE_SUPER_ADMIN` → aucun filtre ajouté, il voit tout.
-- retourne `[]` pour un admin ressource sans groupe → le filtre `IN ()` ne matche rien → il ne voit rien (fail-safe).
-- retourne `[id, …]` sinon → on ajoute `WHERE resource.resourceGroup IN (:ids)` dans le repository.
+- Returns `null` for a `ROLE_SUPER_ADMIN` → no filter added, they see everything.
+- Returns `[]` for a resource admin with no groups → the `IN ()` filter matches nothing → they see nothing (fail-safe).
+- Returns `[id, …]` otherwise → `WHERE resource.resourceGroup IN (:ids)` is added to the repository.
 
-Cette logique vit dans `ReservationSeriesRepository::findPendingWithFilters()` et `findAllWithFilters()`, côté requête principale **et** côté requête de comptage (sinon la pagination mentirait).
+### 8.2 Write (Actions on an object)
 
-### 8.2 Écriture (actions sur un objet)
+For `show`, `download`, `approve`, `reject`, `cancel`, evaluation is delegated to two voters:
 
-Pour `show`, `download`, `approve`, `reject`, `cancel`, on délègue à deux voters :
-
-- `ReservationSeriesVoter::VIEW_DETAILS` — l'owner OU un gestionnaire du groupe.
-- `ReservationSeriesVoter::MANAGE` — super-admin OU gestionnaire d'au moins un groupe associé à une ressource de la série.
-
-La règle "une série = ressources d'un seul groupe" rend le "au moins un" équivalent à "toutes", ce qui simplifie la vérification.
-
-### 8.3 Diagramme de décision
-
-```mermaid
-flowchart TD
-    A["Requête admin sur série #42"] --> B{"Utilisateur SUPER_ADMIN ?"}
-    B -- Oui --> OK1["Accès total"]
-    B -- Non --> C{"A le rôle<br>ROLE_ADMIN_RESSOURCE ?"}
-    C -- Non --> DENY1["403 Access Denied"]
-    C -- Oui --> D["Calcul des groupes<br>de l'utilisateur"]
-    D --> E{"L'utilisateur a<br>au moins un groupe ?"}
-    E -- Non --> DENY2["403 Fail-safe"]
-    E -- Oui --> F["Parcours des ressources<br>de la série #42"]
-    F --> G{"Une des ressources<br>est-elle dans un groupe<br>de l'utilisateur ?"}
-    G -- Non --> DENY3["403 Hors scope"]
-    G -- Oui --> OK2["Accès accordé"]
-```
+- `ReservationSeriesVoter::VIEW_DETAILS` — the owner OR a manager of the group.
+- `ReservationSeriesVoter::MANAGE` — super-admin OR manager of at least one group associated with a resource in the series.
 
 ---
 
-## 9. Flux métier principaux
+## 9. Main Business Flows
 
-### 9.1 Créer une réservation
+### 9.1 Create a Reservation
 
 ```mermaid
 sequenceDiagram
-    actor U as Utilisateur
+    actor U as User
     participant F as Form + Twig
     participant C as ReservationController
     participant A as AvailabilityChecker
@@ -392,149 +285,94 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant M as Mailer
 
-    U->>F: Remplit formulaire
+    U->>F: Fills form
     F->>C: POST /reservation
-    C->>A: Vérifie chevauchement
-    A->>DB: SELECT instances en conflit
-    A-->>C: OK / Conflit
-    alt Conflit détecté
-        C-->>F: Render 422 + erreur
-        F-->>U: Message DSFR
+    C->>A: Checks overlap
+    A->>DB: SELECT conflicting instances
+    A-->>C: OK / Conflict
+    alt Conflict detected
+        C-->>F: Render 422 + error
+        F-->>U: UI Message
     else OK
-        C->>EM: persister série + instances + resources
+        C->>EM: persist series + instances + resources
         EM->>DB: INSERT series, instances, resources
-        C->>M: Notifier gestionnaire<br>si requiresApproval
-        C-->>U: Redirect + flash succès
+        C->>M: Notify manager<br>if requiresApproval
+        C-->>U: Redirect + flash success
     end
 ```
 
-Points de vigilance : la validation côté client (dates min, cohérence début/fin) est uniquement un garde-fou UX. **Toute règle métier est revalidée côté serveur**. Le retour en 422 est nécessaire pour que Turbo remplace le DOM.
-
-Côté serveur, deux services cohabitent :
-
-- `App\Service\AvailabilityChecker` est invoqué depuis le contrôleur utilisateur lors de la création d'une série. Il porte la logique de détection de conflit sur le formulaire.
-- `App\Domain\Reservation\AvailabilityService` est le service de plus bas niveau utilisé notamment par le calendrier et les vues API (fenêtres libres, index des créneaux occupés). Il délègue au `ResourceRulesChecker`.
-
-Les deux ne font pas exactement la même chose : le premier est orienté "ce formulaire est-il valide ?", le second est orienté "quels créneaux sont libres pour affichage ?". Ne pas les confondre.
-
-### 9.2 Valider une demande
+### 9.2 Validate a Request
 
 ```mermaid
 sequenceDiagram
-    actor G as Gestionnaire
+    actor M as Manager
     participant L as /admin/reservation/pending
     participant C as AdminReservationController
     participant V as ReservationSeriesVoter
     participant W as ReservationWorkflow
     participant DB as PostgreSQL
-    participant M as Mailer
+    participant Mail as Mailer
 
-    G->>L: Liste file d'attente
+    M->>L: View pending queue
     L->>C: pending()
     C->>DB: findPendingWithFilters<br>(scope groupIds)
-    DB-->>C: lignes scopées
-    C-->>G: Liste filtrée
+    DB-->>C: scoped rows
+    C-->>M: Filtered list
 
-    G->>C: POST /approve/42
-    C->>V: voter MANAGE série #42
+    M->>C: POST /approve/42
+    C->>V: voter MANAGE series #42
     V-->>C: granted / denied
     alt denied
-        C-->>G: 403
+        C-->>M: 403
     else granted
-        C->>W: ensureAllowed('approve')
         C->>W: apply('approve', actor)
         W->>DB: UPDATE status=APPROVED<br>+ audit log
         W-->>C: OK
-        C->>M: Mail owner "approuvée"
-        C-->>G: Redirect + flash
+        C->>Mail: Email owner "approved"
+        C-->>M: Redirect + flash
     end
 ```
 
-Le motif de refus est **persisté dans `reservation_audit_logs`** (pas dans la série elle-même), ce qui préserve l'historique si la série évolue.
-
-### 9.3 Annulation
-
-L'annulation peut être déclenchée par un gestionnaire via le même mécanisme que `approve`/`reject`, ou par l'owner sur ses propres demandes via un contrôleur dédié (pas détaillé ici, voir `ReservationController`). Dans tous les cas, le statut passe à `CANCELLED` et une ligne d'audit est écrite avec l'acteur.
+The rejection reason is **persisted in `reservation_audit_logs`** (not in the series itself), preserving the history if the series evolves.
 
 ---
 
-## 10. Pièces jointes
+## 10. Audit and Traceability
 
-Les pièces jointes de réservation sont stockées sur le filesystem (paramètre `attachments_directory` injecté par `#[Autowire('%attachments_directory%')]`) et référencées en base par l'entité `ReservationAttachment`. Le téléchargement passe par `AdminReservationController::downloadAttachment()`, gardé par `VIEW_DETAILS` sur la série parente — donc mêmes droits que voir le détail.
+Every state change of a series leaves a trace in `reservation_audit_logs`:
 
-Implication : la suppression d'une série ne doit **jamais** supprimer physiquement les fichiers sans passage par un service dédié (pas encore implémenté). Pour l'instant, la suppression logique via le statut `CANCELLED` est préférée à une suppression dure.
+- `action`: `approve`, `reject`, `cancel`, `create`, …
+- `actor`: the user who triggered the action
+- `reason`: free text reason (mandatory on `reject`)
+- `at`: immutable timestamp
 
----
-
-## 11. Audit et traçabilité
-
-Chaque changement d'état d'une série laisse une trace dans `reservation_audit_logs` :
-
-- `action` : `approve`, `reject`, `cancel`, `create`, …
-- `actor` : l'utilisateur qui a déclenché l'action
-- `reason` : motif libre (obligatoire sur `reject`)
-- `at` : horodatage immuable
-
-Cet audit est la source de vérité pour répondre à "qui a refusé la résa du colonel X ?". Il ne doit jamais être édité a posteriori. Toute évolution du `ReservationWorkflow` doit continuer à écrire dans cette table.
+This audit is the source of truth to answer "who rejected this reservation?". It must never be edited retrospectively.
 
 ---
 
-## 12. Arborescence du code
+## 11. Code Tree
 
-```
+```text
 src/
-├── Controller/         Contrôleurs HTTP, un par contexte
+├── Controller/         HTTP Controllers, one per context
 ├── Domain/
-│   └── Reservation/    Services métier : Workflow, Availability, Checker
-├── Entity/             Entités Doctrine (une classe par table)
-├── Form/               Types de formulaire
-├── Repository/         Repositories Doctrine
+│   └── Reservation/    Business services: Workflow, Availability, Checker
+├── Entity/             Doctrine Entities (one class per table)
+├── Form/               Form Types
+├── Repository/         Doctrine Repositories
 ├── Security/
-│   ├── LemonLdapAuthenticator.php
+│   ├── GoogleAuthenticator.php
 │   └── Voter/          ResourceVoter, ReservationSeriesVoter
-├── Service/            Services transversaux
-└── Twig/               Extensions Twig custom
+├── Service/            Cross-cutting services
+└── Twig/               Custom Twig extensions
 
 config/
-├── packages/           Config par bundle (security.yaml en premier)
-├── routes/             Routes YAML complémentaires aux attributs PHP
-└── services.yaml       Câblage DI
+├── packages/           Bundle configurations (security.yaml first)
+├── routes/             YAML routes complementing PHP attributes
+└── services.yaml       DI wiring
 
-migrations/             Migrations Doctrine (jamais d'écriture manuelle du schéma)
-templates/              Twig, un dossier par contexte
-assets/                 JS/CSS sources, compilés via asset-map
-public/                 Racine web servie par Apache
+migrations/             Doctrine Migrations
+templates/              Twig templates
+assets/                 JS/CSS sources (Tailwind CSS)
+public/                 Web root
 ```
-
-La règle de placement est simple : un nouveau contexte métier crée **son** dossier sous `Controller/`, `Entity/`, `Repository/`, `templates/`. On ne mélange pas.
-
----
-
-## 13. Points d'attention pour les évolutions
-
-**Ajouter un nouveau rôle** : modifier `role_hierarchy` dans `security.yaml`, ajouter `access_control` si un préfixe de route est concerné, et s'assurer que les voters pertinents couvrent les cas fins. Documenter dans la section 7.2 ci-dessus.
-
-**Ajouter un nouveau type de ressource** : créer le `ResourceGroup` correspondant, créer les `Resource` rattachées, affecter les gestionnaires. Aucune modification de code n'est nécessaire tant que la ressource rentre dans le modèle existant (réservable sur créneaux, avec ou sans approbation).
-
-**Ajouter un champ sur la série** : migration Doctrine + modification du formulaire + ré-exécution des tests fonctionnels. Penser à vérifier `findPendingWithFilters` et `findAllWithFilters` si le champ doit entrer dans les critères.
-
-**Changer les statuts** : `ReservationStatus` a des IDs stables (constantes PHP) qui doivent correspondre aux lignes seedées en base. Toute modification impose une migration **et** une mise à jour du seed de `requet.start.txt`.
-
-**Intégrer un nouveau module métier qui ressemble à une réservation** : **ne pas** le greffer sur `ReservationSeries`. Relire l'ADR `02-adr-separation-prestation-reservation.md` avant toute décision.
-
----
-
-## 14. Ce que la doc ne couvre pas (volontairement)
-
-- **L'annuaire LDAP et la config LemonLDAP** : gérés par l'équipe infra, hors périmètre applicatif.
-- **La stratégie de sauvegarde Postgres** : relève des ops serveur.
-- **Le détail de chaque formulaire** : le code Twig reste la source de vérité.
-- **Le protocole de déploiement** : cf. `docs/04-guide-dev.md`.
-
----
-
-## 15. Références internes
-
-- `docs/02-adr-separation-prestation-reservation.md` — bouclier architectural contre la fusion Prestation/Réservation.
-- `docs/03-glossaire.md` — langage ubiquitaire, à partager en réunion.
-- `docs/04-guide-dev.md` — setup, migrations, déploiement, tests.

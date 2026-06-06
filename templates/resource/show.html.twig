@@ -1,251 +1,127 @@
 {% extends 'base.html.twig' %}
 
-{% block title %} : {{ resource.name }}{% endblock %}
+{% block title %}{{ resource.name }} - Librebooking{% endblock %}
 
 {% block body %}
-    <div class="fr-container fr-my-4w">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {# --- FIL D'ARIANE / RETOUR --- #}
-        <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
-            <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-1">Voir le fil d’ariane</button>
-            <div class="fr-collapse" id="breadcrumb-1">
-                <ol class="fr-breadcrumb__list">
-                    <li><a class="fr-breadcrumb__link" href="{{ path('app_home') }}">Accueil</a></li>
-                    <li><a class="fr-breadcrumb__link" href="{{ path('app_resource_index') }}">Ressources</a></li>
-                    <li><a class="fr-breadcrumb__link" aria-current="page">{{ resource.name }}</a></li>
-                </ol>
+    {# --- FIL D'ARIANE --- #}
+    <nav class="flex mb-8" aria-label="Breadcrumb">
+        <ol role="list" class="flex items-center space-x-4">
+            <li>
+                <div>
+                    <a href="{{ path('app_home') }}" class="text-slate-400 hover:text-slate-500">
+                        <svg class="flex-shrink-0 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span class="sr-only">Accueil</span>
+                    </a>
+                </div>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="flex-shrink-0 h-5 w-5 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                    <a href="{{ path('app_resource_index') }}" class="ml-4 text-sm font-medium text-slate-500 hover:text-slate-700">Catalogue</a>
+                </div>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="flex-shrink-0 h-5 w-5 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                    <span class="ml-4 text-sm font-medium text-slate-700" aria-current="page">{{ resource.name }}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="bg-white shadow-xl shadow-slate-200/40 rounded-3xl overflow-hidden border border-slate-100">
+        <div class="lg:flex">
+            
+            {# --- IMAGE COL --- #}
+            <div class="lg:w-2/5 xl:w-1/2 relative bg-slate-100">
+                {% set img = resource.imageName ? asset('uploads/resources/' ~ resource.imageName) : null %}
+                {% if img %}
+                    <img src="{{ img }}" alt="{{ resource.name }}" class="absolute inset-0 w-full h-full object-cover">
+                {% else %}
+                    <div class="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50">
+                        <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                {% endif %}
+                <div class="lg:hidden block pt-[70%]"></div>
             </div>
-        </nav>
 
-        {# --- EN-TÊTE (TITRE + ACTIONS) --- #}
-        <div class="fr-grid-row fr-grid-row--middle fr-mb-4w">
-            <div class="fr-col-12 fr-col-md-8">
-                <h1 class="fr-h2 fr-mb-1w">
-                    {{ resource.name }}
-                </h1>
-                <ul class="fr-badges-group">
-                    <li>
+            {# --- CONTENT COL --- #}
+            <div class="lg:w-3/5 xl:w-1/2 p-8 sm:p-12 flex flex-col">
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        {% if resource.category %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                                {{ resource.category.name }}
+                            </span>
+                        {% endif %}
+                        
                         {% if resource.isActive %}
-                            <p class="fr-badge fr-badge--success fr-badge--no-icon fr-badge--sm">Active</p>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+                                Active
+                            </span>
                         {% else %}
-                            <p class="fr-badge fr-badge--new fr-badge--no-icon fr-badge--sm">Inactive</p>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-800">
+                                Inactive
+                            </span>
                         {% endif %}
-                    </li>
-                    {% if resource.requiresApproval %}
-                        <li><p class="fr-badge fr-badge--info fr-badge--sm">Approbation requise</p></li>
-                    {% endif %}
-                    {% if resource.allowMultiday %}
-                        <li><p class="fr-badge fr-badge--purple-glycine fr-badge--sm">Multi-jours</p></li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div class="fr-col-12 fr-col-md-4 fr-text--right">
-                <ul class="fr-btns-group fr-btns-group--inline fr-btns-group--right">
-                    <li>
-                        <a href="{{ path('app_resource_edit', {'id': resource.id}) }}" class="fr-btn fr-icon-edit-line fr-btn--icon-left">
-                            Modifier
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        {# --- CONTENU EN ONGLETS --- #}
-        <div class="fr-tabs">
-            <ul class="fr-tabs__list" role="tablist" aria-label="Détails de la ressource">
-                <li role="presentation">
-                    <button type="button" id="tab-identity" class="fr-tabs__tab fr-icon-building-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="panel-identity">
-                        Vue d'ensemble
-                    </button>
-                </li>
-                <li role="presentation">
-                    <button type="button" id="tab-rules" class="fr-tabs__tab fr-icon-settings-5-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="panel-rules">
-                        Règles & Paramètres
-                    </button>
-                </li>
-                <li role="presentation">
-                    <button type="button" id="tab-timing" class="fr-tabs__tab fr-icon-timer-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="panel-timing">
-                        Temps & Technique
-                    </button>
-                </li>
-            </ul>
-
-            {# --- PANNEAU 1 : IDENTITÉ --- #}
-            <div id="panel-identity" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tab-identity" tabindex="0">
-                <div class="fr-grid-row fr-grid-row--gutters">
-                    {# Colonne Gauche : Infos #}
-                    <div class="fr-col-12 fr-col-md-8">
-                        {% if resource.description %}
-                            <div class="fr-highlight fr-ml-0 fr-mb-3w">
-                                <p class="fr-text--lg">{{ resource.description }}</p>
-                            </div>
+                        
+                        {% if resource.requiresApproval %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                Approbation requise
+                            </span>
                         {% endif %}
-
-                        <div class="fr-grid-row fr-grid-row--gutters">
-                            <div class="fr-col-6">
-                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Localisation</p>
-                                <p class="fr-text--bold">{{ resource.location|default('Non renseignée') }}</p>
-                            </div>
-                            <div class="fr-col-6">
-                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Catégorie</p>
-                                <p class="fr-text--bold">
-                                    {% if resource.category %}
-                                        <span class="fr-tag fr-tag--sm">{{ resource.category.name }}</span>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="fr-col-6">
-                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Capacité</p>
-                                <p class="fr-text--bold">{{ resource.maxParticipants ? resource.maxParticipants ~ ' personnes' : 'Illimitée' }}</p>
-                            </div>
-                            <div class="fr-col-6">
-                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Contact responsable</p>
-                                <p class="fr-text--bold">{{ resource.contactInfo|default('-') }}</p>
-                            </div>
-                            <div class="fr-col-6">
-                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Planning associé</p>
-                                <p class="fr-text--bold">{{ resource.schedule ? resource.schedule.name : 'Aucun' }}</p>
-                            </div>
-                        </div>
                     </div>
 
-                    {# Colonne Droite : Image #}
-                    <div class="fr-col-12 fr-col-md-4">
-                        {% set img = resource.imageName ?
-                            asset('uploads/resources/' ~ resource.imageName) : asset('image/amphi-toulouse-garonne-2.jpg') %}
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">{{ resource.name }}</h1>
 
-                        {# 👇 ON REMPLACE LA CARTE PAR UN CONTENEUR SIMPLE 👇 #}
-                        <div style="border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            <img src="{{ img }}"
-                                 alt="Visuel de {{ resource.name }}"
-                                 style="width: 100%; height: auto; display: block; object-fit: cover;">
+                    {% if resource.description %}
+                        <div class="prose prose-slate prose-lg mb-8 text-slate-600">
+                            <p>{{ resource.description }}</p>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    {% endif %}
 
-            {# --- PANNEAU 2 : RÈGLES --- #}
-            <div id="panel-rules" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-rules" tabindex="0">
-                <h4 class="fr-h6 fr-mb-2w">Règles d'accès et options</h4>
-                <div class="fr-table fr-table--layout-fixed">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Paramètre</th>
-                            <th>Valeur</th>
-                            <th>Description</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>Approbation</td>
-                            <td>{{ resource.requiresApproval ? '<span class="fr-text--error fr-icon-error-warning-line fr-text--icon-left">Requise</span>' : '<span class="fr-text--success fr-icon-check-line fr-text--icon-left">Automatique</span>' }}</td>
-                            <td class="fr-text--sm">Nécessite une validation admin avant confirmation.</td>
-                        </tr>
-                        <tr>
-                            <td>Multi-jours</td>
-                            <td>{{ resource.allowMultiday ? 'Autorisé' : 'Interdit' }}</td>
-                            <td class="fr-text--sm">Permet de réserver sur plusieurs jours consécutifs.</td>
-                        </tr>
-                        <tr>
-                            <td>Check-in</td>
-                            <td>{{ resource.enableCheckIn ? 'Activé' : 'Désactivé' }}</td>
-                            <td class="fr-text--sm">Les utilisateurs doivent signaler leur présence.</td>
-                        </tr>
-                        <tr>
-                            <td>Libération auto</td>
-                            <td>{{ resource.autoReleaseMinutes > 0 ? resource.autoReleaseMinutes ~ ' min' : 'Désactivé' }}</td>
-                            <td class="fr-text--sm">Annulation automatique si pas de check-in après ce délai.</td>
-                        </tr>
-                        <tr>
-                            <td>Visibilité</td>
-                            <td>{{ resource.allowDisplay ? 'Publique' : 'Masquée' }}</td>
-                            <td class="fr-text--sm">Visible sur le tableau de bord public.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {# --- PANNEAU 3 : TEMPS & TECHNIQUE --- #}
-            <div id="panel-timing" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-timing" tabindex="0">
-
-                <h4 class="fr-h6">Contraintes temporelles</h4>
-                <div class="fr-grid-row fr-grid-row--gutters fr-mb-4w">
-                    <div class="fr-col-12 fr-col-md-3">
-                        <div class="fr-callout fr-callout--brown-caramel fr-p-2w">
-                            <p class="fr-callout__title">{{ resource.minDuration }} min</p>
-                            <p class="fr-text--sm fr-mb-0">Durée Minimum</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 border-t border-slate-100 pt-8">
+                        <div>
+                            <dt class="text-sm font-medium text-slate-500 mb-1">Localisation</dt>
+                            <dd class="text-base font-semibold text-slate-900 flex items-center">
+                                <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                {{ resource.location|default('Non renseignée') }}
+                            </dd>
                         </div>
-                    </div>
-                    <div class="fr-col-12 fr-col-md-3">
-                        <div class="fr-callout fr-callout--brown-caramel fr-p-2w">
-                            <p class="fr-callout__title">{{ resource.maxDuration }} min</p>
-                            <p class="fr-text--sm fr-mb-0">Durée Maximum</p>
+                        <div>
+                            <dt class="text-sm font-medium text-slate-500 mb-1">Capacité maximale</dt>
+                            <dd class="text-base font-semibold text-slate-900 flex items-center">
+                                <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                {{ resource.maxParticipants ? resource.maxParticipants ~ ' personnes' : 'Illimitée' }}
+                            </dd>
                         </div>
-                    </div>
-                    <div class="fr-col-12 fr-col-md-3">
-                        <div class="fr-callout fr-callout--blue-ecume fr-p-2w">
-                            <p class="fr-callout__title">{{ resource.minIncrement }} min</p>
-                            <p class="fr-text--sm fr-mb-0">Pas de réservation</p>
+                        <div>
+                            <dt class="text-sm font-medium text-slate-500 mb-1">Contact responsable</dt>
+                            <dd class="text-base font-semibold text-slate-900 flex items-center">
+                                <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                {{ resource.contactInfo|default('Non défini') }}
+                            </dd>
                         </div>
-                    </div>
-                    <div class="fr-col-12 fr-col-md-3">
-                        <div class="fr-callout fr-callout--purple-glycine fr-p-2w">
-                            <p class="fr-callout__title">{{ resource.bufferTime }} min</p>
-                            <p class="fr-text--sm fr-mb-0">Temps tampon (Buffer)</p>
+                        <div>
+                            <dt class="text-sm font-medium text-slate-500 mb-1">Durée autorisée</dt>
+                            <dd class="text-base font-semibold text-slate-900 flex items-center">
+                                <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{ resource.minDuration }} à {{ resource.maxDuration }} min
+                            </dd>
                         </div>
                     </div>
                 </div>
 
-                <h4 class="fr-h6">Délais de prévenance (Notices)</h4>
-                <ul class="fr-list">
-                    <li>Création avant : <strong>{{ resource.minNoticeTimeAdd }}</strong> (Délai min avant le début)</li>
-                    <li>Anticipation max : <strong>{{ resource.maxNoticeTime }}</strong> (Combien de temps à l'avance on peut réserver)</li>
-                    <li>Modification avant : <strong>{{ resource.minNoticeTimeUpdate }}</strong></li>
-                    <li>Annulation avant : <strong>{{ resource.minNoticeTimeDelete }}</strong></li>
-                </ul>
-
-                <hr class="fr-my-4w">
-
-                <div class="fr-accordion">
-                    <h3 class="fr-accordion__title">
-                        <button class="fr-accordion__btn" aria-expanded="false" aria-controls="accordion-tech">
-                            Données techniques (IDs, Dates)
-                        </button>
-                    </h3>
-                    <div class="fr-collapse" id="accordion-tech">
-                        <div class="fr-table fr-table--no-caption">
-                            <table>
-                                <tbody>
-                                <tr><th>ID interne</th><td>{{ resource.id }}</td></tr>
-                                <tr><th>Legacy ID</th><td>{{ resource.legacyId|default('-') }}</td></tr>
-                                <tr><th>Public ID</th><td>{{ resource.publicId|default('-') }}</td></tr>
-                                <tr><th>Créée le</th><td>{{ resource.dateCreated ? resource.dateCreated|date('d/m/Y H:i') : '-' }}</td></tr>
-                                <tr><th>Modifiée le</th><td>{{ resource.lastModified ? resource.lastModified|date('d/m/Y H:i') : '-' }}</td></tr>
-                                <tr><th>Ordre de tri</th><td>{{ resource.sortOrder }}</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="mt-8 pt-8 border-t border-slate-100">
+                    <a href="{{ path('app_calendar', {'resource': resource.id}) }}" class="w-full flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Réserver cette ressource
+                    </a>
                 </div>
             </div>
         </div>
-
-        {# --- ZONE DANGER --- #}
-        <div class="fr-mt-6w fr-pt-4w fr-pb-2w" style="border-top: 1px solid var(--border-default-grey);">
-            <h2 class="fr-h5 fr-text--error">Zone de danger</h2>
-            <p class="fr-text--sm">La suppression d'une ressource est irréversible et peut impacter les réservations passées.</p>
-
-            <div class="fr-grid-row fr-grid-row--middle">
-                <div class="fr-col-auto">
-                    {# On inclut le formulaire de suppression fourni par Symfony, mais on le stylise souvent dans _delete_form.html.twig #}
-                    {{ include('resource/_delete_form.html.twig') }}
-                </div>
-            </div>
-        </div>
-
     </div>
+</div>
 {% endblock %}

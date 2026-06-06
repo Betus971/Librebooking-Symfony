@@ -20,8 +20,7 @@ knp_paginator:
         page_out_of_range:        fix          # 'fix' = clamp à la dernière page; 'throw' = exception
 
     template:
-        # Notre rendu DSFR maison
-        pagination:    '_partials/_pagination.html.twig'
+        pagination: '@KnpPaginator/Pagination/tailwind_pagination.html.twig'
 
         # Templates par défaut pour le tri / filtre — gardés à la valeur du
         # bundle (pas utilisés activement dans le projet, mais évite un fatal).

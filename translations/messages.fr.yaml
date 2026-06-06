@@ -1,0 +1,22 @@
+menu:
+    home: "Accueil"
+    calendar: "Calendrier"
+    my_reservations: "Mes réservations"
+    admin: "Administration"
+    profile: "Mon Profil"
+    logout: "Déconnexion"
+    login: "Se connecter"
+
+profile:
+    title: "Mon Compte"
+    description: "Gérez vos informations personnelles et préférences."
+    success: "Vos informations ont été mises à jour avec succès."
+    save: "Enregistrer les modifications"
+
+login:
+    title: "Connexion"
+    email: "Email"
+    password: "Mot de passe"
+    remember_me: "Se souvenir de moi"
+    sign_in: "Se connecter"
+    sso_google: "Se connecter avec Google"

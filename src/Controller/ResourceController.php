@@ -23,19 +23,21 @@ final class ResourceController extends AbstractController
     #[Route(name: 'app_resource_index', methods: ['GET'])]
     public function index(ResourceRepository $resourceRepository ,ScheduleRepository $sRepo,  Request $request ): Response
     {
-        $view     = $request->query->get('view', 'table');       // table | cards
+        $view     = $request->query->get('view', 'cards');       // table | cards (défaut sur cards pour plus de clarté)
         $q        = trim((string)$request->query->get('q', ''));  // recherche par nom
         $schedule = $request->query->get('schedule');             // id planning
         $status   = $request->query->get('status');               // active | inactive | all
+        $category = $request->query->get('category');             // NOUVEAU: id categorie
 
         $filters = [
             'q'        => $q ?: null,
             'schedule' => ctype_digit((string)$schedule) ? (int)$schedule : null,
             'status'   => \in_array($status, ['active','inactive','all'], true) ? $status : 'all',
+            'category' => ctype_digit((string)$category) ? (int)$category : null,
         ];
 
         $user = $this->getUser();
-        $resources = $resourceRepository->findForIndex($filters ,$user); // méthode ci-dessous
+        $resources = $resourceRepository->findForIndex($filters ,$user);
         $schedules = $sRepo->findBy([], ['name' => 'ASC']);
 
         return $this->render('resource/index.html.twig', [

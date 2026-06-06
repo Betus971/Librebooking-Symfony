@@ -90,7 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAtValue(): void
     {
         // Si la date n'est pas déjà mise, on met la date actuelle
-        if ($this->date_created === null) {
+        if (!isset($this->date_created)) {
             $this->date_created = new \DateTime();
         }
     }
@@ -109,11 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $uid = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nigend = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $codeunite = null;
 
     /**
      * @var Collection<int, ResourceGroup>
@@ -400,27 +396,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getNigend(): ?string
-    {
-        return $this->nigend;
-    }
 
-    public function setNigend(?string $nigend): static
-    {
-        $this->nigend = $nigend;
-        return $this;
-    }
-
-    public function getCodeunite(): ?int
-    {
-        return $this->codeunite;
-    }
-
-    public function setCodeunite(?int $codeunite): static
-    {
-        $this->codeunite = $codeunite;
-        return $this;
-    }
 
     /**
      * @return Collection<int, ResourceGroup>

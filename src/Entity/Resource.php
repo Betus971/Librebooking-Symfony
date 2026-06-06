@@ -136,20 +136,7 @@ class Resource
     #[ORM\JoinColumn(name: 'admin_group_id', referencedColumnName: 'id')]
     private ?ResourceGroup $resourceGroup = null;
 
-    /**
-     * Code de l'unité propriétaire de la ressource (visibilité hybride P3).
-     *
-     * Clé primaire de la visibilité : un gestionnaire (ROLE_ADMIN_RESSOURCE)
-     * gère par défaut les ressources dont le codeUnite correspond au sien
-     * (dérivé du SSO, cf. LemonLdapAuthenticator). Le ResourceGroup ci-dessus
-     * reste la « porte de sortie » manuelle pour les cas particuliers
-     * (ressource partagée entre unités, gestion déléguée…).
-     *
-     * Nullable : une ressource sans codeUnite n'est gérable que par
-     * super-admin ou via un ResourceGroup explicite.
-     */
-    #[ORM\Column(name: 'code_unite', type: Types::INTEGER, nullable: true)]
-    private ?int $codeUnite = null;
+
 
 
     public function getId(): ?int
@@ -629,16 +616,6 @@ class Resource
         return $this;
     }
 
-    public function getCodeUnite(): ?int
-    {
-        return $this->codeUnite;
-    }
 
-    public function setCodeUnite(?int $codeUnite): static
-    {
-        $this->codeUnite = $codeUnite;
-
-        return $this;
-    }
 
 }

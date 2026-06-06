@@ -99,6 +99,9 @@ class ResourceRepository extends ServiceEntityRepository
         if (($filters['status'] ?? 'all') !== 'all') {
             $qb->andWhere('r.isActive = :act')->setParameter('act', $filters['status'] === 'active');
         }
+        if (!empty($filters['category'])) {
+            $qb->andWhere('r.category = :catId')->setParameter('catId', $filters['category']);
+        }
 
         // --- 🛡️ FILTRE RBAC (CLOISONNEMENT PAR GROUPE) ---
         // Si l'utilisateur est fourni et qu'il N'EST PAS Super Admin
