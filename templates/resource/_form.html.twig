@@ -1,0 +1,202 @@
+{% form_theme form 'form/duration_unit_theme.html.twig' %}
+{{ form_start(form, { attr: {
+    'novalidate': 'novalidate',
+    'class': 'fr-form',
+    'enctype': 'multipart/form-data'
+} }) }}
+
+{# --- SYSTEME D'ONGLETS DSFR --- #}
+<div class="fr-tabs">
+    <ul class="fr-tabs__list" role="tablist" aria-label="Configuration de la ressource">
+        <li role="presentation">
+            {# AJOUT DE type="button" ICI #}
+            <button type="button" id="tabpanel-identity" class="fr-tabs__tab fr-icon-building-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="tabpanel-identity-panel">
+                Identité & Infos
+            </button>
+        </li>
+        <li role="presentation">
+            {# AJOUT DE type="button" ICI #}
+            <button type="button" id="tabpanel-rules" class="fr-tabs__tab fr-icon-settings-5-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-rules-panel">
+                Fonctionnement
+            </button>
+        </li>
+        <li role="presentation">
+            {# AJOUT DE type="button" ICI #}
+            <button type="button" id="tabpanel-timing" class="fr-tabs__tab fr-icon-timer-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-timing-panel">
+                Temps & Délais
+            </button>
+        </li>
+    </ul>
+    {# --- ONGLET 1 : IDENTITÉ --- #}
+    <div id="tabpanel-identity-panel" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tabpanel-identity" tabindex="0">
+        <div class="fr-grid-row fr-grid-row--gutters">
+            <div class="fr-col-12">
+                {{ form_row(form.name, { attr: { placeholder: 'Ex: Salle de réunion A...' } }) }}
+            </div>
+
+            <div class="fr-col-12 fr-col-md-4">
+                {{ form_row(form.category) }}
+            </div>
+
+            <div class="fr-col-12 fr-col-md-4">
+                {{ form_row(form.resourceGroup) }}
+            </div>
+            <div class="fr-col-12 fr-col-md-4">
+                {{ form_row(form.location, { attr: { placeholder: 'Ex: Batiment B, 1er étage' } }) }}
+            </div>
+
+            <div class="fr-col-12">
+                {{ form_row(form.description, { attr: { rows: 4, placeholder: 'Description visible par les utilisateurs...' } }) }}
+            </div>
+
+            <div class="fr-col-12">
+                {{ form_row(form.contactInfo, { label: 'Contact responsable (Email/Tél)', attr: { placeholder: 'Ex: regie@mairie.fr' } }) }}
+            </div>
+            <div class="fr-col-12">
+                {# Vérifie que tu as bien ajouté ->add('photo', FileType::class) dans ResourceType.php #}
+                {{ form_row(form.photo) }}
+            </div>
+        </div>
+    </div>
+
+    {# --- ONGLET 2 : FONCTIONNEMENT --- #}
+    <div id="tabpanel-rules-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tabpanel-rules" tabindex="0">
+        <div class="fr-grid-row fr-grid-row--gutters">
+
+            {# Bloc principal #}
+            <div class="fr-col-12 fr-col-md-6">
+                <div class="fr-input-group">
+                    {{ form_row(form.schedule, { label: 'Planning de référence' }) }}
+                    <span class="fr-hint-text fr-mt-1w">Définit les heures d'ouverture globales.</span>
+                </div>
+            </div>
+            <div class="fr-col-12 fr-col-md-6">
+                {{ form_row(form.maxParticipants, { label: 'Capacité maximale (personnes)' }) }}
+            </div>
+
+            <div class="fr-col-12 fr-my-2w"><hr></div>
+
+            {# Toggle Switches (Interrupteurs) faits main pour le style DSFR #}
+            <div class="fr-col-12 fr-col-md-6">
+                <div class="fr-toggle fr-toggle--label-left">
+                    <input type="checkbox" class="fr-toggle__input"
+                           id="{{ form.isActive.vars.id }}"
+                           name="{{ form.isActive.vars.full_name }}"
+                           {% if form.isActive.vars.checked %}checked{% endif %}
+                           value="1">
+                    <label class="fr-toggle__label" for="{{ form.isActive.vars.id }}" data-fr-checked-label="Activée" data-fr-unchecked-label="Désactivée">
+                        {{ form.isActive.vars.label|default('Ressource active') }}
+                    </label>
+                    <p class="fr-hint-text">Si désactivée, elle n'apparaît plus pour les utilisateurs.</p>
+                </div>
+                {# On cache le widget original pour éviter les doublons, mais on garde la logique Symfony #}
+                {% do form.isActive.setRendered() %}
+            </div>
+
+            <div class="fr-col-12 fr-col-md-6">
+                <div class="fr-toggle fr-toggle--label-left">
+                    <input type="checkbox" class="fr-toggle__input"
+                           id="{{ form.requiresApproval.vars.id }}"
+                           name="{{ form.requiresApproval.vars.full_name }}"
+                           {% if form.requiresApproval.vars.checked %}checked{% endif %}
+                           value="1">
+                    <label class="fr-toggle__label" for="{{ form.requiresApproval.vars.id }}" data-fr-checked-label="Oui" data-fr-unchecked-label="Non">
+                        {{ form.requiresApproval.vars.label|default('Approbation requise') }}
+                    </label>
+                    <p class="fr-hint-text">Un administrateur devra valider chaque demande.</p>
+                </div>
+                {% do form.requiresApproval.setRendered() %}
+            </div>
+
+            <div class="fr-col-12 fr-col-md-6 fr-mt-2w">
+                <div class="fr-toggle fr-toggle--label-left">
+                    <input type="checkbox" class="fr-toggle__input"
+                           id="{{ form.allowMultiday.vars.id }}"
+                           name="{{ form.allowMultiday.vars.full_name }}"
+                           {% if form.allowMultiday.vars.checked %}checked{% endif %}
+                           value="1">
+                    <label class="fr-toggle__label" for="{{ form.allowMultiday.vars.id }}" data-fr-checked-label="Oui" data-fr-unchecked-label="Non">
+                        {{ form.allowMultiday.vars.label|default('Autoriser sur plusieurs jours') }}
+                    </label>
+                </div>
+                {% do form.allowMultiday.setRendered() %}
+            </div>
+
+        </div>
+    </div>
+
+    {# --- ONGLET 3 : TEMPS & DÉLAIS --- #}
+    <div id="tabpanel-timing-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tabpanel-timing" tabindex="0">
+
+        <div class="fr-callout fr-mb-3w">
+            <h3 class="fr-callout__title">Durée des créneaux</h3>
+            <p class="fr-callout__text">Laissez vide si vous ne souhaitez pas imposer de limite.</p>
+
+            <div class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                <div class="fr-col-12 fr-col-md-4">
+                    {# Si ton DurationUnitType gère le rendu, ça s'affichera ici #}
+                    {{ form_row(form.minDuration, { label: 'Durée minimale' }) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-4">
+                    {{ form_row(form.maxDuration, { label: 'Durée maximale' }) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-4">
+                    {{ form_row(form.minIncrement, { label: 'Pas (Incrément)' }) }}
+                    <span class="fr-hint-text">Ex: Pas de 15 min = 9h00, 9h15...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="fr-callout fr-callout--brown-cafe-creme fr-mb-3w">
+            <h3 class="fr-callout__title">Délais d'anticipation</h3>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.minNoticeTimeAdd, { label: 'Délai min. avant Création' }) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.maxNoticeTime, { label: 'Anticipation maximale' }) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.minNoticeTimeUpdate, { label: 'Délai min. avant Modification' }) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.minNoticeTimeDelete, { label: 'Délai min. avant Annulation' }) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="fr-callout fr-icon-information-line fr-mt-3w">
+            <h3 class="fr-callout__title">Options avancées</h3>
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.bufferTime, { label: 'Temps tampon (Buffer)' }) }}
+                    <span class="fr-text--xs">Pause forcée entre deux réservations.</span>
+                </div>
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.autoReleaseMinutes, { label: 'Libération auto' }) }}
+                    <span class="fr-text--xs">Si non confirmé après X minutes (0 = désactivé).</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- BOUTONS D'ACTION (Hors des onglets pour être toujours visibles) --- #}
+<div class="fr-grid-row fr-grid-row--right fr-mt-4w fr-mb-2w">
+    <div class="fr-col-auto">
+        <ul class="fr-btns-group fr-btns-group--inline-lg">
+            <li>
+                <a href="{{ cancel_url|default(path('app_resource_index')) }}" class="fr-btn fr-btn--secondary">
+                    Annuler
+                </a>
+            </li>
+            <li>
+                <button type="submit" class="fr-btn fr-icon-save-line fr-btn--icon-left">
+                    {{ submit_label|default('Enregistrer la ressource') }}
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+{{ form_end(form) }}

@@ -1,0 +1,421 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle réservation - Librebooking{% endblock %}
+{% block body %}
+    {# 1. STRUCTURE DU MODAL (Remplaçant le dialog DSFR) #}
+    <div id="modal-dispo-wrapper" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div id="modal-backdrop" class="fixed inset-0 bg-slate-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-slate-900" id="modal-title">
+                                Disponibilités : <span id="modal-resource-name" class="font-bold"></span>
+                            </h3>
+                            <div class="mt-4">
+                                <div id="modal-slots-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {# Injecté par JS #}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="btn-close-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-slate-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-900">Nouvelle réservation</h1>
+            <p class="mt-2 text-sm text-slate-500">Remplissez les informations ci-dessous pour réserver une ressource.</p>
+        </div>
+
+        <div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-2xl p-6 sm:p-10">
+            {{ form_start(form, {'attr': {'class': 'space-y-8', 'id': 'reservation-form'}}) }}
+
+            {# ALERTE GLOBALE (client-side) #}
+            <div id="form-client-alert" class="hidden rounded-md bg-red-50 p-4 border border-red-200" role="alert">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Votre demande ne peut pas être envoyée</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="form-client-alert-msg">Merci de corriger les champs indiqués en rouge ci-dessous.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                {# 1. TITRE #}
+                <div>
+                    {{ form_label(form.title, 'Titre de la réservation *', {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.title, {'attr': {'class': 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border', 'placeholder': 'Ex : Réunion d’équipe...'}}) }}
+                    </div>
+                    {% if form.title.vars.errors|length > 0 %}
+                        <p class="mt-2 text-sm text-red-600">{{ form_errors(form.title) }}</p>
+                    {% endif %}
+                </div>
+
+                {# 2. RESSOURCE #}
+                <div>
+                    {{ form_label(form.resource, 'Ressource à réserver *', {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.resource, {'attr': {'class': 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 pl-3 pr-10 border', 'id': 'reservation_quick_resource'}}) }}
+                    </div>
+                    <div id="timeblocks-info" class="mt-2 text-sm text-slate-500"></div>
+                    {% if form.resource.vars.errors|length > 0 %}
+                        <p class="mt-2 text-sm text-red-600">{{ form_errors(form.resource) }}</p>
+                    {% endif %}
+                    
+                    <button type="button" id="btn-open-dispo" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition-colors">
+                        <svg class="mr-1.5 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Voir les disponibilités
+                    </button>
+                </div>
+
+                {# 3. DATES ET HEURES #}
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2" data-field="start">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Date et heure de début *</label>
+                        <div class="mt-1 grid grid-cols-2 gap-2">
+                            {{ form_widget(form.startDate, { attr: {
+                                class: 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border',
+                                id: 'reservation_quick_start_date',
+                                min: 'now'|date('Y-m-d')
+                            } }) }}
+                            {{ form_widget(form.startTime, { attr: {
+                                class: 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border',
+                                id: 'reservation_quick_start_time'
+                            } }) }}
+                        </div>
+                        <p class="js-client-error-start mt-2 text-sm text-red-600 hidden"></p>
+                        {% if form.startDate.vars.errors|length > 0 %}<p class="mt-2 text-sm text-red-600">{{ form_errors(form.startDate) }}</p>{% endif %}
+                        {% if form.startTime.vars.errors|length > 0 %}<p class="mt-2 text-sm text-red-600">{{ form_errors(form.startTime) }}</p>{% endif %}
+                    </div>
+
+                    <div data-field="end">
+                        <label class="block text-sm font-medium text-slate-700">Date et heure de fin *</label>
+                        <div class="mt-1 grid grid-cols-2 gap-2">
+                            {{ form_widget(form.endDate, { attr: {
+                                class: 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border',
+                                id: 'reservation_quick_end_date',
+                                min: 'now'|date('Y-m-d')
+                            } }) }}
+                            {{ form_widget(form.endTime, { attr: {
+                                class: 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border',
+                                id: 'reservation_quick_end_time'
+                            } }) }}
+                        </div>
+                        <p class="js-client-error-end mt-2 text-sm text-red-600 hidden"></p>
+                        {% if form.endDate.vars.errors|length > 0 %}<p class="mt-2 text-sm text-red-600">{{ form_errors(form.endDate) }}</p>{% endif %}
+                        {% if form.endTime.vars.errors|length > 0 %}<p class="mt-2 text-sm text-red-600">{{ form_errors(form.endTime) }}</p>{% endif %}
+                    </div>
+                </div>
+                
+                {# 4. PARTICIPANTS #}
+                <div class="border-t border-slate-200 pt-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Liste des participants (Emails)</label>
+                    <p class="text-sm text-slate-500 mb-4">Format attendu : nom@domaine.fr</p>
+                    
+                    <div id="participants-list" data-prototype="{{ form_widget(form.participants.vars.prototype)|e('html_attr') }}" class="space-y-3">
+                        {% for participant in form.participants %}
+                            <div class="flex items-center gap-2 participant-item">
+                                <div class="flex-grow">
+                                    {{ form_widget(participant, {'attr': {'class': 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border'}}) }}
+                                </div>
+                                <button type="button" class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 remove-participant" title="Supprimer">
+                                    <svg class="h-5 w-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="button" id="add-participant-btn" class="mt-4 inline-flex items-center px-3 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Ajouter un participant
+                    </button>
+                </div>
+
+                {# 5. DESCRIPTION #}
+                <div class="border-t border-slate-200 pt-6">
+                    {{ form_label(form.description, 'Description / Motif', {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.description, {'attr': {'class': 'shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border', 'rows': 4}}) }}
+                    </div>
+                    {% if form.description.vars.errors|length > 0 %}
+                        <p class="mt-2 text-sm text-red-600">{{ form_errors(form.description) }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if startError is defined and startError %}
+                <div class="rounded-md bg-red-50 p-4 border border-red-200 mt-6" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-red-800">{{ startError }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if endError is defined and endError %}
+                <div class="rounded-md bg-red-50 p-4 border border-red-200 mt-6" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-red-800">{{ endError }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if formError is defined and formError %}
+                <div class="rounded-md bg-red-50 p-4 border border-red-200 mt-6" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-red-800">
+                            {{ formError }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-end">
+                <a href="{{ path('app_resource_index') }}" class="bg-white py-2 px-4 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
+                    Annuler
+                </a>
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Confirmer la réservation
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- GESTION DE LA MODALE TAILWIND ---
+            const btnOpenDispo = document.getElementById('btn-open-dispo');
+            const btnCloseModal = document.getElementById('btn-close-modal');
+            const modal = document.getElementById('modal-dispo-wrapper');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            
+            const selectResource = document.getElementById('reservation_quick_resource');
+            const modalContainer = document.getElementById('modal-slots-container');
+
+            const inputStartTime = document.getElementById('reservation_quick_start_time');
+            const inputEndTime = document.getElementById('reservation_quick_end_time');
+            const inputDate = document.getElementById('reservation_quick_start_date');
+
+            function openModal() {
+                modal.classList.remove('hidden');
+            }
+            
+            function closeModal() {
+                modal.classList.add('hidden');
+            }
+
+            if (btnOpenDispo) {
+                btnOpenDispo.addEventListener('click', () => {
+                    const resourceId = selectResource.value;
+                    const dateVal = (inputDate && inputDate.value) ? inputDate.value : new Date().toISOString().split('T')[0];
+
+                    if (!resourceId) {
+                        alert("Veuillez d'abord sélectionner une ressource.");
+                        return;
+                    }
+
+                    document.getElementById('modal-resource-name').textContent = selectResource.options[selectResource.selectedIndex].text;
+                    openModal();
+
+                    modalContainer.innerHTML = '<div class="col-span-full text-center py-8"><svg class="animate-spin mx-auto h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-sm text-slate-500">Chargement des créneaux...</p></div>';
+
+                    fetch('{{ path('app_availability_slots') }}?resource=' + resourceId + '&date=' + dateVal)
+                        .then(r => r.json())
+                        .then(list => {
+                            if (list.length === 0) {
+                                modalContainer.innerHTML = `<p class="col-span-full text-sm text-slate-500 text-center py-4">Aucun créneau libre à cette date.</p>`;
+                                return;
+                            }
+
+                            modalContainer.innerHTML = list.map(s => {
+                                const times = s.label.split(' - ');
+                                return `
+                                    <button type="button" class="js-select-slot inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                                            data-start="${times[0] ? times[0].trim() : ''}"
+                                            data-end="${times[1] ? times[1].trim() : ''}">
+                                        ${s.label}
+                                    </button>`;
+                            }).join('');
+                        })
+                        .catch(err => {
+                            modalContainer.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-700 rounded-md text-sm">Erreur lors du chargement des disponibilités.</div>`;
+                        });
+                });
+            }
+
+            if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+            if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+
+            if (modalContainer) {
+                modalContainer.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.js-select-slot');
+                    if (!btn) return;
+
+                    if(inputStartTime) inputStartTime.value = btn.dataset.start;
+                    if(inputEndTime) inputEndTime.value = btn.dataset.end;
+
+                    closeModal();
+
+                    inputStartTime.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500');
+                    setTimeout(() => inputStartTime.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-500'), 2000);
+                });
+            }
+
+            // --- GESTION DES PARTICIPANTS ---
+            const addBtn = document.getElementById('add-participant-btn');
+            const list = document.getElementById('participants-list');
+            
+            if (addBtn && list) {
+                addBtn.addEventListener('click', () => {
+                    // Extract prototype HTML
+                    let prototype = list.dataset.prototype;
+                    // Mettre à jour l'index
+                    const index = list.querySelectorAll('.participant-item').length;
+                    prototype = prototype.replace(/__name__/g, index);
+                    
+                    // On doit injecter les classes Tailwind dans le prototype généré par Symfony
+                    prototype = prototype.replace(/class="[^"]*"/g, 'class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border"');
+
+                    const div = document.createElement('div');
+                    div.classList.add('flex', 'items-center', 'gap-2', 'participant-item');
+                    div.innerHTML = `
+                        <div class="flex-grow">${prototype}</div>
+                        <button type="button" class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 remove-participant" title="Supprimer">
+                            <svg class="h-5 w-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    `;
+                    list.appendChild(div);
+                });
+
+                list.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-participant') || e.target.closest('.remove-participant')) {
+                        e.target.closest('.participant-item').remove();
+                    }
+                });
+            }
+
+            // --- VALIDATION CLIENT ---
+            const inputStartDate   = document.getElementById('reservation_quick_start_date');
+            const inputEndDate     = document.getElementById('reservation_quick_end_date');
+            const inputStartTimeEl = document.getElementById('reservation_quick_start_time');
+            const inputEndTimeEl   = document.getElementById('reservation_quick_end_time');
+            const reservationForm  = document.getElementById('reservation-form');
+
+            const groupStart = document.querySelector('[data-field="start"]');
+            const groupEnd   = document.querySelector('[data-field="end"]');
+            const errStart   = document.querySelector('.js-client-error-start');
+            const errEnd     = document.querySelector('.js-client-error-end');
+
+            const globalAlert    = document.getElementById('form-client-alert');
+            const globalAlertMsg = document.getElementById('form-client-alert-msg');
+
+            function showFieldError(group, errEl, msg) {
+                if (!group || !errEl) return;
+                group.querySelectorAll('input').forEach(i => i.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500'));
+                errEl.textContent = msg;
+                errEl.classList.remove('hidden');
+            }
+            
+            function clearFieldError(group, errEl) {
+                if (!group || !errEl) return;
+                group.querySelectorAll('input').forEach(i => i.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500'));
+                errEl.textContent = '';
+                errEl.classList.add('hidden');
+            }
+            
+            function hideGlobalAlert() {
+                if (!globalAlert) return;
+                globalAlert.classList.add('hidden');
+            }
+
+            function buildDate(dateInput, timeInput) {
+                if (!dateInput || !dateInput.value) return null;
+                const t = (timeInput && timeInput.value) ? timeInput.value : '00:00';
+                const tt = t.length === 5 ? t + ':00' : t;
+                const d = new Date(dateInput.value + 'T' + tt);
+                return isNaN(d.getTime()) ? null : d;
+            }
+
+            function validateDates() {
+                clearFieldError(groupStart, errStart);
+                clearFieldError(groupEnd, errEnd);
+
+                const start = buildDate(inputStartDate, inputStartTimeEl);
+                const end   = buildDate(inputEndDate, inputEndTimeEl);
+
+                const errors = [];
+
+                if (start) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (start < today) {
+                        showFieldError(groupStart, errStart, 'Date dans le passé : choisissez aujourd\'hui ou plus tard.');
+                        errors.push('date de début');
+                    }
+                }
+
+                if (start && end && end <= start) {
+                    showFieldError(groupEnd, errEnd, 'La fin doit être postérieure au début.');
+                    errors.push('date de fin');
+                }
+
+                if (errors.length === 0) {
+                    hideGlobalAlert();
+                    return true;
+                }
+                hideGlobalAlert();
+                return false;
+            }
+
+            [inputStartDate, inputEndDate, inputStartTimeEl, inputEndTimeEl].forEach(el => {
+                if (!el) return;
+                el.addEventListener('change', validateDates);
+                el.addEventListener('blur', validateDates);
+            });
+
+            if (reservationForm) {
+                reservationForm.addEventListener('submit', (e) => {
+                    if (!validateDates()) {
+                        e.preventDefault();
+                        if (globalAlert) {
+                            globalAlert.classList.remove('hidden');
+                            globalAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

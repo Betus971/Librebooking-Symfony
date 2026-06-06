@@ -1,0 +1,25 @@
+# ============================================================
+# SURCHARGE SÉCURITÉ EN ENVIRONNEMENT DEV UNIQUEMENT
+# Ce fichier remplace les paramètres de security.yaml pour APP_ENV=dev.
+# En PROD, ce fichier est complètement ignoré.
+# ============================================================
+security:
+    firewalls:
+        main:
+            # En dev : on n'est plus stateless, on utilise le login form classique
+            # car il n'y a pas de LemonLDAP pour injecter les headers SSO.
+            stateless: false
+            lazy: true
+
+            # On réactive les deux authenticators :
+            # - LemonLdapAuthenticator : si par hasard tu simules les headers SSO en dev
+            # - Authenticator          : le bon vieux login/mot de passe pour bosser en local
+            custom_authenticator:
+                - App\Security\Authenticator
+
+            entry_point: App\Security\Authenticator
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /

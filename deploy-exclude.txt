@@ -1,0 +1,14 @@
+.git/
+.idea/
+node_modules/
+var/cache/
+var/log/
+tests/
+.env.local
+.env.local.php
+*.log
+build-prod.bat
+deploy-exclude.txt
+phpunit.dist.xml
+compose.yaml
+compose.override.yaml

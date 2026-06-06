@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ReservationController!{% endblock %}
+
+{% block body %}
+    {% extends 'base.html.twig' %}
+    {% block title %}Réservations{% endblock %}
+    {% block body %}
+        <h1>Réservations</h1>
+        <p><a class="fr-btn" href="{{ path('reservation_new') }}">Nouvelle réservation</a></p>
+
+        <ul>
+            {% for s in series %}
+                <li>
+                    <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}">{{ s.title }}</a>
+                    — créée le {{ s.dateCreated|date('Y-m-d H:i') }}
+                </li>
+            {% else %}
+                <li>Aucune réservation.</li>
+            {% endfor %}
+        </ul>
+    {% endblock %}
+
+{% endblock %}

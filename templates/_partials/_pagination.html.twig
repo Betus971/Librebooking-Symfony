@@ -1,0 +1,101 @@
+{#
+ #  ═══════════════════════════════════════════════════════════════════════
+ #  Template de rendu unifié pour KnpPaginatorBundle — Conforme DSFR.
+ #
+ #  Référencé dans config/packages/knp_paginator.yaml :
+ #      template:
+ #          pagination: '_partials/_pagination.html.twig'
+ #
+ #  Toutes les listes paginées du projet (admin/reservation, admin/users…) 
+ #  héritent automatiquement de ce rendu.
+ #  Ne pas dupliquer du markup `fr-pagination` ailleurs : tout passe par ici.
+ #
+ #  Variables fournies par KnpPaginator (cf. SlidingPaginationInterface) :
+ #    - pageCount      (int)   nombre total de pages
+ #    - current        (int)   page courante
+ #    - first          (int)   première page (typiquement 1)
+ #    - last           (int)   dernière page (= pageCount)
+ #    - previous       (int)   page précédente (UNDEFINED si current=1)
+ #    - next           (int)   page suivante  (UNDEFINED si current=last)
+ #    - pagesInRange   (int[]) fenêtre glissante autour de current
+ #    - route          (str)   nom de route à utiliser
+ #    - query          (map)   query-string courante (filtres, tri…)
+ #    - options        (map)   options paginator (pageParameterName, etc.)
+ #  ═══════════════════════════════════════════════════════════════════════
+ #}
+{% if pageCount > 1 %}
+    <nav role="navigation" class="fr-pagination" aria-label="Pagination">
+        <ul class="fr-pagination__list">
+
+            {# ---- Première page ---- #}
+            <li>
+                <a class="fr-pagination__link fr-pagination__link--first"
+                   {% if current != first %}
+                       href="{{ path(route, knp_pagination_query(query, first, options)) }}"
+                   {% else %}
+                       aria-disabled="true" role="link"
+                   {% endif %}>
+                    Première page
+                </a>
+            </li>
+
+            {# ---- Page précédente ---- #}
+            <li>
+                <a class="fr-pagination__link fr-pagination__link--prev"
+                   {% if previous is defined %}
+                       rel="prev"
+                       href="{{ path(route, knp_pagination_query(query, previous, options)) }}"
+                   {% else %}
+                       aria-disabled="true" role="link"
+                   {% endif %}>
+                    Page précédente
+                </a>
+            </li>
+
+            {# ---- Pages dans la fenêtre glissante ---- #}
+            {% for page in pagesInRange %}
+                <li>
+                    {% if page != current %}
+                        <a class="fr-pagination__link"
+                           href="{{ path(route, knp_pagination_query(query, page, options)) }}"
+                           title="Page {{ page }}">
+                            {{ page }}
+                        </a>
+                    {% else %}
+                        {# Page courante : pas de href, aria-current obligatoire DSFR #}
+                        <a class="fr-pagination__link"
+                           aria-current="page"
+                           title="Page {{ page }}">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+
+            {# ---- Page suivante ---- #}
+            <li>
+                <a class="fr-pagination__link fr-pagination__link--next"
+                   {% if next is defined %}
+                       rel="next"
+                       href="{{ path(route, knp_pagination_query(query, next, options)) }}"
+                   {% else %}
+                       aria-disabled="true" role="link"
+                   {% endif %}>
+                    Page suivante
+                </a>
+            </li>
+
+            {# ---- Dernière page ---- #}
+            <li>
+                <a class="fr-pagination__link fr-pagination__link--last"
+                   {% if last is defined and current != last %}
+                       href="{{ path(route, knp_pagination_query(query, last, options)) }}"
+                   {% else %}
+                       aria-disabled="true" role="link"
+                   {% endif %}>
+                    Dernière page
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}

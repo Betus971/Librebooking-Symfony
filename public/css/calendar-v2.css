@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Calendar V2 — restyle FullCalendar conforme maquette UX DSFR
+   --------------------------------------------------------------------------
+   Charge uniquement sur /calendar/v2 via la balise <link> du template
+   index_v2.html.twig. N'affecte PAS le calendrier de production.
+   ========================================================================== */
+
+/* ---------- Palette & variables ---------- */
+:root {
+    --cal2-border:       #e5e5e5;
+    --cal2-text:         #161616;
+    --cal2-muted:        #6a6a6a;
+    --cal2-head-bg:      #f5f5fe;
+    --cal2-today-bg:     #000091;   /* Bleu France DSFR */
+    --cal2-today-fg:     #ffffff;
+    --cal2-slot-line:    #f0f0f5;
+    --cal2-hint-bg:      #eef0f9;
+    --cal2-hint-fg:      #3a3a3a;
+
+    /* Catégories (modifiables depuis le Twig via --cat-xxx) */
+    --cal2-cat-reunion:   #6a6af4;   /* violet */
+    --cal2-cat-seminaire: #e1000f;   /* rouge */
+    --cal2-cat-atelier:   #18753c;   /* vert */
+}
+
+/* ---------- Carte conteneur ---------- */
+.cal2-card {
+    background: #fff;
+    border: 1px solid var(--cal2-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 18, 0.04);
+}
+
+/* ---------- Barre supérieure (mois + légende) ---------- */
+.cal2-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.cal2-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.cal2-topbar-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.cal2-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    margin-right: 0.5rem;
+    color: var(--cal2-text);
+    text-transform: capitalize;
+}
+
+.cal2-btn-icon {
+    background: transparent;
+    border: 1px solid var(--cal2-border);
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--cal2-text);
+}
+
+.cal2-btn-icon:hover {
+    background: var(--cal2-head-bg);
+}
+
+.cal2-btn-today {
+    background: #fff;
+    border: 1px solid var(--cal2-border);
+    border-radius: 4px;
+    height: 32px;
+    padding: 0 0.85rem;
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--cal2-text);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.cal2-btn-today:hover {
+    background: var(--cal2-head-bg);
+    border-color: var(--cal2-today-bg);
+    color: var(--cal2-today-bg);
+}
+
+.cal2-legend {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: var(--cal2-muted);
+}
+
+/* --- Boutons vues (Jour / Semaine / Mois) --- */
+.cal2-view-group {
+    display: inline-flex;
+    gap: 0.15rem;
+    align-items: center;
+}
+
+.cal2-btn-view {
+    border: none;
+    background: transparent;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--cal2-text);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s ease-in-out;
+}
+
+.cal2-btn-view:hover {
+    background: var(--cal2-head-bg);
+}
+
+.cal2-btn-view.is-active {
+    background: var(--cal2-today-bg);
+    color: #fff;
+    font-weight: 600;
+}
+
+.cal2-legend__dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: baseline;
+}
+
+/* ---------- Tête de colonne (jours de la semaine) ---------- */
+.cal2 .fc-col-header-cell {
+    background: var(--cal2-head-bg);
+    border: 1px solid var(--cal2-border) !important;
+    padding: 0.55rem 0;
+    text-align: center;
+}
+
+.cal2 .fc-col-header-cell-cushion {
+    color: var(--cal2-text);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-transform: capitalize;
+}
+
+/* Jour courant — bloc bleu France pointu */
+.cal2 .fc-col-header-cell.fc-day-today {
+    background: transparent;
+}
+
+.cal2 .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--cal2-today-bg);
+    color: var(--cal2-today-fg);
+    border-radius: 4px;
+    padding: 0.25rem 1rem;
+}
+
+/* En-tête personnalisé (Lundi 13, superposé) */
+.cal2-day-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.3;
+}
+
+.cal2 .fc-col-header-cell-cushion {
+    padding: 0.35rem 0.5rem;
+}
+
+/* ---------- Grille horaire ---------- */
+.cal2 .fc-theme-standard td,
+.cal2 .fc-theme-standard th {
+    border-color: var(--cal2-slot-line) !important;
+}
+
+.cal2 .fc-timegrid-slot {
+    height: 2.6rem !important;
+    border-bottom: 1px solid var(--cal2-slot-line) !important;
+}
+
+.cal2 .fc-timegrid-slot-label {
+    color: var(--cal2-muted);
+    font-size: 0.78rem;
+    vertical-align: top;
+    padding-right: 0.5rem;
+}
+
+/* Colonne aujourd'hui — très léger voile bleu */
+.cal2 .fc-day-today {
+    background: rgba(0, 0, 145, 0.025) !important;
+}
+
+/* Ligne « nowIndicator » */
+.cal2 .fc-timegrid-now-indicator-line {
+    border-color: var(--cal2-today-bg);
+    border-width: 2px;
+}
+
+.cal2 .fc-timegrid-now-indicator-arrow {
+    border-color: var(--cal2-today-bg);
+}
+
+/* ---------- Événements (pills) ---------- */
+.cal2 .fc-event {
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.cal2 .fc-event-main {
+    padding: 0 !important;
+}
+
+/* Rendu custom injecté par eventContent */
+.cal2-pill {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.35rem 0.55rem;
+    height: 100%;
+    color: var(--cal2-text); /* Changé en noir pour être lisible sur fond gris sans hover */
+    font-size: 0.78rem;
+    line-height: 1.2;
+}
+
+.cal2-pill__time {
+    font-weight: 600;
+    font-size: 0.72rem;
+    opacity: 0.95;
+}
+
+.cal2-pill__title {
+    font-weight: 600;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.cal2-pill__loc {
+    font-size: 0.72rem;
+    opacity: 0.9;
+}
+
+/* « +N autre(s) » en bas d'une cellule surchargée */
+.cal2 .fc-timegrid-more-link,
+.cal2 .fc-daygrid-more-link {
+    color: var(--cal2-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+/* ---------- Pied — hint ---------- */
+.cal2-hint {
+    margin-top: 1rem;
+    padding: 0.65rem 1rem;
+    background: var(--cal2-hint-bg);
+    color: var(--cal2-hint-fg);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* ---------- Boutons toolbar personnalisés ---------- */
+.cal2 .fc-toolbar {
+    margin-bottom: 0.75rem !important;
+}
+
+.cal2 .fc-button-primary {
+    background: #fff !important;
+    color: var(--cal2-text) !important;
+    border: 1px solid var(--cal2-border) !important;
+    font-weight: 500;
+    text-transform: none;
+    box-shadow: none !important;
+}
+
+.cal2 .fc-button-primary:hover {
+    background: #f5f5fe !important;
+}
+
+.cal2 .fc-button-primary:not(:disabled).fc-button-active,
+.cal2 .fc-button-primary:not(:disabled):active {
+    background: var(--cal2-today-bg) !important;
+    color: #fff !important;
+    border-color: var(--cal2-today-bg) !important;
+}
+
+.cal2 .fc-toolbar-title {
+    font-size: 1.05rem !important;
+    font-weight: 700;
+    color: var(--cal2-text);
+    text-transform: capitalize;
+}

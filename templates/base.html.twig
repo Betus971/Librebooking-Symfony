@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Librebooking{% endblock %}</title>
+    
+    {# Modern Font (Inter) #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+
+    {% block stylesheets %}
+    {% endblock %}
+
+    {% block javascripts %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+    {# Header / Menu #}
+    {% include 'header/menu.html.twig' %}
+
+    {# Global Flash Messages #}
+    {% set _allFlashes = app.flashes %}
+    {% if _allFlashes|length > 0 %}
+        <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-6" id="flash-messages">
+            {% for label, messages in _allFlashes %}
+                {% for message in messages %}
+                    {% if message is not empty and message != '…' %}
+                        {% set alertClass = 'bg-blue-50 text-blue-800 border-blue-200' %}
+                        {% if 'success' in label or 'succes' in label %}
+                            {% set alertClass = 'bg-emerald-50 text-emerald-800 border-emerald-200' %}
+                        {% elseif 'warning' in label %}
+                            {% set alertClass = 'bg-amber-50 text-amber-800 border-amber-200' %}
+                        {% elseif 'danger' in label or 'error' in label %}
+                            {% set alertClass = 'bg-red-50 text-red-800 border-red-200' %}
+                        {% endif %}
+                        <div role="alert" class="flex p-4 mb-4 text-sm border rounded-lg shadow-sm {{ alertClass }} transition-all duration-300">
+                            <svg class="flex-shrink-0 inline w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# Main Content #}
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        {% block body %}{% endblock %}
+    </main>
+
+    {# Footer #}
+    {% include 'header/footer.html.twig' %}
+</body>
+</html>

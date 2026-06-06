@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Erreur interne — 500</title>
+    <link rel="stylesheet"
+          href="/assets/dsfr/dsfr.min.css"
+          onerror="this.onerror=null;">
+    <style>
+        body { font-family: Marianne, Arial, sans-serif; background: #f6f6f6; margin: 0; }
+        .error-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .error-card { background: #fff; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,.12); max-width: 640px; width: 100%; padding: 3rem 2.5rem; text-align: center; }
+        .error-code { font-size: 5rem; font-weight: 700; color: #000091; line-height: 1; margin-bottom: .5rem; }
+        .error-title { font-size: 1.5rem; font-weight: 700; color: #1e1e1e; margin-bottom: 1rem; }
+        .error-desc { color: #3a3a3a; margin-bottom: 2rem; line-height: 1.6; }
+        .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-primary { background: #000091; color: #fff; padding: .625rem 1.5rem; border-radius: 4px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #1212ff; }
+        .btn-secondary { background: transparent; color: #000091; padding: .625rem 1.5rem; border-radius: 4px; text-decoration: none; font-weight: 600; border: 2px solid #000091; cursor: pointer; }
+        .btn-secondary:hover { background: #f0f0ff; }
+    </style>
+</head>
+<body>
+<div class="error-wrapper">
+    <div class="error-card">
+        <div class="error-code">500</div>
+        <h1 class="error-title">Erreur interne du serveur</h1>
+        <p class="error-desc">
+            Une erreur inattendue s'est produite. L'équipe technique a été notifiée.<br>
+            Merci de réessayer dans quelques instants.
+        </p>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="window.location.reload();">Réessayer</button>
+            <a class="btn-secondary" href="/">Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

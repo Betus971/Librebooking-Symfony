@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DevSlotsController!{% endblock %}
+
+{% block body %}
+    <div class="fr-tabs fr-mb-6w">
+        <ul class="fr-tabs__list" role="tablist" aria-label="Gestion">
+            <li role="presentation">
+                <button id="tab-2" class="fr-tabs__tab" role="tab" aria-selected="true" aria-controls="tabpanel-2">
+                    Gestion des créneaux
+                </button>
+            </li>
+            <li role="presentation">
+                <button id="tab-1" class="fr-tabs__tab" role="tab" aria-selected="false" aria-controls="tabpanel-1">
+                    Gestion des guichets
+                </button>
+            </li>
+        </ul>
+
+        <div id="tabpanel-2" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tab-2">
+            <h4 class="fr-mb-2w">Sélectionner un créneau — {{ date|date('EEEE d MMMM Y', 'Europe/Paris') }}</h4>
+
+            <div class="fr-btns-group fr-btns-group--inline fr-btns-group--sm">
+                {% for t in times %}
+                    <button
+                        type="button"
+                        class="fr-btn fr-btn--secondary fr-mb-1w js-slot"
+                        data-date="{{ date }}"
+                        data-time="{{ t }}"
+                        data-step="{{ step_minutes }}"
+                        data-resource="{{ resource.id }}"
+                        title="Sélectionner {{ t }}"
+                    >{{ t|replace({':':'h'}) }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="tabpanel-1" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-1">
+            <p class="fr-mb-0">Zone de test “guichets”.</p>
+        </div>
+    </div>
+
+    {# Déclencheur DSFR du modal (on le clique en JS) #}
+    <button id="open-reservation-modal" class="fr-btn" data-fr-opened="false" aria-controls="modal-reservation" hidden>
+        Ouvrir
+    </button>
+
+    {# Modal DSFR #}
+    <div class="fr-modal" id="modal-reservation" aria-labelledby="modal-reservation-title">
+        <div class="fr-modal__body">
+            <div class="fr-modal__header">
+                <button class="fr-btn--close fr-btn" title="Fermer" aria-controls="modal-reservation">Fermer</button>
+            </div>
+            <div class="fr-modal__content">
+                <h1 id="modal-reservation-title" class="fr-modal__title">Confirmer votre créneau</h1>
+
+                {# Pour le test on envoie vers /dev/res-check #}
+                <form method="get" action="{{ path('app_dev_res_check') }}" class="fr-mt-3w">
+                    <div class="fr-input-group fr-mb-3w">
+                        <label class="fr-label" for="res-start">Début</label>
+                        <input class="fr-input" id="res-start" name="start" type="datetime-local" required>
+                    </div>
+
+                    <div class="fr-input-group fr-mb-3w">
+                        <label class="fr-label" for="res-end">Fin</label>
+                        <input class="fr-input" id="res-end" name="end" type="datetime-local" required>
+                    </div>
+
+                    <input id="res-resource" name="resource" type="hidden" value="{{ resource.id }}">
+
+                    <div class="fr-btns-group fr-btns-group--inline">
+                        <button class="fr-btn" type="submit">Continuer</button>
+                        <button class="fr-btn fr-btn--secondary" type="button" aria-controls="modal-reservation">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            function fmtLocal(dt) {
+                const p = n => String(n).padStart(2,'0');
+                return `${dt.getFullYear()}-${p(dt.getMonth()+1)}-${p(dt.getDate())}T${p(dt.getHours())}:${p(dt.getMinutes())}`;
+            }
+            function addMinutes(dt, m) { return new Date(dt.getTime() + m*60000); }
+
+            const trigger   = document.getElementById('open-reservation-modal');
+            const startIn   = document.getElementById('res-start');
+            const endIn     = document.getElementById('res-end');
+            const resIn     = document.getElementById('res-resource');
+
+            document.querySelectorAll('.js-slot').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const date = btn.dataset.date;          // YYYY-MM-DD
+                    const time = btn.dataset.time;          // HH:MM
+                    const step = parseInt(btn.dataset.step || '30', 10);
+                    const res  = btn.dataset.resource;
+
+                    const [Y,M,D] = date.split('-').map(Number);
+                    const [H,I]   = time.split(':').map(Number);
+                    const start   = new Date(Y, M-1, D, H, I, 0);
+                    const end     = addMinutes(start, step);
+
+                    startIn.value = fmtLocal(start);
+                    endIn.value   = fmtLocal(end);
+                    resIn.value   = res;
+
+                    trigger.click(); // ouvre le modal DSFR
+                });
+            });
+        })();
+    </script>
+{% endblock %}

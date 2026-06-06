@@ -1,0 +1,257 @@
+# ============================================================
+# Interface générale
+# ============================================================
+menu:
+    home: "Accueil"
+    calendar: "Calendrier"
+    my_reservations: "Mes réservations"
+    new_reservation: "Nouvelle réservation"
+    resources: "Ressources"
+    search: "Recherche"
+    admin: "Administration"
+    profile: "Mon Profil"
+    logout: "Déconnexion"
+    login: "Se connecter"
+
+common:
+    yes: "Oui"
+    no: "Non"
+    save: "Enregistrer"
+    cancel: "Annuler"
+    create: "Créer"
+    edit: "Modifier"
+    delete: "Supprimer"
+    back: "Retour"
+    actions: "Actions"
+    details: "Détails"
+    search: "Rechercher"
+    filter: "Filtrer"
+    loading: "Chargement…"
+    none: "Aucun"
+    confirm_delete: "Êtes-vous sûr de vouloir supprimer cet élément ?"
+
+# ============================================================
+# Authentification
+# ============================================================
+login:
+    title: "Connexion"
+    email: "Email"
+    password: "Mot de passe"
+    remember_me: "Se souvenir de moi"
+    sign_in: "Se connecter"
+    sso_google: "Se connecter avec Google"
+    sso_description: "Authentification via votre compte Google."
+
+# ============================================================
+# Profil utilisateur
+# ============================================================
+profile:
+    title: "Mon Compte"
+    description: "Gérez vos informations personnelles et préférences."
+    success: "Vos informations ont été mises à jour avec succès."
+    save: "Enregistrer les modifications"
+    name: "Nom complet"
+    email: "Adresse email"
+    phone: "Téléphone"
+    organization: "Organisation / Service"
+    position: "Poste occupé"
+    timezone: "Fuseau horaire"
+    language: "Langue d'interface"
+    last_login: "Dernière connexion"
+
+# ============================================================
+# Réservations (tunnel utilisateur)
+# ============================================================
+reservation:
+    title: "Réservation"
+    new: "Nouvelle réservation"
+    my: "Mes réservations"
+    all: "Toutes les réservations"
+    none: "Aucune réservation pour le moment."
+    instances: "Séances"
+    resources: "Ressources réservées"
+
+    status:
+        pending: "En attente"
+        approved: "Approuvée"
+        rejected: "Refusée"
+        cancelled: "Annulée"
+
+    field:
+        title: "Titre"
+        description: "Description / Motif"
+        resource: "Ressource à réserver"
+        start_date: "Date et heure de début"
+        end_date: "Date et heure de fin"
+        status: "Statut"
+        type: "Type"
+        owner: "Demandeur"
+        created_at: "Créée le"
+        last_modified: "Modifiée le"
+        participants: "Participants"
+        attachments: "Pièces jointes"
+        reference: "Référence"
+
+    action:
+        approve: "Approuver"
+        reject: "Refuser"
+        cancel: "Annuler la réservation"
+        view: "Voir les détails"
+        new: "Nouvelle demande"
+
+    flash:
+        created: "Votre réservation a bien été enregistrée."
+        cancelled: "Votre réservation a bien été annulée."
+        approved: "La réservation a bien été approuvée."
+        rejected: "La réservation a bien été refusée."
+        cannot_cancel: "Cette réservation ne peut plus être annulée."
+
+    error:
+        past_date: "Impossible de réserver une date passée. Veuillez choisir une date à partir d'aujourd'hui."
+        end_before_start: "L'heure de fin doit être postérieure à l'heure de début."
+        not_available: "Ce créneau n'est pas disponible : la ressource est déjà réservée ou hors des horaires d'ouverture."
+        concurrent: "Ce créneau vient d'être réservé par un autre utilisateur. Merci d'en choisir un autre."
+        blackout: "Impossible de réserver : la ressource est fermée (maintenance, travaux…) sur ce créneau."
+
+# ============================================================
+# Administration — Dashboard & menus
+# ============================================================
+admin:
+    back_to_site: "Retour au site"
+
+    tab:
+        general: "Général"
+        booking_rules: "Règles de réservation"
+        advanced: "Avancé"
+        identity: "Identité"
+        permissions: "Droits & Accès"
+        preferences: "Préférences"
+        activity: "Activité"
+        availability: "Disponibilités"
+
+    section:
+        reservations: "Réservations"
+        resources: "Ressources"
+        configuration: "Configuration"
+        system: "Système"
+
+    resource:
+        singular: "Ressource"
+        plural: "Ressources"
+        help: "Gérez les salles, équipements et véhicules disponibles à la réservation."
+
+    resource_group:
+        singular: "Groupe d'approbation"
+        plural: "Groupes d'approbation"
+        help: "Un groupe regroupe des ressources et leurs gestionnaires. Un gestionnaire ne peut approuver que les réservations des ressources de son groupe."
+
+    resource_category:
+        singular: "Catégorie"
+        plural: "Catégories"
+
+    schedule:
+        singular: "Planning"
+        plural: "Plannings"
+        help: "Un planning définit les créneaux d'ouverture associés à une ou plusieurs ressources."
+
+    announcement:
+        singular: "Annonce"
+        plural: "Annonces"
+
+    user:
+        singular: "Utilisateur"
+        plural: "Utilisateurs"
+
+    reservation_series:
+        singular: "Réservation"
+        plural: "Historique des réservations"
+
+# ============================================================
+# Entités — libellés de champs
+# ============================================================
+entity:
+    resource:
+        name: "Nom"
+        name_help: "Nom affiché dans le catalogue et sur le calendrier."
+        group: "Groupe d'approbation"
+        group_help: "Détermine quel gestionnaire valide les demandes pour cette ressource."
+        category: "Cat��gorie"
+        schedule: "Planning"
+        schedule_help: "Définit les créneaux horaires disponibles."
+        location: "Localisation"
+        contact_info: "Contact responsable"
+        description: "Description publique"
+        color: "Couleur (calendrier)"
+        is_active: "Actif"
+        requires_approval: "Approbation obligatoire"
+        requires_approval_help: "Chaque demande doit être validée par un gestionnaire du groupe."
+        allow_multiday: "Réservations multi-jours"
+        max_participants: "Capacité maximale"
+        min_duration: "Durée minimale (min)"
+        max_duration: "Durée maximale (min)"
+        duration_help: "Exprimé en minutes. Laisser vide pour ne pas limiter."
+        buffer_time: "Délai tampon (min)"
+        buffer_time_help: "Délai de nettoyage entre deux réservations consécutives, en minutes."
+        min_notice_time_add: "Préavis minimum (min)"
+        min_notice_time_add_help: "L'utilisateur doit réserver au moins X minutes à l'avance."
+        sort_order: "Ordre d'affichage"
+        sort_order_help: "Tri croissant. Les ressources avec la valeur la plus basse apparaissent en premier."
+        notes: "Notes internes"
+        notes_help: "Visibles uniquement par les administrateurs."
+
+    user:
+        fname: "Prénom"
+        lname: "Nom de famille"
+        email: "Adresse email"
+        roles: "Rôles"
+        roles_help: "Ex : ROLE_ADMIN_RESSOURCE pour un gestionnaire, ROLE_SUPER_ADMIN pour un super-administrateur."
+        resource_groups: "Groupes gérés"
+        resource_groups_help: "Les groupes dont cet utilisateur est gestionnaire."
+        organization: "Organisation / Service"
+        position: "Poste"
+        phone: "Téléphone"
+        timezone: "Fuseau horaire"
+        language: "Langue"
+        status: "Statut"
+        date_created: "Inscrit le"
+        last_login: "Dernière connexion"
+
+    schedule:
+        name: "Nom"
+        is_default: "Planning par défaut"
+        is_default_help: "Utilisé automatiquement lors de la création d'une ressource si aucun planning n'est spécifié."
+        weekday_start: "Premier jour de la semaine"
+        days_visible: "Nombre de jours affichés"
+        days_visible_help: "Nombre de jours visibles dans la vue agenda."
+        start_date: "Ouverture des réservations"
+        start_date_help: "Les réservations ne sont pas acceptées avant cette date."
+        end_date: "Fermeture des réservations"
+        end_date_help: "Les réservations ne sont pas acceptées après cette date."
+        layout: "Mise en page (créneaux)"
+        layout_help: "Définit les blocs horaires disponibles (ex : 08h-12h, 14h-18h)."
+        published: "Publié"
+        allow_concurrent: "Autoriser les réservations simultanées"
+        allow_concurrent_help: "Plusieurs utilisateurs peuvent réserver la même ressource sur le même créneau."
+        total_concurrent: "Nb max de réservations simultanées"
+        max_resources: "Nb max de ressources par réservation"
+        notes: "Notes"
+
+    announcement:
+        message: "Message de l'annonce"
+        message_help: "Texte affiché sur la page d'accueil."
+        start_date: "Début de diffusion"
+        start_date_help: "L'annonce est visible à partir de cette date. Laisser vide pour afficher immédiatement."
+        end_date: "Fin de diffusion"
+        end_date_help: "L'annonce disparaît automatiquement après cette date."
+        priority: "Priorité"
+        priority_help: "Les annonces sont affichées par ordre de priorité croissant (0 = plus haute priorité)."
+
+    resource_group:
+        name: "Nom du groupe"
+        name_help: "Ex : Salles de réunion, Véhicules, Amphithéâtres."
+        managers: "Gestionnaires"
+        managers_help: "Utilisateurs ayant le rôle ROLE_ADMIN_RESSOURCE sur ce groupe."
+
+    resource_category:
+        name: "Nom de la catégorie"
+        description: "Description"
