@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Reservation\ReservationWorkflow;
 use App\Dto\ReservationQuickDto;
 use App\Entity\ReservationAttachment;
 use App\Entity\ReservationAuditLog;
@@ -346,24 +347,30 @@ final class ReservationController extends AbstractController
         ]);
     }
 
-                #[Route('/reservation/{uuid}/cancel', name: 'reservation_cancel', methods: ['POST'])]
+    #[Route('/reservation/{uuid}/cancel', name: 'reservation_cancel', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancel(
+        Request $request,
+        #[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series,
+        ReservationWorkflow $workflow,
+    ): Response {
+        if ($series->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException("Vous ne pouvez pas annuler la réservation d'un autre.");
+        }
 
-                public function cancel(Request $request,#[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series, EntityManagerInterface $em): Response
-                {
-                    // 1. Sécurité : On vérifie que c'est bien MA réservation
-                    if ($series->getOwner() !== $this->getUser()) {
-                        throw $this->createAccessDeniedException("Vous ne pouvez pas annuler la réservation d'un autre.");
-                    }
+        if (!$this->isCsrfTokenValid('cancel'.$series->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
 
-                    // 2. Sécurité CSRF (Protection contre les failles)
-                    if (!$this->container->has('security.csrf.token_manager') || $this->isCsrfTokenValid('cancel'.$series->getId(), $request->request->get('_token'))) {
+        try {
+            /** @var User $actor */
+            $actor = $this->getUser();
+            $workflow->apply('cancel', $series, $actor);
+            $this->addFlash('success', 'Votre réservation a bien été annulée.');
+        } catch (\LogicException $e) {
+            $this->addFlash('warning', $e->getMessage());
+        }
 
-                        $series->setStatus($em->getReference(ReservationStatus::class, ReservationStatus::CANCELLED));
-
-                        $em->flush();
-                        $this->addFlash('success', 'Votre réservation a bien été annulée.');
-                    }
-
-                    return $this->redirectToRoute('reservation_mine');
-                }
+        return $this->redirectToRoute('reservation_mine');
+    }
 }
