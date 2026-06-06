@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Schedule{% endblock %}
+
+{% block body %}
+    <h1>Schedule</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ schedule.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ schedule.name }}</td>
+            </tr>
+            <tr>
+                <th>IsDefault</th>
+                <td>{{ schedule.isDefault ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>WeekdayStart</th>
+                <td>{{ schedule.weekdayStart }}</td>
+            </tr>
+            <tr>
+                <th>DaysVisible</th>
+                <td>{{ schedule.daysVisible }}</td>
+            </tr>
+            <tr>
+                <th>Notes</th>
+                <td>{{ schedule.notes }}</td>
+            </tr>
+            <tr>
+                <th>Published</th>
+                <td>{{ schedule.published ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>PublicId</th>
+                <td>{{ schedule.publicId }}</td>
+            </tr>
+            <tr>
+                <th>AllowCalendarSubscription</th>
+                <td>{{ schedule.allowCalendarSubscription ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>StartDate</th>
+                <td>{{ schedule.startDate ? schedule.startDate|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>EndDate</th>
+                <td>{{ schedule.endDate ? schedule.endDate|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>AllowConcurrentBookings</th>
+                <td>{{ schedule.allowConcurrentBookings ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>DefaultLayout</th>
+                <td>{{ schedule.defaultLayout ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>TotalConcurrentReservations</th>
+                <td>{{ schedule.totalConcurrentReservations }}</td>
+            </tr>
+            <tr>
+                <th>MaxResourcesPerReservation</th>
+                <td>{{ schedule.maxResourcesPerReservation }}</td>
+            </tr>
+            <tr>
+                <th>AdditionalProperties</th>
+                <td>{{ schedule.additionalProperties ? schedule.additionalProperties|json_encode : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_schedule_index') }}">back to list</a>
+
+    <a href="{{ path('app_schedule_edit', {'id': schedule.id}) }}">edit</a>
+
+    {{ include('schedule/_delete_form.html.twig') }}
+{% endblock %}

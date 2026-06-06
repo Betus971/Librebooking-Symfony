@@ -1,0 +1,265 @@
+{#
+ #  ═══════════════════════════════════════════════════════════════════════
+ #  Calendar V2 — restyle FullCalendar (option A) conforme maquette UX
+ #
+ #  Template PARALLÈLE : n'écrase pas templates/calendar/index.html.twig.
+ #  Route associée : /calendar/v2 (cf. CalendarController::indexV2).
+ #
+ #  Philosophie :
+ #    - Même source d'événements `/fc-load-events` → aucun code back à réécrire
+ #    - Rendu custom via `eventContent` (FullCalendar hook → HTML sur mesure)
+ #    - CSS dédiée public/css/calendar-v2.css → pills, jour actif bleu France,
+ #      tête DSFR, hint bas de page
+ #  ═══════════════════════════════════════════════════════════════════════
+ #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Planning — Aperçu V2{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/calendar-v2.css') }}?v={{ "now"|date('U') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-4w">
+
+        {# ---- En-tête ---- #}
+        <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mb-3w">
+            <div class="fr-col-12 fr-col-md-6">
+                <h1 class="fr-h3 fr-mb-1w">{{ pageTitle }}</h1>
+                <p class="fr-badge fr-badge--info fr-badge--no-icon">Aperçu — ne remplace pas le planning principal</p>
+            </div>
+            <div class="fr-col-12 fr-col-md-6 fr-text--right">
+                <a href="{{ path('app_calendar') }}" class="fr-btn fr-btn--secondary fr-btn--sm fr-icon-arrow-left-line fr-btn--icon-left">
+                    Revenir au planning classique
+                </a>
+            </div>
+        </div>
+
+        {# ---- Carte calendrier ---- #}
+        <div class="cal2-card">
+
+            {# Barre supérieure customisée : Titre, Navigation, Vues et Légende #}
+            <div class="cal2-topbar">
+                <div class="cal2-topbar-left">
+                    <h2 id="cal2-title" class="cal2-title"></h2>
+                    <button class="cal2-btn-icon" id="cal2-prev" aria-label="Précédent"><span class="fr-icon-arrow-left-s-line"></span></button>
+                    <button class="cal2-btn-icon" id="cal2-next" aria-label="Suivant"><span class="fr-icon-arrow-right-s-line"></span></button>
+                    <button class="cal2-btn-today" id="cal2-today">Aujourd'hui</button>
+                </div>
+                <div class="cal2-topbar-right">
+                    <div class="cal2-legend" aria-label="Légende des catégories">
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-reunion);"></span>Réunion</span>
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-seminaire);"></span>Séminaire</span>
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-atelier);"></span>Atelier</span>
+                    </div>
+                    <div class="cal2-view-group">
+                        <button class="cal2-btn-view" data-view="timeGridDay">Jour</button>
+                        <button class="cal2-btn-view is-active" data-view="timeGridWeek">Semaine</button>
+                        <button class="cal2-btn-view" data-view="dayGridMonth">Mois</button>
+                    </div>
+                </div>
+            </div>
+
+            {# Sélecteur de ressource #}
+            <div class="fr-grid-row fr-mb-2w">
+                <div class="fr-col-12 fr-col-md-6">
+                    <div class="fr-select-group fr-mb-0">
+                        <label class="fr-label" for="resource-select-v2">Filtrer par ressource</label>
+                        <select class="fr-select" id="resource-select-v2">
+                            <option value="" selected>Toutes les ressources</option>
+                            {% for res in resources %}
+                                <option value="{{ res.id }}">{{ res.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {# Le calendrier FullCalendar s'injecte ici #}
+            <div id="calendar-v2"
+                 class="cal2"
+                 data-week-start="{{ weekStart }}"
+                 data-new-url="{{ path('reservation_new') }}"
+                 data-events-url="/fc-load-events"></div>
+
+            <p class="cal2-hint">
+                <span class="fr-icon-information-line" aria-hidden="true"></span>
+                Cliquez sur un créneau pour ajouter un événement.
+            </p>
+        </div>
+    </div>
+
+    {{ include('components/_fullcalendar_lib.html.twig') }}
+    <script>
+        (function() {
+            let fc = null;
+            let initialized = false;
+
+            /**
+             * Nettoie une instance FullCalendar existante (évite le double-init
+             * entre DOMContentLoaded et turbo:load).
+             */
+            function destroyFc() {
+                if (fc) { try { fc.destroy(); } catch (_) {} fc = null; }
+                const el = document.getElementById('calendar-v2');
+                if (el) el.innerHTML = '';
+            }
+
+            /**
+             * Rend le contenu HTML d'un événement (pill colorée : horaire + titre
+             * + lieu éventuel). Appelé par FullCalendar via `eventContent`.
+             */
+            function renderEventContent(arg) {
+                const start = arg.event.start;
+                const end   = arg.event.end;
+                const pad   = (n) => String(n).padStart(2, '0');
+                const fmt   = (d) => d ? pad(d.getHours()) + ':' + pad(d.getMinutes()) : '';
+                const timeLabel = start && end ? (fmt(start) + '–' + fmt(end)) : fmt(start);
+
+                const loc = arg.event.extendedProps.location || '';
+                const safe = (s) => String(s).replace(/[&<>"']/g, c => (
+                    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+                ));
+
+                const isMonth = arg.view.type === 'dayGridMonth';
+
+                // En vue Mois, la cellule a une hauteur dynamique : on ne peut pas utiliser height: 100%
+                if (isMonth) {
+                    return { html: '<div style="color: black !important; font-size: 0.8rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px;">' + safe(timeLabel) + ' ' + safe(arg.event.title) + '</div>' };
+                }
+
+                // Vue Semaine/Jour : On utilise cal2-pill avec une consigne de couleur stricte
+                const html =
+                    '<div class="cal2-pill" style="color: black !important;">' +
+                        '<div class="cal2-pill__time">' + safe(timeLabel) + '</div>' +
+                        '<div class="cal2-pill__title">' + safe(arg.event.title) + '</div>' +
+                        (loc ? '<div class="cal2-pill__loc">📍 ' + safe(loc) + '</div>' : '') +
+                    '</div>';
+
+                return { html: html };
+            }
+
+            function initFc() {
+                if (initialized) return;
+                const el = document.getElementById('calendar-v2');
+                if (!el || typeof FullCalendar === 'undefined') return;
+
+                destroyFc();
+
+                const weekStart = el.dataset.weekStart;
+                const newUrl    = el.dataset.newUrl;
+                const eventsUrl = el.dataset.eventsUrl;
+                const select    = document.getElementById('resource-select-v2');
+
+                const buildExtraParams = () => {
+                    const v = select ? select.value : '';
+                    const resourceId = v === '' ? null : parseInt(v, 10);
+                    return { filters: JSON.stringify({ resourceId: resourceId }) };
+                };
+
+                fc = new FullCalendar.Calendar(el, {
+                    initialView: 'timeGridWeek',
+                    initialDate: weekStart,
+                    locale: 'fr',
+                    timeZone: 'Europe/Paris',
+                    firstDay: 1,
+                    nowIndicator: true,
+                    expandRows: true,
+                    allDaySlot: false,
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '22:00:00', // Modifié pour s'adapter à des horaires tardifs (21h)
+                    slotDuration: '01:00:00',
+                    slotLabelInterval: '01:00',
+                    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+                    headerToolbar: false, // Désactive la toolbar native
+                    dayHeaderContent: function(arg) {
+                        const dayName = arg.date.toLocaleDateString('fr-FR', { weekday: 'long' });
+                        const capDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+                        
+                        if (arg.view.type === 'dayGridMonth') {
+                            return { html: '<div class="cal2-day-head" style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;"><span class="cal2-day-name">' + capDay + '</span></div>' };
+                        }
+                        
+                        const dateNum = arg.date.toLocaleDateString('fr-FR', { day: 'numeric' });
+                        return { html: '<div class="cal2-day-head" style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;"><span class="cal2-day-name">' + capDay + '</span> <span class="cal2-day-num">' + dateNum + '</span></div>' };
+                    },
+                    datesSet: function(info) {
+                        const titleEl = document.getElementById('cal2-title');
+                        if (titleEl) titleEl.textContent = info.view.title;
+
+                        // Mise à jour des boutons de vue actifs
+                        document.querySelectorAll('.cal2-btn-view').forEach(btn => {
+                            if (btn.dataset.view === info.view.type) {
+                                btn.classList.add('is-active');
+                            } else {
+                                btn.classList.remove('is-active');
+                            }
+                        });
+                    },
+                    events: {
+                        url: eventsUrl,
+                        method: 'POST',
+                        extraParams: buildExtraParams
+                    },
+                    eventClassNames: (arg) => arg.event.extendedProps.classNames || [],
+                    eventContent: renderEventContent,
+                    dayMaxEvents: 3, // → génère automatiquement "+N autre(s)" si surcharge
+                    dateClick: function(info) {
+                        const v = select ? select.value : '';
+                        const resourceId = v === '' ? null : parseInt(v, 10);
+                        let url = newUrl + '?date=' + info.dateStr;
+                        if (resourceId !== null) url += '&resource=' + resourceId;
+                        window.location.href = url;
+                    },
+                    eventClick: function(info) {
+                        if (info.event.id) {
+                            // Les instances renvoient l'UUID de la série (cf. subscriber).
+                            window.location.href = '/reservation/' + info.event.id;
+                        }
+                    }
+                });
+
+                fc.render();
+                initialized = true;
+
+                // Navigation customisée : Changement de mois/semaine
+                const btnPrev = document.getElementById('cal2-prev');
+                const btnNext = document.getElementById('cal2-next');
+                const btnToday = document.getElementById('cal2-today');
+                if (btnPrev) btnPrev.addEventListener('click', () => fc.prev());
+                if (btnNext) btnNext.addEventListener('click', () => fc.next());
+                if (btnToday) btnToday.addEventListener('click', () => fc.today());
+
+                // Navigation customisée : Vues
+                document.querySelectorAll('.cal2-btn-view').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const viewName = e.target.dataset.view;
+                        if (viewName) fc.changeView(viewName);
+                    });
+                });
+
+                // Ressource changée → on re-fetche.
+                if (select) {
+                    select.addEventListener('change', () => {
+                        fc.refetchEvents();
+                    });
+                }
+            }
+
+            // Cycle de vie Turbo-compatible :
+            // - Premier chargement classique : on init dès que le DOM est prêt
+            // - Navigation Turbo : turbo:before-cache → détruit, turbo:load → re-init
+            // Le flag `initialized` empêche les doubles-inits si les deux events tirent.
+            if (document.readyState !== 'loading') {
+                initFc();
+            } else {
+                document.addEventListener('DOMContentLoaded', initFc, { once: true });
+            }
+
+            document.addEventListener('turbo:load', () => { initialized = false; initFc(); });
+            document.addEventListener('turbo:before-cache', () => { destroyFc(); initialized = false; });
+        })();
+    </script>
+{% endblock %}

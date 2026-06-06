@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Schedule{% endblock %}
+
+{% block body %}
+
+
+    <div class="fr-container fr-mt-6w fr-mb-6w">
+        {{ include('alert/_flashes_ns.html.twig', { keys: ['planning.succes','planning.error'] }) }}
+
+        {# ... le reste de ta page ... #}
+    </div>
+{#    <h1>Edit Schedule</h1>#}
+
+{#    {{ include('schedule/_form.html.twig', {'button_label': 'Update'}) }}#}
+{#    #}{# 👉 ajoute ceci : boutons pour gérer les créneaux du layout #}
+{#    {% if schedule.layout %}#}
+{#        <div class="fr-mt-3w fr-mb-3w">#}
+{#            <a href="{{ path('app_time_block_new', {id: schedule.layout.id}) }}"#}
+{#               class="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left">#}
+{#                Ajouter un créneau#}
+{#            </a>#}
+
+{#            <a href="{{ path('app_time_block_index', {id: schedule.layout.id}) }}"#}
+{#               class="fr-btn fr-btn--tertiary">#}
+{#                Voir tous les créneaux#}
+{#            </a>#}
+{#        </div>#}
+{#    {% endif %}#}
+
+{#    <a href="{{ path('app_schedule_index') }}">back to list</a>#}
+
+
+{#    {{ include('schedule/_delete_form.html.twig') }}#}
+
+
+    <div class="fr-container fr-mt-6w fr-mb-6w">
+        <h1 class="fr-h2 fr-mb-3w">
+            Modifier le planning : {{ schedule.name }}
+        </h1>
+
+        {{ include('schedule/_form.html.twig', {
+            form: form,
+            schedule: schedule,
+            button_label: 'Enregistrer'
+        }) }}
+
+        <div class="fr-mt-4w">
+            <a href="{{ path('app_schedule_index') }}"
+               class="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-line fr-btn--icon-left">
+                Retour
+            </a>
+        </div>
+    </div>
+
+{% endblock %}

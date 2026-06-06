@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Schedule{% endblock %}
+
+{% block body %}
+
+    <div class="fr-container fr-mt-6w fr-mb-6w">
+        <h1 class="fr-h2 fr-mb-3w">Nouveau planning</h1>
+
+        {{ include('schedule/_form.html.twig', {
+            form: form,
+            schedule: schedule ?? null,
+            button_label: 'Créer'
+        }) }}
+
+        <div class="fr-mt-4w">
+            <a href="{{ path('app_schedule_index') }}"
+               class="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-line fr-btn--icon-left">
+                Retour
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} : {{ resource.name }}{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-4w">
+
+        {# --- FIL D'ARIANE / RETOUR --- #}
+        <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+            <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-1">Voir le fil d’ariane</button>
+            <div class="fr-collapse" id="breadcrumb-1">
+                <ol class="fr-breadcrumb__list">
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_resource_index') }}">Ressources</a></li>
+                    <li><a class="fr-breadcrumb__link" aria-current="page">{{ resource.name }}</a></li>
+                </ol>
+            </div>
+        </nav>
+
+        {# --- EN-TÊTE (TITRE + ACTIONS) --- #}
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-4w">
+            <div class="fr-col-12 fr-col-md-8">
+                <h1 class="fr-h2 fr-mb-1w">
+                    {{ resource.name }}
+                </h1>
+                <ul class="fr-badges-group">
+                    <li>
+                        {% if resource.isActive %}
+                            <p class="fr-badge fr-badge--success fr-badge--no-icon fr-badge--sm">Active</p>
+                        {% else %}
+                            <p class="fr-badge fr-badge--new fr-badge--no-icon fr-badge--sm">Inactive</p>
+                        {% endif %}
+                    </li>
+                    {% if resource.requiresApproval %}
+                        <li><p class="fr-badge fr-badge--info fr-badge--sm">Approbation requise</p></li>
+                    {% endif %}
+                    {% if resource.allowMultiday %}
+                        <li><p class="fr-badge fr-badge--purple-glycine fr-badge--sm">Multi-jours</p></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="fr-col-12 fr-col-md-4 fr-text--right">
+                <ul class="fr-btns-group fr-btns-group--inline fr-btns-group--right">
+                    <li>
+                        <a href="{{ path('app_resource_edit', {'id': resource.id}) }}" class="fr-btn fr-icon-edit-line fr-btn--icon-left">
+                            Modifier
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {# --- CONTENU EN ONGLETS --- #}
+        <div class="fr-tabs">
+            <ul class="fr-tabs__list" role="tablist" aria-label="Détails de la ressource">
+                <li role="presentation">
+                    <button type="button" id="tab-identity" class="fr-tabs__tab fr-icon-building-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="panel-identity">
+                        Vue d'ensemble
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button type="button" id="tab-rules" class="fr-tabs__tab fr-icon-settings-5-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="panel-rules">
+                        Règles & Paramètres
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button type="button" id="tab-timing" class="fr-tabs__tab fr-icon-timer-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="panel-timing">
+                        Temps & Technique
+                    </button>
+                </li>
+            </ul>
+
+            {# --- PANNEAU 1 : IDENTITÉ --- #}
+            <div id="panel-identity" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tab-identity" tabindex="0">
+                <div class="fr-grid-row fr-grid-row--gutters">
+                    {# Colonne Gauche : Infos #}
+                    <div class="fr-col-12 fr-col-md-8">
+                        {% if resource.description %}
+                            <div class="fr-highlight fr-ml-0 fr-mb-3w">
+                                <p class="fr-text--lg">{{ resource.description }}</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="fr-grid-row fr-grid-row--gutters">
+                            <div class="fr-col-6">
+                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Localisation</p>
+                                <p class="fr-text--bold">{{ resource.location|default('Non renseignée') }}</p>
+                            </div>
+                            <div class="fr-col-6">
+                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Catégorie</p>
+                                <p class="fr-text--bold">
+                                    {% if resource.category %}
+                                        <span class="fr-tag fr-tag--sm">{{ resource.category.name }}</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="fr-col-6">
+                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Capacité</p>
+                                <p class="fr-text--bold">{{ resource.maxParticipants ? resource.maxParticipants ~ ' personnes' : 'Illimitée' }}</p>
+                            </div>
+                            <div class="fr-col-6">
+                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Contact responsable</p>
+                                <p class="fr-text--bold">{{ resource.contactInfo|default('-') }}</p>
+                            </div>
+                            <div class="fr-col-6">
+                                <p class="fr-text--sm fr-mb-0 fr-text--mention-grey">Planning associé</p>
+                                <p class="fr-text--bold">{{ resource.schedule ? resource.schedule.name : 'Aucun' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Colonne Droite : Image #}
+                    <div class="fr-col-12 fr-col-md-4">
+                        {% set img = resource.imageName ?
+                            asset('uploads/resources/' ~ resource.imageName) : asset('image/amphi-toulouse-garonne-2.jpg') %}
+
+                        {# 👇 ON REMPLACE LA CARTE PAR UN CONTENEUR SIMPLE 👇 #}
+                        <div style="border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <img src="{{ img }}"
+                                 alt="Visuel de {{ resource.name }}"
+                                 style="width: 100%; height: auto; display: block; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- PANNEAU 2 : RÈGLES --- #}
+            <div id="panel-rules" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-rules" tabindex="0">
+                <h4 class="fr-h6 fr-mb-2w">Règles d'accès et options</h4>
+                <div class="fr-table fr-table--layout-fixed">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Valeur</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Approbation</td>
+                            <td>{{ resource.requiresApproval ? '<span class="fr-text--error fr-icon-error-warning-line fr-text--icon-left">Requise</span>' : '<span class="fr-text--success fr-icon-check-line fr-text--icon-left">Automatique</span>' }}</td>
+                            <td class="fr-text--sm">Nécessite une validation admin avant confirmation.</td>
+                        </tr>
+                        <tr>
+                            <td>Multi-jours</td>
+                            <td>{{ resource.allowMultiday ? 'Autorisé' : 'Interdit' }}</td>
+                            <td class="fr-text--sm">Permet de réserver sur plusieurs jours consécutifs.</td>
+                        </tr>
+                        <tr>
+                            <td>Check-in</td>
+                            <td>{{ resource.enableCheckIn ? 'Activé' : 'Désactivé' }}</td>
+                            <td class="fr-text--sm">Les utilisateurs doivent signaler leur présence.</td>
+                        </tr>
+                        <tr>
+                            <td>Libération auto</td>
+                            <td>{{ resource.autoReleaseMinutes > 0 ? resource.autoReleaseMinutes ~ ' min' : 'Désactivé' }}</td>
+                            <td class="fr-text--sm">Annulation automatique si pas de check-in après ce délai.</td>
+                        </tr>
+                        <tr>
+                            <td>Visibilité</td>
+                            <td>{{ resource.allowDisplay ? 'Publique' : 'Masquée' }}</td>
+                            <td class="fr-text--sm">Visible sur le tableau de bord public.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# --- PANNEAU 3 : TEMPS & TECHNIQUE --- #}
+            <div id="panel-timing" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-timing" tabindex="0">
+
+                <h4 class="fr-h6">Contraintes temporelles</h4>
+                <div class="fr-grid-row fr-grid-row--gutters fr-mb-4w">
+                    <div class="fr-col-12 fr-col-md-3">
+                        <div class="fr-callout fr-callout--brown-caramel fr-p-2w">
+                            <p class="fr-callout__title">{{ resource.minDuration }} min</p>
+                            <p class="fr-text--sm fr-mb-0">Durée Minimum</p>
+                        </div>
+                    </div>
+                    <div class="fr-col-12 fr-col-md-3">
+                        <div class="fr-callout fr-callout--brown-caramel fr-p-2w">
+                            <p class="fr-callout__title">{{ resource.maxDuration }} min</p>
+                            <p class="fr-text--sm fr-mb-0">Durée Maximum</p>
+                        </div>
+                    </div>
+                    <div class="fr-col-12 fr-col-md-3">
+                        <div class="fr-callout fr-callout--blue-ecume fr-p-2w">
+                            <p class="fr-callout__title">{{ resource.minIncrement }} min</p>
+                            <p class="fr-text--sm fr-mb-0">Pas de réservation</p>
+                        </div>
+                    </div>
+                    <div class="fr-col-12 fr-col-md-3">
+                        <div class="fr-callout fr-callout--purple-glycine fr-p-2w">
+                            <p class="fr-callout__title">{{ resource.bufferTime }} min</p>
+                            <p class="fr-text--sm fr-mb-0">Temps tampon (Buffer)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="fr-h6">Délais de prévenance (Notices)</h4>
+                <ul class="fr-list">
+                    <li>Création avant : <strong>{{ resource.minNoticeTimeAdd }}</strong> (Délai min avant le début)</li>
+                    <li>Anticipation max : <strong>{{ resource.maxNoticeTime }}</strong> (Combien de temps à l'avance on peut réserver)</li>
+                    <li>Modification avant : <strong>{{ resource.minNoticeTimeUpdate }}</strong></li>
+                    <li>Annulation avant : <strong>{{ resource.minNoticeTimeDelete }}</strong></li>
+                </ul>
+
+                <hr class="fr-my-4w">
+
+                <div class="fr-accordion">
+                    <h3 class="fr-accordion__title">
+                        <button class="fr-accordion__btn" aria-expanded="false" aria-controls="accordion-tech">
+                            Données techniques (IDs, Dates)
+                        </button>
+                    </h3>
+                    <div class="fr-collapse" id="accordion-tech">
+                        <div class="fr-table fr-table--no-caption">
+                            <table>
+                                <tbody>
+                                <tr><th>ID interne</th><td>{{ resource.id }}</td></tr>
+                                <tr><th>Legacy ID</th><td>{{ resource.legacyId|default('-') }}</td></tr>
+                                <tr><th>Public ID</th><td>{{ resource.publicId|default('-') }}</td></tr>
+                                <tr><th>Créée le</th><td>{{ resource.dateCreated ? resource.dateCreated|date('d/m/Y H:i') : '-' }}</td></tr>
+                                <tr><th>Modifiée le</th><td>{{ resource.lastModified ? resource.lastModified|date('d/m/Y H:i') : '-' }}</td></tr>
+                                <tr><th>Ordre de tri</th><td>{{ resource.sortOrder }}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- ZONE DANGER --- #}
+        <div class="fr-mt-6w fr-pt-4w fr-pb-2w" style="border-top: 1px solid var(--border-default-grey);">
+            <h2 class="fr-h5 fr-text--error">Zone de danger</h2>
+            <p class="fr-text--sm">La suppression d'une ressource est irréversible et peut impacter les réservations passées.</p>
+
+            <div class="fr-grid-row fr-grid-row--middle">
+                <div class="fr-col-auto">
+                    {# On inclut le formulaire de suppression fourni par Symfony, mais on le stylise souvent dans _delete_form.html.twig #}
+                    {{ include('resource/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

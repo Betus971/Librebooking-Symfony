@@ -1,0 +1,34 @@
+
+<div class="fr-container fr-my-4w">
+    <h1 class="fr-h2 fr-mb-3w">
+        {{ page_title|default('Catégorie de ressource') }}
+    </h1>
+
+    {{ form_start(form, {'attr': {'class': 'fr-form'}}) }}
+
+    {{ form_row(form.name, {
+        label: 'Nom',
+        label_attr: {'class': 'fr-label'},
+        row_attr: {'class': 'fr-form-group'},
+        attr: {'class': 'fr-input'}
+    }) }}
+
+    {{ form_row(form.description, {
+        label: 'Description',
+        label_attr: {'class': 'fr-label'},
+        row_attr: {'class': 'fr-form-group'},
+        attr: {'class': 'fr-textarea', rows: 4}
+    }) }}
+
+    <div class="fr-btns-group fr-btns-group--inline-md fr-mt-3w">
+        <button class="fr-btn">
+            {{ button_label|default('Enregistrer') }}
+        </button>
+        <a class="fr-btn fr-btn--secondary" href="{{ path('app_resource_category_index') }}">
+            Annuler
+        </a>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+

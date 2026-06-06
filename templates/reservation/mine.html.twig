@@ -1,0 +1,122 @@
+{# templates/reservation/mine.html.twig #}
+{% extends 'base.html.twig' %}
+{% block title %}Mes réservations{% endblock %}
+{% block body %}
+    <div class="fr-container fr-mt-4w fr-mb-8w">
+
+        {# --- EN-TÊTE --- #}
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-4w">
+            <div class="fr-col">
+                <h1 class="fr-h3 fr-mb-0">Mes réservations</h1>
+                <p class="fr-text--sm fr-text--mention-grey fr-mb-0">Suivez l'état de vos demandes de salles et véhicules.</p>
+            </div>
+            <div class="fr-col-auto">
+                <a href="{{ path('reservation_index') }}" class="fr-btn fr-btn--secondary fr-icon-arrow-left-line fr-btn--icon-left">
+                    Retour à l'accueil
+                </a>
+                <a href="{{ path('reservation_new') }}" class="fr-btn fr-icon-add-line fr-btn--icon-left fr-ml-2w">
+                    Nouvelle demande
+                </a>
+            </div>
+        </div>
+
+        {# --- CONTENU --- #}
+        {% if series is empty %}
+            <div class="fr-alert fr-alert--info">
+                <h3 class="fr-alert__title">Aucune réservation</h3>
+                <p>Vous n'avez effectué aucune demande de réservation pour le moment.</p>
+            </div>
+        {% else %}
+            <div class="fr-table fr-table--bordered fr-table--layout-fixed">
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col" style="width: 25%;">Titre de la réservation</th>
+                        <th scope="col">Ressource(s)</th>
+                        <th scope="col">Prochaine séance</th>
+                        <th scope="col">Statut</th>
+                        <th scope="col" class="fr-text--right">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for s in series %}
+                        <tr>
+                            {# TITRE & TYPE #}
+                            <td>
+                                <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="fr-text--bold" style="text-decoration: none;">
+                                    {{ s.title|default('Série #' ~ s.id) }}
+                                </a>
+                                {% if s.type %}
+                                    <br><span class="fr-text--xs fr-text--mention-grey">{{ s.type.label }}</span>
+                                {% endif %}
+                            </td>
+
+                            {# RESSOURCES #}
+                            <td>
+                                {% for lien in s.reservationResources %}
+                                    <span class="fr-badge fr-badge--sm fr-badge--blue-cumulus fr-mb-1v">
+                                        {{ lien.resource.name }}
+                                        {% if lien.resource.category %}
+                                            ({{ lien.resource.category.name }})
+                                        {% endif %}
+                                    </span><br>
+                                {% else %}
+                                    <span class="fr-text--disabled">-</span>
+                                {% endfor %}
+                            </td>
+
+                            {# PROCHAINE SÉANCE #}
+                            <td>
+                                {% set next = s.nextReservation %}
+                                {% if next %}
+                                    <span class="fr-icon-calendar-event-line fr-icon--sm fr-mr-1v" aria-hidden="true"></span>
+                                    {{ next.startDate|date('d/m/Y') }}<br>
+                                    <span class="fr-text--xs">à {{ next.startDate|date('H:i') }}</span>
+                                {% else %}
+                                    <span class="fr-badge fr-badge--sm fr-badge--grey">Terminée / Passée</span>
+                                {% endif %}
+                            </td>
+
+                            {# STATUT #}
+                            <td>
+                                {% if s.status %}
+                                    {% set badgeClass = 'fr-badge--info' %}
+                                    {% set badgeIcon = '' %}
+
+                                    {% if s.status.id == 1 %}        {# En attente #}
+                                        {% set badgeClass = 'fr-badge--warning' %}
+                                        {% set badgeIcon = 'fr-icon-time-line' %}
+                                    {% elseif s.status.id == 2 %}    {# Approuvée #}
+                                        {% set badgeClass = 'fr-badge--success' %}
+                                        {% set badgeIcon = 'fr-icon-checkbox-circle-line' %}
+                                    {% elseif s.status.id == 3 %}    {# Refusée #}
+                                        {% set badgeClass = 'fr-badge--error' %}
+                                        {% set badgeIcon = 'fr-icon-close-circle-line' %}
+                                    {% elseif s.status.id == 4 %}    {# Annulée #}
+                                        {% set badgeClass = 'fr-badge--error' %}
+                                    {% endif %}
+
+                                    <p class="fr-badge {{ badgeClass }} fr-badge--sm {{ badgeIcon }} fr-badge--icon-left fr-mb-0">
+                                        {{ s.status.label }}
+                                    </p>
+                                {% else %}
+                                    <span class="fr-text--disabled">-</span>
+                                {% endif %}
+                            </td>
+
+                            {# ACTIONS #}
+                            <td class="fr-text--right">
+                                <a class="fr-btn fr-btn--secondary fr-btn--sm fr-icon-eye-line" href="{{ path('reservation_show', {uuid: s.uuid}) }}" title="Voir les détails">
+                                    Détails
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+
+{% endblock %}

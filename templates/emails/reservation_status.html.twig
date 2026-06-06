@@ -1,0 +1,33 @@
+<div style="font-family: Arial, sans-serif; color: #1e1e1e; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5;">
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #000091; margin: 0;">Service Réservation</h2>
+    </div>
+
+    <p>Bonjour <strong>{{ demandeur }}</strong>,</p>
+
+    <p>Votre demande de réservation pour <strong>"{{ titre }}"</strong> a été mise à jour par le service logistique.</p>
+
+    {# Encart de Statut #}
+    <div style="padding: 15px; margin: 20px 0; border-radius: 4px; {% if statut == 'approuvee' %}background-color: #e3ebd3; border-left: 4px solid #18753c;{% else %}background-color: #fee9e5; border-left: 4px solid #ce0500;{% endif %}">
+
+        <h3 style="margin-top: 0; {% if statut == 'approuvee' %}color: #18753c;{% else %}color: #ce0500;{% endif %}">
+            {% if statut == 'approuvee' %}
+                ✅ Votre réservation est APPROUVÉE
+            {% else %}
+                ❌ Votre réservation est REFUSÉE
+            {% endif %}
+        </h3>
+
+        {% if motif is defined and motif is not empty %}
+            <p style="margin-bottom: 0;"><strong>Motif :</strong> {{ motif }}</p>
+        {% endif %}
+    </div>
+
+    <p>Pour consulter les détails de votre demande, vous pouvez vous connecter à votre espace personnel.</p>
+
+    <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
+    <p style="font-size: 12px; color: #666; text-align: center;">
+        Ceci est un message automatique, merci de ne pas y répondre.
+    </p>
+</div>

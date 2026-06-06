@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planning{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #calendar { max-width: 1200px; margin: 0 auto; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-4w">
+        <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mb-3w">
+            <div class="fr-col-12 fr-col-md-6">
+                <h1 class="fr-h3 fr-mb-1w">{{ pageTitle }}</h1>
+            </div>
+            <div class="fr-col-12 fr-col-md-6 fr-text--right">
+                <div class="fr-select-group fr-mb-0">
+                    <label class="fr-label" for="resource-select">Filtrer par ressource</label>
+                    <select class="fr-select" id="resource-select">
+                        <option value="" {{ currentResourceId is null ? 'selected' : '' }}>Toutes les ressources</option>
+                        {% for res in resources %}
+                            <option value="{{ res.id }}" {{ currentResourceId == res.id ? 'selected' : '' }}>{{ res.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendar"
+             data-resource-id="{{ resourceId is not null ? resourceId : '' }}"
+             data-week-start="{{ weekStart }}"
+             data-new-url="{{ path('reservation_new') }}"
+             data-events-url="/fc-load-events"></div>
+    </div>
+
+    {{ include('components/_fullcalendar_lib.html.twig') }}
+    <script>
+        (function() {
+            // IIFE → aucune variable ne fuit dans le global, pas de double-init entre deux pages.
+            let fc = null;
+            let initialized = false;
+
+            function destroyFc() {
+                if (fc) {
+                    try { fc.destroy(); } catch (_) {}
+                    fc = null;
+                }
+                const el = document.getElementById('calendar');
+                if (el) el.innerHTML = '';
+            }
+
+            function initFc() {
+                if (initialized) return;            // garde-fou contre DOMContentLoaded + turbo:load
+                const el = document.getElementById('calendar');
+                if (!el || typeof FullCalendar === 'undefined') return;
+
+                destroyFc();
+
+                const resourceIdAttr = el.dataset.resourceId;
+                const resourceId = resourceIdAttr === '' ? null : parseInt(resourceIdAttr, 10);
+                const weekStart  = el.dataset.weekStart;
+                const newUrl     = el.dataset.newUrl;
+                const eventsUrl  = el.dataset.eventsUrl;
+
+                fc = new FullCalendar.Calendar(el, {
+                    initialView: 'timeGridWeek',
+                    initialDate: weekStart,
+                    locale: 'fr',
+                    timeZone: 'Europe/Paris',
+                    firstDay: 1,
+                    nowIndicator: true,
+                    expandRows: true,
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '21:00:00',
+                    slotDuration: '00:30:00',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', day: 'Jour' },
+                    events: {
+                        url: eventsUrl,
+                        method: 'POST',
+                        extraParams: { filters: JSON.stringify({ resourceId: resourceId }) }
+                    },
+                    eventClassNames: (arg) => arg.event.extendedProps.classNames || [],
+                    dateClick: function(info) {
+                        let url = newUrl + '?date=' + info.dateStr;
+                        if (resourceId !== null) url += '&resource=' + resourceId;
+                        window.location.href = url;
+                    },
+                    eventClick: function(info) {
+                        info.jsEvent.preventDefault();
+                        if (info.event.id) {
+                            window.location.href = '/reservation/' + info.event.id + '/';
+                        }
+                    }
+                });
+
+                fc.render();
+                initialized = true;
+            }
+
+            // Changement de ressource : navigation Turbo-friendly (window.location gère tout seul)
+            const select = document.getElementById('resource-select');
+            if (select) {
+                select.addEventListener('change', (e) => {
+                    const v = e.target.value;
+                    window.location.href = v ? ('/calendar/' + v) : '/calendar';
+                });
+            }
+
+            // Cycle de vie :
+            // - Premier chargement classique : on init dès que le DOM est prêt
+            // - Navigation Turbo : turbo:before-cache → detruit, turbo:load → re-init
+            // Le flag `initialized` empêche les doubles-inits si les deux events tirent.
+            if (document.readyState !== 'loading') {
+                initFc();
+            } else {
+                document.addEventListener('DOMContentLoaded', initFc, { once: true });
+            }
+
+            document.addEventListener('turbo:load', () => { initialized = false; initFc(); });
+            document.addEventListener('turbo:before-cache', () => { destroyFc(); initialized = false; });
+        })();
+    </script>
+{% endblock %}

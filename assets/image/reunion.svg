@@ -1,0 +1,14 @@
+<!-- public/pictogrammes/dsfr/default.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Pictogramme générique</title>
+  <rect x="4" y="4" width="120" height="120" rx="16" fill="#000091"></rect>
+  <!-- Silhouettes -->
+  <circle cx="64" cy="48" r="12" fill="#ffffff"></circle>
+  <rect x="44" y="68" width="40" height="24" rx="12" fill="#ffffff"></rect>
+
+  <circle cx="40" cy="56" r="10" fill="#ffffff" opacity="0.95"></circle>
+  <rect x="24" y="72" width="28" height="20" rx="10" fill="#ffffff" opacity="0.95"></rect>
+
+  <circle cx="88" cy="56" r="10" fill="#ffffff" opacity="0.95"></circle>
+  <rect x="76" y="72" width="28" height="20" rx="10" fill="#ffffff" opacity="0.95"></rect>
+</svg>

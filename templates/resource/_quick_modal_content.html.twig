@@ -1,0 +1,35 @@
+{#  {% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="fr-container">
+
+<h2 id="modal-create-title" class="fr-modal__title">
+    <span class="fr-icon-arrow-right-line fr-icon--lg" aria-hidden="true"></span>
+    Créer une ressource
+</h2>
+
+{{ form_start(form, { attr: { class: 'fr-mt-2w' } }) }}
+<div class="fr-fieldset">
+    <div class="fr-fieldset__element">{{ form_row(form.name) }}</div>
+    <div class="fr-fieldset__element">{{ form_row(form.schedule) }}</div>
+    <div class="fr-fieldset__element">{{ form_row(form.location) }}</div>
+    <div class="fr-fieldset__element">{{ form_row(form.maxParticipants) }}</div>
+    <div class="fr-fieldset__element">{{ form_row(form.unitCost) }}</div>
+
+    <div class="fr-fieldset__element">
+        <div class="fr-upload-group">
+            <label class="fr-label" for="{{ form.photo.vars.id }}">Photo (JPEG/PNG)
+                <span class="fr-hint-text">Taille max 4 Mo</span>
+            </label>
+            {{ form_widget(form.photo, { attr: { class: 'fr-upload' } }) }}
+            {{ form_errors(form.photo) }}
+        </div>
+    </div>
+</div>
+
+<div class="fr-btns-group fr-btns-group--right fr-mt-3w">
+    <button class="fr-btn" type="submit">Créer</button>
+</div>
+{{ form_end(form) }}
+</div>
+{% endblock %}

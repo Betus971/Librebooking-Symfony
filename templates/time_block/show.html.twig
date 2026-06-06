@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TimeBlock{% endblock %}
+
+{% block body %}
+    <h1>TimeBlock</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ time_block.id }}</td>
+            </tr>
+            <tr>
+                <th>Label</th>
+                <td>{{ time_block.label }}</td>
+            </tr>
+            <tr>
+                <th>EndLabel</th>
+                <td>{{ time_block.endLabel }}</td>
+            </tr>
+            <tr>
+                <th>DayOfWeek</th>
+                <td>{{ time_block.dayOfWeek }}</td>
+            </tr>
+            <tr>
+                <th>AvailabilityCode</th>
+                <td>{{ time_block.availabilityCode }}</td>
+            </tr>
+            <tr>
+                <th>StartTime</th>
+                <td>{{ time_block.startTime ? time_block.startTime|date('H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>EndTime</th>
+                <td>{{ time_block.endTime ? time_block.endTime|date('H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_time_block_index') }}">back to list</a>
+
+    <a href="{{ path('app_time_block_edit', {'id': time_block.id}) }}">edit</a>
+
+    {{ include('time_block/_delete_form.html.twig') }}
+{% endblock %}

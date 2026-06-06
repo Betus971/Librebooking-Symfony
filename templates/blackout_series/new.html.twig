@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New BlackoutSeries{% endblock %}
+
+{% block body %}
+    <h1>Create new BlackoutSeries</h1>
+
+    {{ include('blackout_series/_form.html.twig') }}
+
+    <a href="{{ path('app_blackout_series_index') }}">back to list</a>
+{% endblock %}

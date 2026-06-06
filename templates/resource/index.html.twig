@@ -1,0 +1,245 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Resource index{% endblock %}
+
+
+
+
+{% block body %}
+
+    <div class="fr-container-xl fr-my-4w">
+
+
+        {# --- MODALE DES FILTRES --- #}
+        <dialog id="modal-filters" class="fr-modal" aria-labelledby="modal-filters-title">
+            <div class="fr-container fr-container--fluid fr-container-md">
+                <div class="fr-grid-row fr-grid-row--center">
+                    <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+                        <div class="fr-modal__body">
+                            <div class="fr-modal__header">
+                                <button aria-controls="modal-filters" title="Fermer" type="button" class="fr-btn fr-btn--close">Fermer</button>
+                            </div>
+                            <div class="fr-modal__content">
+                                <h1 id="modal-filters-title" class="fr-modal__title">Filtrer les ressources</h1>
+                                <form method="get" class="fr-grid-row fr-grid-row--gutters">
+                                    <div class="fr-col-12">
+                                        <div class="fr-search-bar" role="search">
+                                            <label class="fr-label" for="q">Rechercher</label>
+                                            <input class="fr-input" id="q" name="q" type="search" value="{{ filters.q ?? '' }}" placeholder="Nom, lieu...">
+                                            <button class="fr-btn" type="submit">Rechercher</button>
+                                        </div>
+                                    </div>
+                                    <div class="fr-col-12 fr-col-md-6">
+                                        <div class="fr-select-group">
+                                            <label class="fr-label" for="schedule">Planning associé</label>
+                                            <select class="fr-select" id="schedule" name="schedule">
+                                                <option value="">Tous les plannings</option>
+                                                {% for s in schedules %}
+                                                    <option value="{{ s.id }}" {{ (filters.schedule ?? null) == s.id ? 'selected' }}>{{ s.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="fr-col-12 fr-col-md-6">
+                                        <div class="fr-select-group">
+                                            <label class="fr-label" for="status">Statut</label>
+                                            <select class="fr-select" id="status" name="status">
+                                                {% set st = filters.status ?? 'all' %}
+                                                <option value="all"      {{ st == 'all' ? 'selected' }}>Tous</option>
+                                                <option value="active"   {{ st == 'active' ? 'selected' }}>Actives uniquement</option>
+                                                <option value="inactive" {{ st == 'inactive' ? 'selected' }}>Inactives / Archivées</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="fr-col-12 fr-mt-2w fr-grid-row fr-grid-row--right">
+                                        <button type="submit" class="fr-btn fr-icon-check-line fr-btn--icon-left">Appliquer les filtres</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+        {# --- EN-TÊTE DE PAGE --- #}
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+            {# Colonne de GAUCHE : Le Titre #}
+            <div class="fr-col">
+                <h1 class="fr-h2 fr-mb-0">Gestion des Ressources</h1>
+                <p class="fr-text--sm fr-text--mention-grey fr-mb-0">{{ resources|length }} ressource(s) trouvée(s)</p>
+            </div>
+
+            {# Colonne de DROITE : Le Bouton #}
+            <div class="fr-col-auto">
+                <a href="{{ path('app_resource_new') }}" class="fr-btn fr-icon-add-line fr-btn--icon-left">
+                    Nouvelle ressource
+                </a>
+            </div>
+        </div>
+
+        {# --- BARRE D'OUTILS (Vues & Filtres) --- #}
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-2w fr-background-alt--blue-france fr-p-2w fr-rounded">
+            <div class="fr-col-12 fr-col-md-6">
+                {# Sélecteur de vue (Simulé via paramètres GET pour éviter le JS complexe) #}
+                <ul class="fr-btns-group fr-btns-group--inline fr-btns-group--sm">
+                    <li>
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'view': 'table'})) }}"
+                           class="fr-btn fr-btn--sm fr-icon-table-line fr-btn--icon-left {{ view == 'table' ? '' : 'fr-btn--secondary' }}">
+                            Tableau
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'view': 'cards'})) }}"
+                           class="fr-btn fr-btn--sm fr-icon-layout-grid-line fr-btn--icon-left {{ view == 'cards' ? '' : 'fr-btn--secondary' }}">
+                            Cartes
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="fr-col-12 fr-col-md-6 fr-text--right">
+                <button data-fr-opened="false" aria-controls="modal-filters" class="fr-btn fr-btn--secondary fr-btn--sm fr-icon-filter-fill fr-btn--icon-left">
+                    Filtrer la liste
+                </button>
+                {% if filters.q or filters.schedule or (filters.status and filters.status != 'all') %}
+                    <a href="{{ path('app_resource_index') }}" class="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-circle-line fr-btn--icon-right">
+                        Effacer les filtres
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# === CONTENU === #}
+
+        {# VUE CARTES #}
+        {% if view == 'cards' %}
+            <div class="fr-grid-row fr-grid-row--gutters">
+                {% for resource in resources %}
+                    {% set img = resource.imageName ? asset('uploads/resources/' ~ resource.imageName) : asset('image/amphi-toulouse-garonne-2.jpg') %}
+                    <div class="fr-col-12 fr-col-md-6 fr-col-lg-4">
+                        <div class="fr-card fr-enlarge-link">
+                            <div class="fr-card__body">
+                                <div class="fr-card__content">
+                                    <h3 class="fr-card__title">
+                                        <a href="{{ path('app_resource_show', {id: resource.id}) }}">{{ resource.name }}</a>
+                                    </h3>
+                                    <p class="fr-card__desc">
+                                        {{ resource.description|u.truncate(80, '...') }}
+                                    </p>
+                                    <div class="fr-card__start">
+                                        <ul class="fr-tags-group">
+                                            <li>
+                                                {% if resource.isActive %}
+                                                    <p class="fr-tag fr-tag--sm fr-tag--green-emerald">Active</p>
+                                                {% else %}
+                                                    <p class="fr-tag fr-tag--sm">Inactive</p>
+                                                {% endif %}
+                                            </li>
+                                            {% if resource.location %}
+                                                <li><p class="fr-tag fr-tag--sm fr-icon-map-pin-2-line fr-tag--icon-left">{{ resource.location }}</p></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fr-card__header">
+                                <div class="fr-card__img">
+                                    <img src="{{ img }}" class="fr-responsive-img" alt="" style="object-fit: cover; height: 200px; width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="fr-col-12">
+                        <div class="fr-alert fr-alert--info">Aucune ressource ne correspond à votre recherche.</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# VUE TABLEAU (Par défaut) #}
+        {% else %}
+            <div class="fr-table fr-table--bordered fr-table--layout-fixed">
+                <div class="fr-table__wrapper">
+                    <div class="fr-table__container">
+                        <div class="fr-table__content">
+                            <table>
+                                <caption>Liste détaillée des ressources</caption>
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="fr-col-1">Image</th>
+                                    <th scope="col" style="width: 25%;">Nom</th>
+                                    <th scope="col">Catégorie</th>
+                                    <th scope="col">Capacité</th>
+                                    <th scope="col">Lieu</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col" class="fr-text--right">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for resource in resources %}
+{#                                    {% set img = resource.imageName ? asset('uploads/resources/' ~ resource.imageName) : asset('image/amphi-toulouse-garonne-2.jpg') %}#}
+                                    <tr>
+                                        <td>
+                                            {% if resource.imageName %}
+                                                <img src="{{ asset('uploads/resources/' ~ resource.imageName) }}"
+                                                     alt="{{ resource.name }}"
+                                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                            {% else %}
+                                                {# Icône par défaut si pas de photo #}
+                                                <div style="width: 50px; height: 50px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                                    <span class="fr-icon-image-line" aria-hidden="true"></span>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="fr-text--bold fr-link">
+                                                {{ resource.name }}
+                                            </a>
+                                            {% if resource.requiresApproval %}
+                                                <br><span class="fr-badge fr-badge--info fr-badge--no-icon fr-badge--sm fr-mt-1v">Approbation requise</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if resource.category %}
+                                                <span class="fr-tag fr-tag--sm">{{ resource.category.name }}</span>
+                                            {% else %}
+                                                <span class="fr-text--mention-grey">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if resource.maxParticipants %}
+                                                {{ resource.maxParticipants }} pers.
+                                            {% else %}
+                                                <span class="fr-text--mention-grey">Non défini</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ resource.location ?? '-' }}</td>
+                                        <td>
+                                            {% if resource.isActive %}
+                                                <p class="fr-badge fr-badge--success fr-badge--no-icon fr-badge--sm">Active</p>
+                                            {% else %}
+                                                <p class="fr-badge fr-badge--new fr-badge--no-icon fr-badge--sm">Inactive</p>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fr-text--right">
+                                            <ul class="fr-btns-group fr-btns-group--inline fr-btns-group--sm fr-btns-group--right">
+                                                <li>
+                                                    <a href="{{ path('app_resource_edit', {id: resource.id}) }}" class="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line" title="Modifier">
+                                                        Modifier
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="7" class="fr-text--center">Aucune ressource trouvée.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}

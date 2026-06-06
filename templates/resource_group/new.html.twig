@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Équipe{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-mt-4w">
+        <h1>Créer une nouvelle équipe</h1>
+
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="fr-btn fr-mt-2w" type="submit">Enregistrer l'équipe</button>
+        <a href="{{ path('app_resource_group_index') }}" class="fr-btn fr-btn--secondary fr-mt-2w">Annuler</a>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

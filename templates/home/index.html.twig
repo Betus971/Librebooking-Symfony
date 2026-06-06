@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Site des réservations – Accueil{% endblock %}
+
+{% block body %}
+
+{# ── Annonces ────────────────────────────────────────────────────────────── #}
+{% if announcements is defined and announcements|length > 0 %}
+<div class="fr-container fr-mt-3w">
+    {% for ann in announcements %}
+        {% set alertType = 'info' %}
+        {% set alertTitle = 'Information' %}
+        {% if ann.priority == 2 %}
+            {% set alertType = 'success' %}
+            {% set alertTitle = 'Succès' %}
+        {% elseif ann.priority == 3 %}
+            {% set alertType = 'warning' %}
+            {% set alertTitle = 'Important' %}
+        {% elseif ann.priority == 4 %}
+            {% set alertType = 'error' %}
+            {% set alertTitle = 'Urgent' %}
+        {% endif %}
+    <div class="fr-alert fr-alert--{{ alertType }} fr-mb-2w">
+        <h3 class="fr-alert__title">{{ alertTitle }}</h3>
+        <p style="white-space: pre-wrap; margin-bottom: 0;">{{ ann.message }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Layout principal : sidebar gauche + contenu ─────────────────────────── #}
+<div class="fr-container fr-mt-4w fr-mb-8w">
+    <div class="fr-grid-row fr-grid-row--gutters">
+
+        {# ── Sidebar gauche : Prochaine réservation ──────────────────────── #}
+        {% if next_reservation is not null %}
+        <div class="fr-col-12 fr-col-md-3">
+            <div class="home-next-resa">
+                <div class="home-next-resa__icon">
+                    <span class="fr-icon-calendar-event-line" aria-hidden="true"></span>
+                </div>
+                <p class="home-next-resa__label">Prochaine réservation</p>
+                <p class="home-next-resa__title">{{ next_reservation.title }}</p>
+                {% set inst = next_reservation.instances|first %}
+                {% if inst %}
+                <p class="home-next-resa__date">
+                    <span class="fr-icon-time-line fr-icon--sm" aria-hidden="true"></span>
+                    {{ inst.startDate|date('d/m/Y') }}<br>
+                    {{ inst.startDate|date('H:i') }} – {{ inst.endDate|date('H:i') }}
+                </p>
+                {% endif %}
+                <a class="fr-btn fr-btn--secondary fr-btn--sm fr-mt-1w"
+                   href="{{ path('reservation_show', {uuid: next_reservation.uuid}) }}">
+                    Voir
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# ── Contenu principal ────────────────────────────────────────────── #}
+        <div class="fr-col-12 {{ next_reservation is not null ? 'fr-col-md-9' : 'fr-col-md-12' }}">
+
+            {# Hero #}
+            <h1 class="fr-h2">Nos Services de Réservation DGGN</h1>
+            <p class="fr-text--lead fr-mb-4w">
+                Accédez à tous nos services de réservation au même endroit.
+                Choisissez le service dont vous avez besoin.
+            </p>
+
+            {# Grille des catégories #}
+            <div class="fr-grid-row fr-grid-row--gutters">
+                {% for item in categories %}
+                {% set cat = item.category %}
+                <div class="fr-col-12 fr-col-md-4">
+                    <div class="fr-card fr-card--no-border fr-enlarge-link"
+                         style="border:1px solid var(--border-default-grey); border-radius:4px; height:100%;">
+                        <div class="fr-card__body">
+                            <div class="fr-card__content">
+
+                                <ul class="fr-tags-group fr-mb-2w">
+                                    <li><p class="fr-tag fr-tag--sm">{{ cat.name }}</p></li>
+                                </ul>
+
+                                <h3 class="fr-card__title fr-mb-1w">
+                                    <a class="fr-card__link"
+                                       href="{{ path('app_resource_category_show', {id: cat.id}) }}">
+                                        {{ cat.name }}
+                                    </a>
+                                </h3>
+
+                                {% if cat.description %}
+                                <p class="fr-card__desc fr-text--sm">{{ cat.description }}</p>
+                                {% endif %}
+
+                                <p class="fr-text--xs fr-text--mention-grey fr-mb-0 fr-mt-2w">
+                                    {{ item.count }} ressource{{ item.count > 1 ? 's' : '' }} disponible{{ item.count > 1 ? 's' : '' }}
+                                </p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="fr-col-12">
+                    <p class="fr-text--mention-grey">Aucun service disponible pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# ── Styles inline pour le widget sidebar ──────────────────────────────── #}
+<style>
+.home-next-resa {
+    position: sticky;
+    top: 1.5rem;
+    background: var(--background-alt-grey, #f6f6f6);
+    border-left: 3px solid var(--blue-france-sun-113-625, #000091);
+    border-radius: 0 8px 8px 0;
+    padding: 1.25rem 1rem;
+    font-size: 0.85rem;
+}
+
+.home-next-resa__icon {
+    color: var(--blue-france-sun-113-625, #000091);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.home-next-resa__label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-mention-grey, #666);
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+}
+
+.home-next-resa__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-title-grey, #161616);
+    margin: 0 0 0.5rem 0;
+}
+
+.home-next-resa__date {
+    font-size: 0.82rem;
+    color: var(--text-default-grey, #3a3a3a);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs & Rôles{% endblock %}
+
+{% block body %}
+<div class="fr-container fr-mt-4w fr-mb-6w">
+
+    <h1 class="fr-h2">Gestion des Utilisateurs &amp; Rôles</h1>
+    <p class="fr-text--sm fr-text--mention-grey">{{ total }} utilisateur{{ total > 1 ? 's' : '' }} trouvé{{ total > 1 ? 's' : '' }}</p>
+
+    {# ── Barre de recherche DSFR ── #}
+    <form method="get" action="{{ path('app_admin_user') }}" class="fr-search-bar fr-mb-4w" role="search" id="user-search-form">
+        <input
+            type="search"
+            id="user-search-input"
+            name="q"
+            class="fr-input"
+            value="{{ q }}"
+            placeholder="Rechercher par email, nom, uid ou nigend..."
+            autocomplete="off"
+        >
+        <button type="submit" class="fr-btn" title="Rechercher">
+            Rechercher
+        </button>
+        {% if q %}
+            <a href="{{ path('app_admin_user') }}" class="fr-btn fr-btn--secondary fr-ml-1w" title="Effacer la recherche">
+                Effacer
+            </a>
+        {% endif %}
+    </form>
+
+    {# ── Tableau ── #}
+    <div class="fr-table fr-table--bordered" id="table-md">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Email / Identifiant</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">UID SSO</th>
+                    <th scope="col">Rôles actuels</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.lname ?? '—' }}</td>
+                    <td><code>{{ user.uid ?? '—' }}</code></td>
+                    <td>
+                        {% set hasSpecialRole = false %}
+                        {% for role in user.roles %}
+                            {% if role != 'ROLE_USER' %}
+                                {% set hasSpecialRole = true %}
+                                <span class="fr-badge fr-badge--info fr-badge--sm">{{ role|replace({'ROLE_': ''}) }}</span>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not hasSpecialRole %}
+                            <span class="fr-badge fr-badge--sm">Utilisateur</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ path('admin_users_edit_roles', {id: user.id}) }}"
+                           class="fr-btn fr-btn--sm fr-icon-lock-line fr-btn--icon-left">
+                            Gérer les droits
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="fr-text--center">
+                        {% if q %}
+                            Aucun utilisateur trouvé pour "<strong>{{ q }}</strong>"
+                        {% else %}
+                            Aucun utilisateur
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ── Pagination DSFR (rendu unifié via KnpPaginator) ── #}
+    <div class="fr-mt-3w">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+
+</div>
+{% endblock %}

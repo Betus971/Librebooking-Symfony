@@ -1,0 +1,9 @@
+doctrine:
+    dbal:
+        driver: 'pdo_sqlite'
+        url: '%env(resolve:DATABASE_URL)%'
+    orm:
+        auto_generate_proxy_classes: true
+        metadata_cache_driver: array
+        query_cache_driver: array
+        result_cache_driver: array

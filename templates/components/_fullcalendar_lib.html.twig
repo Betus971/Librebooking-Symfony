@@ -1,0 +1,18 @@
+{#
+    Charge la librairie FullCalendar depuis public/js/.
+
+    ⚠️  Environnement réseau fermé : la lib N'EST PAS récupérée depuis une CDN
+        ni via l'importmap (qui résout sur jspm.io). Le fichier
+        `public/js/fullcalendar.min.js` est vendu en statique.
+
+    ✅  Point d'entrée UNIQUE. Partout où un template a besoin de FullCalendar,
+        faire :
+
+            {{ include('components/_fullcalendar_lib.html.twig') }}
+
+        avant le `<script>` qui instancie le calendrier.
+
+    Chargement en <body> (et non <head>) pour que Turbo la ré-exécute à chaque
+    navigation — cf. tâche "Diagnose Turbo interference with FullCalendar".
+#}
+<script src="{{ asset('js/fullcalendar.min.js') }}" data-turbo-track="reload"></script>

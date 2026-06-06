@@ -1,0 +1,262 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AvailabilityController!{% endblock %}
+
+ {% block body %}
+
+
+     <div class="fr-container fr-my-6w">
+         {# Ajout de onchange sur les selects pour recharger la page automatiquement #}
+         <form method="get" class="fr-grid-row fr-grid-row--gutters fr-mb-4w">
+             <div class="fr-col-12 fr-col-md-3">
+                 <label class="fr-label" for="start">Semaine</label>
+                 {# On recharge aussi si on change la date manuellement #}
+                 <input id="start" name="start" type="date" class="fr-input" value="{{ weekStart|date('Y-m-d') }}" onchange="this.form.submit()">
+             </div>
+             <div class="fr-col-12 fr-col-md-3">
+                 <label class="fr-label" for="type">Type de ressource</label>
+                 <select id="type" name="type" class="fr-select" onchange="this.form.submit()">
+                     <option value="">— Tout —</option>
+                     {% for category in filters.categories %}
+                         <option value="{{ category.id }}" {{ category.id == app.request.get('type') ? 'selected' : '' }}>
+                             {{ category.name }}
+                         </option>
+                     {% endfor %}
+                 </select>
+             </div>
+             <div class="fr-col-6 fr-col-md-2">
+                 <label class="fr-label" for="cap">Capacité min.</label>
+                 <input id="cap" name="cap" type="number" min="1" class="fr-input" value="{{ app.request.get('cap') }}">
+             </div>
+
+             <div class="fr-col-12 fr-col-md-2 fr-mt-4w md:fr-mt-0">
+                 <button class="fr-btn fr-btn--icon-left fr-icon-filter-line">Filtrer</button>
+             </div>
+         </form>
+
+         <div class="fr-grid-row fr-mb-2w">
+             <div class="fr-col">
+                 <a class="fr-link fr-icon-arrow-left-line fr-link--icon-left"
+                    href="{{ path('app_availability', app.request.query.all|merge({'start': (weekStart|date_modify('-7 day'))|date('Y-m-d')})) }}">
+                     Semaine précédente
+                 </a>
+             </div>
+             <div class="fr-col fr-text--lead fr-text--bold fr-text--center">
+                 {{ days|first|date('d/m/Y') }} – {{ days|last|date('d/m/Y') }}
+             </div>
+             <div class="fr-col fr-text--right">
+                 <a class="fr-link fr-icon-arrow-right-line fr-link--icon-right"
+                    href="{{ path('app_availability', app.request.query.all|merge({'start': (weekStart|date_modify('+7 day'))|date('Y-m-d')})) }}">
+                     Semaine suivante
+                 </a>
+             </div>
+         </div>
+
+         <div class="fr-table fr-table--bordered fr-table--layout-fixed fr-table--no-scroll">
+             <div class="fr-table__wrapper">
+                 <div class="fr-table__container">
+                     <div class="fr-table__content">
+                         <table>
+                             <caption>Disponibilités des ressources (semaine)</caption>
+                             <thead>
+                             <tr>
+                                 <th scope="col" style="width: 220px">Ressources</th>
+                                 {% for d in days %}
+                                     <th scope="col">
+                                         {{ d|format_datetime(pattern='EEE d MMM', locale='fr')|capitalize }}
+                                     </th>
+                                 {% endfor %}
+                             </tr>
+                             </thead>
+                             <tbody>
+                             {% for r in resources %}
+                                 <tr>
+                                     <th scope="row">{{ r.name }}</th>
+                                     {% for d in days %}
+                                         {% set key = d|date('Y-m-d') %}
+                                         <td>
+                                             {% set slots = (matrix[r.id][key] ?? []) %}
+
+                                             {% if slots is not empty %}
+                                                 <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 3rem;">
+                                                     {#
+                                                     BOUTON STYLE BADGE
+                                                     - fr-badge + fr-badge--success : Le style visuel "Bourgeon"
+                                                     - js-more : Pour que ton JavaScript détecte le clic
+                                                     #}
+                                                     <button type="button"
+                                                             class="fr-badge fr-badge--success fr-badge--no-icon js-more"
+                                                             style="cursor: pointer; border: none; background-color: var(--background-contrast-success); color: var(--text-default-success);"
+                                                             data-rid="{{ r.id }}"
+                                                             data-date="{{ key }}"
+                                                             title="Voir les {{ slots|length }} créneaux">
+
+                                                         {# Affiche "+ 4 dispo" par exemple #}
+                                                         + {{ slots|length }} dispo
+
+                                                     </button>
+                                                 </div>
+                                             {% else %}
+
+                                             {% endif %}
+                                         </td>
+{#                                         <td>#}
+{#                                             {% set slots = (matrix[r.id][key] ?? []) %}#}
+{#                                             {% if slots is not empty %}#}
+{#                                                 #}{# On affiche les 3 premiers #}
+{#                                                 {% for w in slots|slice(0,3) %}#}
+{#                                                     <a class="fr-badge fr-badge--success fr-mr-1w fr-mb-1w"#}
+{#                                                        title="Réserver de {{ w.start|date('H:i') }} à {{ w.end|date('H:i') }}"#}
+{#                                                        href="{{ path('reservation_new', {#}
+{#                                                            resource: r.id,#}
+{#                                                            date: w.start|date('Y-m-d'),#}
+{#                                                            start: w.start|date('H:i'),#}
+{#                                                            end: w.end|date('H:i')#}
+{#                                                        }) }}">#}
+{#                                                         #}{# MODIF : Affichage simplifié (Juste l'heure de début) #}
+{#                                                         {{ w.start|date('H:i') }}#}
+{#                                                     </a>#}
+{#                                                 {% endfor %}#}
+
+{#                                                 {% if slots|length > 3 %}#}
+{#                                                     #}{# Bouton "voir plus" #}
+{#                                                     <button type="button" class="fr-link fr-link--sm js-more"#}
+{#                                                             data-rid="{{ r.id }}"#}
+{#                                                             data-date="{{ key }}">#}
+{#                                                         +{{ slots|length - 3 }} autres#}
+{#                                                     </button>#}
+{#                                                 {% endif %}#}
+{#                                             {% else %}#}
+{#                                                 <span class="fr-text-mention--grey fr-text--sm">-</span>#}
+{#                                             {% endif %}#}
+{#                                         </td>#}
+                                     {% endfor %}
+                                 </tr>
+                             {% endfor %}
+                             </tbody>
+                         </table>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+
+     {# --- LE MODALE (Caché par défaut) --- #}
+     <dialog id="slots-modal" class="fr-modal" role="dialog" aria-labelledby="slots-modal-title">
+         <div class="fr-container fr-container--fluid fr-container-md">
+             <div class="fr-grid-row fr-grid-row--center">
+                 <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+                     <div class="fr-modal__body">
+                         <div class="fr-modal__header">
+                             <button class="fr-btn--close fr-btn" aria-controls="slots-modal" title="Fermer">
+                                 Fermer
+                             </button>
+                         </div>
+                         <div class="fr-modal__content">
+                             <h1 id="slots-modal-title" class="fr-modal__title">
+                                 <span class="fr-icon-calendar-line fr-icon--lg" aria-hidden="true"></span>
+                                 Disponibilités du <span id="modal-date-label">...</span>
+                             </h1>
+
+                             {# Ici, on injectera la liste des boutons #}
+                             <div id="modal-slots-container" class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </dialog>
+
+     <script>
+         (function() {
+             // On cible le modale et ses éléments internes
+             const modal = document.getElementById('slots-modal');
+             const modalTitleDate = document.getElementById('modal-date-label');
+             const modalContainer = document.getElementById('modal-slots-container');
+
+             if (!modalContainer) return;
+
+             // On écoute les clics sur le corps de page (délégation d'événement)
+             document.body.addEventListener('click', (e) => {
+                 // On vérifie si le clic vient d'un bouton "+X"
+                 const btn = e.target.closest('.js-more');
+                 if (!btn) return;
+
+                 // Empêcher le comportement par défaut (au cas où)
+                 e.preventDefault();
+
+                 // 1. Récupération des infos (ID ressource et Date)
+                 const resourceId = btn.dataset.rid;
+                 const dateStr = btn.dataset.date; // format YYYY-MM-DD
+
+                 // 2. Mise à jour du titre du modale
+                 const dateObj = new Date(dateStr);
+                 modalTitleDate.textContent = dateObj.toLocaleDateString('fr-FR', {
+                     weekday: 'long', day: 'numeric', month: 'long'
+                 });
+
+                 // 3. Affichage du loader DANS le modale (on ne touche pas au tableau)
+                 modalContainer.innerHTML = `
+                <div class="fr-col-12 fr-text--center fr-py-3w">
+                    <span class="fr-icon-refresh-line fr-icon--lg fr-icon--spin" aria-hidden="true"></span>
+                    <p class="fr-text--sm fr-mt-1w">Chargement des créneaux...</p>
+                </div>
+            `;
+
+                 // 4. OUVERTURE DU MODALE
+                 // Gestion compatible DSFR / Natif
+                 if (window.dsfr && window.dsfr(modal).modal) {
+                     window.dsfr(modal).modal.disclose();
+                 } else {
+                     modal.setAttribute('data-fr-opened', 'true');
+                     modal.showModal();
+                 }
+
+                 // 5. Appel AJAX pour remplir le modale
+                 fetch('{{ path('app_availability_slots') }}?resource=' + resourceId + '&date=' + dateStr)
+                     .then(r => r.json())
+                     .then(list => {
+                         if (list.length === 0) {
+                             modalContainer.innerHTML = `<p class="fr-col-12 fr-text--sm">Aucun créneau supplémentaire.</p>`;
+                             return;
+                         }
+
+                         // P0.8 — Construction DOM sûre (createElement + textContent)
+                         // au lieu d'interpoler s.label / s.url dans une template string
+                         // injectée en innerHTML. Le label provient d'une ressource dont
+                         // le nom est saisi par un admin → potentielle XSS stockée si
+                         // rendu en HTML brut. textContent neutralise tout balisage.
+                         modalContainer.innerHTML = '';
+                         list.forEach(s => {
+                             const col = document.createElement('div');
+                             col.className = 'fr-col-6 fr-col-md-4 fr-col-lg-3';
+
+                             const a = document.createElement('a');
+                             a.className = 'fr-btn fr-btn--secondary fr-btn--sm fr-btn--icon-left fr-icon-time-line';
+                             a.style.width = '100%';
+                             a.style.justifyContent = 'center';
+                             // N'accepter qu'une URL interne (commence par "/") pour éviter
+                             // un href "javascript:" ou une redirection externe forgée.
+                             a.setAttribute('href', (typeof s.url === 'string' && s.url.startsWith('/')) ? s.url : '#');
+                             a.textContent = s.label != null ? String(s.label) : '';
+
+                             col.appendChild(a);
+                             modalContainer.appendChild(col);
+                         });
+                     })
+                     .catch(err => {
+                         console.error(err);
+                         modalContainer.innerHTML = `
+                        <div class="fr-alert fr-alert--error fr-mb-2w">
+                            <p>Erreur lors du chargement des disponibilités.</p>
+                        </div>`;
+                     });
+             });
+         })();
+     </script>
+
+
+
+{% endblock %}

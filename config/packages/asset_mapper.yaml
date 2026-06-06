@@ -1,0 +1,15 @@
+framework:
+    asset_mapper:
+        # The paths to make available to the asset mapper.
+        paths:
+            - assets/
+        missing_import_mode: strict
+            # AJOUTE CECI 👇
+        excluded_patterns:
+                - '**/dsfr/src/**'
+                - '**/dsfr/**/example/**' # Optionnel, pour nettoyer encore plus
+
+when@prod:
+    framework:
+        asset_mapper:
+            missing_import_mode: warn

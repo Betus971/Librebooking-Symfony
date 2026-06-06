@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+{% block title %}Réservation{% endblock %}
+{% block body %}
+    <div class="fr-container fr-mt-4w fr-mb-8w">
+
+        {# --- FIL D'ARIANE / RETOUR --- #}
+        <div class="fr-mb-4w">
+            <a href="{{ path('reservation_mine') }}" class="fr-link fr-icon-arrow-left-line fr-link--icon-left">
+                Retour à mes réservations
+            </a>
+        </div>
+
+        <div class="fr-grid-row fr-grid-row--gutters">
+
+            {# ========================================== #}
+            {# COLONNE GAUCHE : Détails et Calendrier     #}
+            {# ========================================== #}
+            <div class="fr-col-12 fr-col-md-8">
+                <h1 class="fr-h2 fr-mb-1w">
+                    {{ series.title|default('Réservation sans titre') }}
+                </h1>
+
+                {# --- BADGES STATUT ET TYPE --- #}
+                <div class="fr-mb-4w">
+                    {% if series.status %}
+                        {% set badgeClass = 'fr-badge--info' %}
+                        {% set badgeIcon = '' %}
+
+                        {# On utilise les ID exacts comme dans mine.html.twig #}
+                        {% if series.status.id == 1 %}        {# En attente #}
+                            {% set badgeClass = 'fr-badge--warning' %}
+                            {% set badgeIcon = 'fr-icon-time-line' %}
+                        {% elseif series.status.id == 2 %}    {# Approuvée #}
+                            {% set badgeClass = 'fr-badge--success' %}
+                            {% set badgeIcon = 'fr-icon-checkbox-circle-line' %}
+                        {% elseif series.status.id == 3 %}    {# Refusée #}
+                            {% set badgeClass = 'fr-badge--error' %}
+                            {% set badgeIcon = 'fr-icon-close-circle-line' %}
+                        {% elseif series.status.id == 4 %}    {# Annulée #}
+                            {% set badgeClass = 'fr-badge--error' %}
+                        {% endif %}
+
+                        <span class="fr-badge {{ badgeClass }} {{ badgeIcon }} fr-badge--icon-left fr-mr-1w">
+                        {{ series.status.label }}
+                    </span>
+                    {% endif %}
+
+                    {% if series.type %}
+                        <span class="fr-badge fr-badge--new fr-badge--no-icon">{{ series.type.label }}</span>
+                    {% endif %}
+                </div>
+
+                {# --- DESCRIPTION --- #}
+                {% if series.description %}
+                    <div class="fr-highlight fr-mb-4w">
+                        <p class="fr-text--lg fr-mb-0">{{ series.description|nl2br }}</p>
+                    </div>
+                {% endif %}
+
+                {# --- LISTE DES SÉANCES --- #}
+                <h2 class="fr-h4 fr-mt-4w">Calendrier des séances</h2>
+                <div class="fr-table fr-table--bordered">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Horaire</th>
+                            <th scope="col">Référence</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for instance in series.instances %}
+                            <tr>
+                                <td>
+                                    <span class="fr-icon-calendar-event-line fr-icon--sm fr-mr-1v" aria-hidden="true"></span>
+                                    {{ instance.startDate|format_datetime(locale='fr', pattern='EEEE d MMMM y')|capitalize }}
+                                </td>
+                                <td>
+                                    <span class="fr-icon-time-line fr-icon--sm fr-mr-1v" aria-hidden="true"></span>
+                                    {{ instance.startDate|date('H:i') }} - {{ instance.endDate|date('H:i') }}
+                                </td>
+                                <td>
+                                <span class="fr-text--sm fr-text--mention-grey">
+                                    {{ instance.referenceNumber|default('-') }}
+                                </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3" class="fr-text--center">Aucune date enregistrée pour cette série.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# ========================================== #}
+            {# COLONNE DROITE : Ressources, Contact, Actions #}
+            {# ========================================== #}
+            <div class="fr-col-12 fr-col-md-4">
+                <div class="fr-card fr-card--no-border fr-card--shadow fr-p-3w">
+
+                    {# --- RESSOURCES --- #}
+                    <h3 class="fr-h5 fr-mb-2w fr-icon-map-pin-2-line fr-icon--sm"> Ressources réservées</h3>
+                    {% if series.reservationResources is not empty %}
+                        <ul class="fr-tags-group">
+                            {% for link in series.reservationResources %}
+                                <li>
+                                    <p class="fr-tag">
+                                        {{ link.resource.name }}
+                                        {% if link.resource.category %}
+                                            <span class="fr-text--regular fr-ml-1v" style="opacity: 0.7;">
+                                            ({{ link.resource.category.name }})
+                                        </span>
+                                        {% endif %}
+                                    </p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="fr-text--sm fr-text--mention-grey">Aucune ressource associée.</p>
+                    {% endif %}
+
+                    <hr class="fr-my-3w">
+
+                    {# --- INFORMATIONS & DEMANDEUR --- #}
+                    <h3 class="fr-h5 fr-mb-2w fr-icon-user-line fr-icon--sm"> Informations</h3>
+
+                    <p class="fr-text--sm fr-mb-1w">
+                        <strong>Créée le :</strong> {{ series.dateCreated|date('d/m/Y à H:i') }}
+                    </p>
+
+                    {% if series.owner %}
+                        <div class="fr-callout fr-p-2w fr-mt-2w fr-mb-0">
+                            <p class="fr-text--sm fr-mb-1v">
+                                <strong>Demandeur :</strong> {{ series.owner.fname|upper }} {{ series.owner.lname|capitalize }}
+                            </p>
+                            <p class="fr-text--sm fr-mb-0">
+                                <strong>Email :</strong> <a href="mailto:{{ series.owner.email }}">{{ series.owner.email }}</a>
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <hr class="fr-my-3w">
+
+                    {# --- ACTIONS --- #}
+                    <h3 class="fr-h5 fr-mb-2w fr-icon-settings-5-line fr-icon--sm"> Actions</h3>
+                    <div class="fr-mt-2w">
+                        <button class="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-pencil-line fr-mb-2w fr-btn--wide" disabled title="Fonctionnalité à venir">
+                            Modifier la demande
+                        </button>
+
+                        {# On n'affiche le bouton annuler que si ce n'est pas DÉJÀ refusé (3) ou annulé (4) #}
+                        {% if series.status and series.status.id not in [3, 4] %}
+                            <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler définitivement cette réservation ?');" style="display: inline-block; width: 100%;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ series.id) }}">
+                                <button class="fr-btn fr-btn--danger fr-btn--icon-left fr-icon-close-circle-line fr-btn--wide" title="Annuler ma réservation">
+                                    Annuler ma réservation
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

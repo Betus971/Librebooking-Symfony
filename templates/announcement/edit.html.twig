@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'annonce{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-6v">
+
+        {# Fil d'Ariane #}
+        <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+            <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-edit">Voir le fil d’Ariane</button>
+            <div class="fr-collapse" id="breadcrumb-edit">
+                <ol class="fr-breadcrumb__list">
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_announcement_index') }}">Annonces</a></li>
+                    <li><a class="fr-breadcrumb__link" aria-current="page">Modifier</a></li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+            <div class="fr-col">
+                <h1 class="fr-h3 fr-mb-0">Modifier l'annonce</h1>
+                <p class="fr-text--sm fr-text--mention-grey fr-mb-0">
+                    Mettez à jour le contenu, la période de diffusion ou le niveau d'alerte.
+                </p>
+            </div>
+            <div class="fr-col-auto">
+                {{ include('announcement/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        {{ include('announcement/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+    </div>
+{% endblock %}

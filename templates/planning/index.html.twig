@@ -1,0 +1,192 @@
+{# Barre filtres + navigation semaine #}
+<div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+    <div class="fr-col-12 fr-col-md-8">
+        <div class="fr-select-group">
+            <label class="fr-label" for="filter-type">Type de ressource</label>
+            <select id="filter-type" class="fr-select">
+                <option value="">Tous</option>
+                {# Passe depuis le contrôleur une liste [{code:'sport', label:'Sport'}, ...] #}
+                {% for t in resourceTypes|default([]) %}
+                    <option value="{{ t.code }}">{{ t.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="fr-col-12 fr-col-md-4 fr-text--right">
+        <div class="fr-btns-group fr-btns-group--inline-md">
+            <button type="button" id="btn-prev" class="fr-btn fr-btn--secondary">Semaine précédente</button>
+            <button type="button" id="btn-today" class="fr-btn fr-btn--secondary">Cette semaine</button>
+            <button type="button" id="btn-next" class="fr-btn fr-btn--secondary">Semaine suivante</button>
+        </div>
+    </div>
+</div>
+
+{# Tableau planning (7 jours) #}
+<div id="planning"
+     class="fr-table fr-table--bordered"
+     data-api="/api/planning"
+     data-days="7">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+                <table>
+                    <caption id="planning-caption" class="fr-text--lead">Chargement…</caption>
+                    <thead>
+                    <tr id="th-row">
+                        {# Le JS remplira : 1ère colonne “Ressource” + 7 jours #}
+                    </tr>
+                    </thead>
+                    <tbody id="tb-body">
+                    <tr>
+                        <td class="fr-text--center" colspan="8">Chargement…</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    (function () {
+        const root      = document.getElementById('planning');
+        const api       = root.dataset.api || '/api/planning';
+        const daysN     = parseInt(root.dataset.days || '7', 10);
+        const thRow     = document.getElementById('th-row');
+        const tbBody    = document.getElementById('tb-body');
+        const caption   = document.getElementById('planning-caption');
+        const selType   = document.getElementById('filter-type');
+        const btnPrev   = document.getElementById('btn-prev');
+        const btnNext   = document.getElementById('btn-next');
+        const btnToday  = document.getElementById('btn-today');
+
+        let monday = startOfWeek(new Date());
+        let abortCtrl = null;
+
+        // --- Utils ---
+        function startOfWeek(d) {
+            const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            const dow = x.getDay(); // 0=dim..6=sam
+            const diff = (dow === 0 ? -6 : 1 - dow); // vers lundi
+            x.setDate(x.getDate() + diff);
+            x.setHours(0,0,0,0);
+            return x;
+        }
+        function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+        function isoDate(d) { return d.toISOString().slice(0,10); }
+        function headLabel(d) { return d.toLocaleDateString('fr-FR', { weekday:'short', day:'2-digit', month:'2-digit' }); }
+        function overlapsDay(booking, day) {
+            const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0,0,0);
+            const dayEnd   = new Date(dayStart); dayEnd.setDate(dayEnd.getDate()+1);
+            const bStart = new Date(booking.start);
+            const bEnd   = new Date(booking.end);
+            return bStart < dayEnd && bEnd > dayStart;
+        }
+
+        // --- Header (Ressource + 7 jours) ---
+        function renderHeader() {
+            thRow.innerHTML = '';
+            const th0 = document.createElement('th');
+            th0.className = 'fr-cell--fixed';
+            th0.textContent = 'Ressource';
+            thRow.appendChild(th0);
+
+            for (let i=0;i<daysN;i++) {
+                const d = addDays(monday, i);
+                const th = document.createElement('th');
+                th.textContent = headLabel(d);
+                thRow.appendChild(th);
+            }
+            caption.textContent = `Semaine du ${monday.toLocaleDateString('fr-FR')}`;
+        }
+
+        // --- Chargement principal ---
+        async function load() {
+            // annule une requête en cours si besoin
+            if (abortCtrl) abortCtrl.abort();
+            abortCtrl = new AbortController();
+
+            tbBody.innerHTML = `<tr><td class="fr-text--center" colspan="${daysN+1}">Chargement…</td></tr>`;
+
+            const params = new URLSearchParams({ from: isoDate(monday), days: String(daysN) });
+            const type = selType && selType.value ? selType.value : '';
+            if (type) params.append('type', type);
+
+            let res, text;
+            try {
+                res = await fetch(`${api}?${params.toString()}`, {
+                    headers: { 'Accept':'application/json' },
+                    signal: abortCtrl.signal
+                });
+                text = await res.text();
+                if (!res.ok) {
+                    try { const j = JSON.parse(text); throw new Error(j.error || `HTTP ${res.status}`); }
+                    catch { throw new Error(`HTTP ${res.status} – ${text.slice(0,200)}`); }
+                }
+            } catch (e) {
+                tbBody.innerHTML = `<tr><td class="fr-text--center fr-text--sm" colspan="${daysN+1}">${e.message}</td></tr>`;
+                return;
+            }
+
+            let data;
+            try { data = JSON.parse(text); } catch { data = null; }
+            if (!data || !Array.isArray(data.resources) || !Array.isArray(data.bookings)) {
+                tbBody.innerHTML = `<tr><td class="fr-text--center" colspan="${daysN+1}">Format JSON inattendu.</td></tr>`;
+                return;
+            }
+
+            // Indexer par ressource
+            const byRes = new Map();
+            for (const b of data.bookings) {
+                if (!byRes.has(b.resourceId)) byRes.set(b.resourceId, []);
+                byRes.get(b.resourceId).push(b);
+            }
+
+            const frag = document.createDocumentFragment();
+            if (data.resources.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="fr-text--center" colspan="${daysN+1}">Aucune ressource pour ce filtre.</td>`;
+                frag.appendChild(tr);
+            } else {
+                for (const r of data.resources) {
+                    const tr = document.createElement('tr');
+
+                    // Colonne fixe "Ressource"
+                    const th = document.createElement('th');
+                    th.setAttribute('scope', 'row');
+                    th.className = 'fr-cell--fixed';
+                    const typeText = r.type ? r.type : '—';
+                    const capText  = (r.capacity || r.capacity === 0) ? ` · ${r.capacity}` : '';
+                    th.innerHTML = `<span class="fr-text--sm">${r.name}</span><br><span class="fr-hint-text fr-text--xs">${typeText}${capText}</span>`;
+                    tr.appendChild(th);
+
+                    // 7 cellules jour
+                    const list = byRes.get(r.id) || [];
+                    for (let i=0;i<daysN;i++) {
+                        const d = addDays(monday, i);
+                        const hasAny = list.some(b => overlapsDay(b, d));
+                        const td = document.createElement('td');
+                        td.innerHTML = hasAny
+                            ? `<p class="fr-badge fr-badge--sm fr-badge--success">Réservé</p>`
+                            : `<p class="fr-badge fr-badge--sm fr-badge--new">Libre</p>`;
+                        tr.appendChild(td);
+                    }
+                    frag.appendChild(tr);
+                }
+            }
+            tbBody.innerHTML = '';
+            tbBody.appendChild(frag);
+        }
+
+        // --- Interactions ---
+        btnPrev?.addEventListener('click', () => { monday = addDays(monday, -7); renderHeader(); load(); });
+        btnNext?.addEventListener('click', () => { monday = addDays(monday, +7); renderHeader(); load(); });
+        btnToday?.addEventListener('click', () => { monday = startOfWeek(new Date()); renderHeader(); load(); });
+        selType?.addEventListener('change', () => { load(); });
+
+        // --- Init ---
+        renderHeader();
+        load();
+    })();
+</script>

@@ -1,0 +1,29 @@
+# ═════════════════════════════════════════════════════════════════════════
+#  Configuration KnpPaginatorBundle
+#  Source unique du rendu de pagination DSFR pour tout le projet.
+#
+#  Tout `knp_pagination_render(...)` dans un template Twig utilise désormais
+#  templates/_partials/_pagination.html.twig — markup DSFR conforme.
+# ═════════════════════════════════════════════════════════════════════════
+knp_paginator:
+    # Taille de la fenêtre glissante (ex. 5 => "... 4 5 [6] 7 8 ..." )
+    page_range: 5
+
+    # Empêche dépassement (cap à la dernière page si page demandée > pageCount)
+    default_options:
+        page_name:                page
+        sort_field_name:          sort
+        sort_direction_name:      direction
+        distinct:                 true
+        filter_field_name:        filterField
+        filter_value_name:        filterValue
+        page_out_of_range:        fix          # 'fix' = clamp à la dernière page; 'throw' = exception
+
+    template:
+        # Notre rendu DSFR maison
+        pagination:    '_partials/_pagination.html.twig'
+
+        # Templates par défaut pour le tri / filtre — gardés à la valeur du
+        # bundle (pas utilisés activement dans le projet, mais évite un fatal).
+        sortable:      '@KnpPaginator/Pagination/sortable_link.html.twig'
+        filtration:    '@KnpPaginator/Pagination/filtration.html.twig'

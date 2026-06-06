@@ -1,0 +1,19 @@
+<div class="fr-container fr-py-6w">
+
+
+    {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'fr-form' } }) }}
+
+    <div class="fr-grid-row fr-grid-row--gutters">
+        <div class="fr-col-12 fr-col-md-6">{{ form_row(form.name) }}</div>
+        <div class="fr-col-12 fr-col-md-6">{{ form_row(form.timezone) }}</div>
+        <div class="fr-col-12 fr-col-md-6">{{ form_row(form.layoutType) }}</div>
+    </div>
+
+    <div class="fr-btns-group fr-btns-group--right fr-mt-4w">
+        <a href="{{ path('app_layout_index') }}" class="fr-btn fr-btn--secondary">Annuler</a>
+        <button type="submit" class="fr-btn">{{ submit_label|default('Enregistrer') }}</button>
+    </div>
+
+    {{ form_end(form) }}
+
+</div>

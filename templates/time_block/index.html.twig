@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TimeBlock index{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-mt-5w">
+        <h1 class="fr-h2">
+            {% if layout is defined %}
+                Créneaux — {{ layout.name }} ({{ layout.timezone }})
+            {% else %}
+                Créneaux (tous les layouts)
+            {% endif %}
+        </h1>
+
+        {% if layout is defined %}
+            <p>
+                <a href="{{ path('app_time_block_new', { id: layout.id }) }}" class="fr-btn fr-btn--primary">
+                    Ajouter un créneau
+                </a>
+            </p>
+        {% endif %}
+
+        <div class="fr-table fr-table--bordered fr-mt-3w">
+            <table>
+                <thead>
+                <tr>
+                    <th>Layout</th>
+                    <th>Jour</th>
+                    <th>Début</th>
+                    <th>Fin</th>
+                    <th>Disponibilité</th>
+                    <th>Libellé</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for b in time_blocks %}
+                    <tr>
+                        <td>{{ b.layout ? b.layout.name : '—' }}</td>
+                        <td>
+                            {% if b.dayOfWeek is not null %}
+                                {{ ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][b.dayOfWeek] }}
+                            {% else %}
+                                <em>Tous les jours</em>
+                            {% endif %}
+                        </td>
+                        <td>{{ b.startTime|date('H:i') }}</td>
+                        <td>{{ b.endTime|date('H:i') }}</td>
+                        <td>
+                            {% if b.availabilityCode == 1 %}
+                                <span class="fr-badge fr-badge--success">Disponible</span>
+                            {% else %}
+                                <span class="fr-badge fr-badge--error">Fermé</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ b.label ?? '' }}</td>
+                        <td class="fr-text--right">
+                            <a class="fr-btn fr-btn--sm fr-btn--secondary" href="{{ path('app_time_block_edit', {id: b.id}) }}">Éditer</a>
+                            <form style="display:inline" method="post" action="{{ path('app_time_block_delete', {id: b.id}) }}" onsubmit="return confirm('Supprimer ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_time_block_' ~ b.id) }}">
+                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-text-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7"><em>Aucun créneau.</em></td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

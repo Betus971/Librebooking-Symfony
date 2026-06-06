@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Erreur 504 - Temps d'attente dépassé{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-8w">
+        <div class="fr-grid-row fr-grid-row--center">
+            <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+                <h1 class="fr-h1">Erreur 504</h1>
+                <p class="fr-text--lead">Le serveur a mis trop de temps à répondre.</p>
+                <p class="fr-text--sm fr-mb-5w">
+                    Ce problème est généralement temporaire et dû à une surcharge de l'application ou à un traitement très long.
+                    Nous vous invitons à patienter quelques instants puis à rafraîchir la page.
+                </p>
+                <ul class="fr-btns-group fr-btns-group--inline-md">
+                    <li>
+                        <button class="fr-btn" onclick="window.location.reload();">
+                            Rafraîchir la page
+                        </button>
+                    </li>
+                    <li>
+                        <a class="fr-btn fr-btn--secondary" href="{{ path('app_home') }}">
+                            Retour à l'accueil
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

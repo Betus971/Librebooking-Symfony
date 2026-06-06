@@ -1,0 +1,97 @@
+
+
+{#{{ form_start(form, { attr: { class: 'fr-form', novalidate: 'novalidate' } }) }}#}
+
+{#<div class="fr-grid-row fr-grid-row--gutters">#}
+{#    <div class="fr-col-12 fr-col-md-6">#}
+{#        <fieldset class="fr-fieldset fr-mb-3w">#}
+{#            <legend class="fr-fieldset__legend">Jours concernés</legend>#}
+{#            <div class="fr-fieldset__content">#}
+{#                {% for child in form.days %}#}
+{#                    <div class="fr-checkbox-group">#}
+{#                        {{ form_widget(child) }}#}
+{#                        {{ form_label(child) }}#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#                <p class="fr-hint-text fr-mt-1w">#}
+{#                    Coche plusieurs jours puis “Générer les créneaux” ou “Vider jours sélectionnés”.#}
+{#                </p>#}
+{#            </div>#}
+{#        </fieldset>#}
+{#    </div>#}
+
+{#    <div class="fr-col-12 fr-col-md-6">#}
+{#        <div class="fr-input-group fr-mb-3w">#}
+{#            {{ form_label(form.dayOfWeek, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.dayOfWeek, { attr: { class: 'fr-select' } }) }}#}
+{#            <p class="fr-hint-text">Laisse vide si tu utilises “Jours concernés”.</p>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+{#<div class="fr-grid-row fr-grid-row--gutters">#}
+{#    <div class="fr-col-12 fr-col-md-3">#}
+{#        <div class="fr-input-group">#}
+{#            {{ form_label(form.startTime, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.startTime, { attr: { class: 'fr-input' } }) }}#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="fr-col-12 fr-col-md-3">#}
+{#        <div class="fr-input-group">#}
+{#            {{ form_label(form.endTime, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.endTime, { attr: { class: 'fr-input' } }) }}#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="fr-col-12 fr-col-md-3">#}
+{#        <div class="fr-input-group">#}
+{#            {{ form_label(form.slotDuration, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.slotDuration, { attr: { class: 'fr-input', placeholder: 'Ex : 30' } }) }}#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+{#<div class="fr-grid-row fr-grid-row--gutters fr-mt-2w">#}
+{#    <div class="fr-col-12 fr-col-md-4">#}
+{#        <div class="fr-input-group">#}
+{#            {{ form_label(form.label, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.label, { attr: { class: 'fr-input', placeholder: 'Ex : matin, après-midi…' } }) }}#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="fr-col-12 fr-col-md-4">#}
+{#        <div class="fr-input-group">#}
+{#            {{ form_label(form.endLabel, null, { label_attr: { class: 'fr-label' } }) }}#}
+{#            {{ form_widget(form.endLabel, { attr: { class: 'fr-input', placeholder: 'Ex : pause, fin de journée…' } }) }}#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="fr-col-12 fr-col-md-4">#}
+{#        <fieldset class="fr-fieldset">#}
+{#            <legend class="fr-fieldset__legend">Disponibilité</legend>#}
+{#            <div class="fr-fieldset__content">#}
+{#                {% for child in form.availabilityCode %}#}
+{#                    <div class="fr-radio-group">#}
+{#                        {{ form_widget(child) }}#}
+{#                        {{ form_label(child) }}#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{#        </fieldset>#}
+{#    </div>#}
+{#</div>#}
+
+{#<ul class="fr-btns-group fr-btns-group--right fr-mt-4w">#}
+{#    <li>{{ form_widget(form.clear, { attr: { class: 'fr-btn fr-btn--secondary' } }) }}</li>#}
+{#    <li>{{ form_widget(form.generate, { attr: { class: 'fr-btn' } }) }}</li>#}
+{#    <li>{{ form_widget(form.save, { attr: { class: 'fr-btn fr-btn--primary' } }) }}</li>#}
+
+{#    {% if schedule is defined %}#}
+{#        <li><a class="fr-btn fr-btn--tertiary-no-outline"#}
+{#               href="{{ path('app_schedule_edit', { id: schedule.id, tab: 'grid' }) }}">Retour</a></li>#}
+{#    {% elseif layout is defined %}#}
+{#        <li><a class="fr-btn fr-btn--tertiary-no-outline"#}
+{#               href="{{ path('app_layout_edit', { id: layout.id }) }}">Retour</a></li>#}
+{#    {% endif %}#}
+{#</ul>#}
+
+{# rend les champs cachés (token, etc.) #}
+{#{{ form_rest(form) }}#}
+{#{{ form_end(form) }}#}

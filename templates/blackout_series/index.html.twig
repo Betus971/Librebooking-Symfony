@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BlackoutSeries index{% endblock %}
+
+{% block body %}
+    <h1>BlackoutSeries index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>DateCreated</th>
+                <th>LastModified</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>LegacyId</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for blackout_series in blackout_series %}
+            <tr>
+                <td>{{ blackout_series.id }}</td>
+                <td>{{ blackout_series.dateCreated ? blackout_series.dateCreated|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ blackout_series.lastModified ? blackout_series.lastModified|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ blackout_series.title }}</td>
+                <td>{{ blackout_series.description }}</td>
+                <td>{{ blackout_series.legacyId }}</td>
+                <td>
+                    <a href="{{ path('app_blackout_series_show', {'id': blackout_series.id}) }}">show</a>
+                    <a href="{{ path('app_blackout_series_edit', {'id': blackout_series.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_blackout_series_new') }}">Create new</a>
+{% endblock %}

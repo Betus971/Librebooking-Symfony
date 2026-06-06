@@ -1,0 +1,24 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+
+    # Note that the session will be started ONLY if you read or write from it.
+    # Durcissement des cookies de session (P2.7) :
+    #  - cookie_secure: auto  → cookie Secure dès que la requête est en HTTPS
+    #  - cookie_httponly      → cookie inaccessible au JavaScript (anti-vol via XSS)
+    #  - cookie_samesite: lax → limite l'envoi cross-site (anti-CSRF en profondeur)
+    session:
+        cookie_secure: auto
+        cookie_httponly: true
+        cookie_samesite: lax
+
+    # La protection CSRF reste active par défaut (pour le dev/local).
+
+    #esi: true
+    #fragments: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

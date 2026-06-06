@@ -1,0 +1,383 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle réservation{% endblock %}
+{% block body %}
+    {# 1. STRUCTURE DU MODAL #}
+    <dialog aria-labelledby="fr-modal-title-modal-1" id="modal-dispo-form" class="fr-modal" role="dialog">
+        <div class="fr-container fr-container--fluid fr-container-md">
+            <div class="fr-grid-row fr-grid-row--center">
+                <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+                    <div class="fr-modal__body">
+                        <div class="fr-modal__header">
+                            <button class="fr-btn--close fr-btn" aria-controls="modal-dispo-form">Fermer</button>
+                        </div>
+                        <div class="fr-modal__content">
+                            <h1 id="fr-modal-title-modal-1" class="fr-modal__title">
+                                <span class="fr-icon-calendar-line fr-icon--lg" aria-hidden="true"></span>
+                                Disponibilités : <span id="modal-resource-name"></span>
+                            </h1>
+                            <div id="modal-slots-container" class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                                {# Injecté par JS #}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <div class="fr-container fr-py-6w">
+        <div class="fr-grid-row fr-grid-row--gutters">
+            <div class="fr-col-md-8">
+                {{ form_start(form, {'attr': {'class': 'fr-form'}}) }}
+
+                {# ALERTE GLOBALE (client-side, reco DSFR) #}
+                <div id="form-client-alert" class="fr-alert fr-alert--error fr-mb-3w" role="alert" hidden>
+                    <h3 class="fr-alert__title">Votre demande ne peut pas être envoyée</h3>
+                    <p id="form-client-alert-msg">Merci de corriger les champs indiqués en rouge ci-dessous.</p>
+                </div>
+
+                {# 1. TITRE #}
+                <div class="fr-form-group">
+                    {{ form_label(form.title, null, {'label_attr': {'class': 'fr-label'}}) }}
+                    {{ form_widget(form.title, {'attr': {'class': 'fr-input', 'placeholder': 'Ex : Réunion d’équipe...'}}) }}
+                    {# FIX CROIX ROUGE : On n'affiche que s'il y a vraiment une erreur #}
+                    {% if form.title.vars.errors|length > 0 %}{{ form_errors(form.title) }}{% endif %}
+                </div>
+
+                {# 2. RESSOURCE #}
+                <div class="fr-form-group">
+                    {{ form_label(form.resource, 'Ressource à réserver *', {'label_attr': {'class': 'fr-label'}}) }}
+                    {{ form_widget(form.resource, {'attr': {'class': 'fr-select', 'id': 'reservation_quick_resource'}}) }}
+                    <div id="timeblocks-info" class="fr-hint-text fr-mt-2w"></div>
+                    {% if form.resource.vars.errors|length > 0 %}{{ form_errors(form.resource) }}{% endif %}
+                </div>
+
+                {# LIEN MODAL #}
+                <div class="fr-col-12 fr-mb-2w">
+                    {# BOUTON CACHÉ POUR OUVRIR LA MODALE NATIVEMENT SANS CRASH JS #}
+                    <button type="button" id="hidden-modal-trigger" data-fr-opened="false" aria-controls="modal-dispo-form" style="display: none;"></button>
+
+                    <button type="button"
+                            class="fr-link fr-icon-calendar-line fr-link--icon-left"
+                            id="btn-open-dispo"
+                            style="padding: 0; background: none; border: none; cursor: pointer; color: #000091;">
+                        Voir les disponibilités
+                    </button>
+                </div>
+
+                {# 3. PARTICIPANTS #}
+                <div class="fr-col-12 fr-my-2w">
+                    <div class="fr-form-group">
+                        <label class="fr-label">Liste des participants (Emails)</label>
+                        <p class="fr-hint-text">Format attendu : nom@domaine.fr</p>
+                        <div id="participants-list" data-prototype="{{ form_widget(form.participants.vars.prototype)|e('html_attr') }}">
+                            {% for participant in form.participants %}
+                                <div class="fr-input-group fr-mb-1w participant-item">
+                                    <div class="fr-grid-row fr-grid-row--middle">
+                                        <div class="fr-col">{{ form_widget(participant, {'attr': {'class': 'fr-input'}}) }}</div>
+                                        <div class="fr-col-auto fr-pl-1w">
+                                            <button type="button" class="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-delete-line remove-participant">Supprimer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left fr-mt-2w" id="add-participant-btn">Ajouter un participant</button>
+                    </div>
+                </div>
+
+                {# 4. DATES ET HEURES #}
+                <div class="fr-grid-row fr-grid-row--gutters">
+                    <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-form-group {% if startError is defined and startError %}fr-input-group--error{% endif %}" data-field="start">
+                            <label class="fr-label">
+                                Date de début *
+                                <span class="fr-hint-text">Format JJ/MM/AAAA</span>
+                            </label>
+                            <div class="fr-grid-row fr-grid-row--gutters">
+                                <div class="fr-col-7">
+                                    {{ form_widget(form.startDate, { attr: {
+                                        class: 'fr-input' ~ (startError is defined and startError ? ' fr-input--error' : ''),
+                                        id: 'reservation_quick_start_date',
+                                        min: 'now'|date('Y-m-d')
+                                    } }) }}
+                                </div>
+                                <div class="fr-col-5">
+                                    {{ form_widget(form.startTime, { attr: {
+                                        class: 'fr-input' ~ (startError is defined and startError ? ' fr-input--error' : ''),
+                                        id: 'reservation_quick_start_time'
+                                    } }) }}
+                                </div>
+                            </div>
+                            {% if startError is defined and startError %}
+                                <p class="fr-error-text">{{ startError }}</p>
+                            {% endif %}
+                            <p class="js-client-error-start" style="display: none;"></p>
+                            {% if form.startDate.vars.errors|length > 0 %}{{ form_errors(form.startDate) }}{% endif %}
+                            {% if form.startTime.vars.errors|length > 0 %}{{ form_errors(form.startTime) }}{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-form-group {% if endError is defined and endError %}fr-input-group--error{% endif %}" data-field="end">
+                            <label class="fr-label">
+                                Date de fin *
+                                <span class="fr-hint-text">Format JJ/MM/AAAA</span>
+                            </label>
+                            <div class="fr-grid-row fr-grid-row--gutters">
+                                <div class="fr-col-7">
+                                    {{ form_widget(form.endDate, { attr: {
+                                        class: 'fr-input' ~ (endError is defined and endError ? ' fr-input--error' : ''),
+                                        id: 'reservation_quick_end_date',
+                                        min: 'now'|date('Y-m-d')
+                                    } }) }}
+                                </div>
+                                <div class="fr-col-5">
+                                    {{ form_widget(form.endTime, { attr: {
+                                        class: 'fr-input' ~ (endError is defined and endError ? ' fr-input--error' : ''),
+                                        id: 'reservation_quick_end_time'
+                                    } }) }}
+                                </div>
+                            </div>
+                            {% if endError is defined and endError %}
+                                <p class="fr-error-text">{{ endError }}</p>
+                            {% endif %}
+                            <p class="js-client-error-end" style="display: none;"></p>
+                            {% if form.endDate.vars.errors|length > 0 %}{{ form_errors(form.endDate) }}{% endif %}
+                            {% if form.endTime.vars.errors|length > 0 %}{{ form_errors(form.endTime) }}{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <p class="fr-hint-text fr-mb-2w">Pour une réservation sur plusieurs jours, modifiez la date de fin.</p>
+
+                {# 5. DESCRIPTION #}
+                <div class="fr-form-group">
+                    {{ form_label(form.description, null, {'label_attr': {'class': 'fr-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'fr-textarea', 'rows': 4}}) }}
+                    {% if form.description.vars.errors|length > 0 %}{{ form_errors(form.description) }}{% endif %}
+                </div>
+
+                {% if formError is defined and formError %}
+                    <div class="fr-alert fr-alert--error fr-mt-3w" role="alert">
+                        <p class="fr-alert__title">
+                            <span class="fr-icon-error-warning-fill fr-icon--sm" aria-hidden="true"></span>
+                            {{ formError }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                <div class="fr-form-group fr-mt-4w">
+                    <button type="submit" class="fr-btn">Créer la réservation</button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+
+            <div class="fr-col-md-4">
+                <div class="fr-highlight fr-p-3w">
+                    <h3 class="fr-h5">Besoin d’aide ?</h3>
+                    <p class="fr-text--sm">Les créneaux disponibles s’affichent après sélection de la ressource.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const btnOpenDispo = document.getElementById('btn-open-dispo');
+            if (!btnOpenDispo) return; // Sécurité si la page ne contient pas l'élément
+
+            const hiddenTrigger = document.getElementById('hidden-modal-trigger');
+            const selectResource = document.getElementById('reservation_quick_resource');
+            const modal = document.getElementById('modal-dispo-form');
+            const modalContainer = document.getElementById('modal-slots-container');
+
+            const inputStartTime = document.getElementById('reservation_quick_start_time');
+            const inputEndTime = document.getElementById('reservation_quick_end_time');
+            const inputDate = document.getElementById('reservation_quick_start_date');
+
+            btnOpenDispo.addEventListener('click', () => {
+                const resourceId = selectResource.value;
+                const dateVal = (inputDate && inputDate.value) ? inputDate.value : new Date().toISOString().split('T')[0];
+
+                if (!resourceId) {
+                    alert("Veuillez d'abord sélectionner une ressource.");
+                    return;
+                }
+
+                document.getElementById('modal-resource-name').textContent = selectResource.options[selectResource.selectedIndex].text;
+
+                // FIX MODALE : On simule un clic sur le bouton caché DSFR qui ouvrira la modale 100% du temps sans erreur
+                hiddenTrigger.click();
+
+                modalContainer.innerHTML = '<div class="fr-col-12 fr-text--center fr-py-3w"><span class="fr-icon-refresh-line fr-icon--lg fr-icon--spin" aria-hidden="true"></span><p class="fr-text--sm fr-mt-1w">Chargement des créneaux...</p></div>';
+
+                fetch('{{ path('app_availability_slots') }}?resource=' + resourceId + '&date=' + dateVal)
+                    .then(r => r.json())
+                    .then(list => {
+                        if (list.length === 0) {
+                            modalContainer.innerHTML = `<p class="fr-col-12 fr-text--sm">Aucun créneau libre.</p>`;
+                            return;
+                        }
+
+                        modalContainer.innerHTML = list.map(s => {
+                            const times = s.label.split(' - ');
+                            return `
+                                <div class="fr-col-6 fr-col-md-4">
+                                    <button type="button" class="fr-btn fr-btn--secondary fr-btn--sm js-select-slot"
+                                            data-start="${times[0] ? times[0].trim() : ''}"
+                                            data-end="${times[1] ? times[1].trim() : ''}"
+                                            style="width: 100%; justify-content: center;">
+                                        ${s.label}
+                                    </button>
+                                </div>`;
+                        }).join('');
+                    })
+                    .catch(err => {
+                        modalContainer.innerHTML = `<div class="fr-alert fr-alert--error"><p>Erreur lors du chargement des disponibilités.</p></div>`;
+                    });
+            });
+
+            modalContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.js-select-slot');
+                if (!btn) return;
+
+                if(inputStartTime) inputStartTime.value = btn.dataset.start;
+                if(inputEndTime) inputEndTime.value = btn.dataset.end;
+
+                // Fermeture native
+                if (typeof dsfr === 'function') {
+                    try { dsfr(modal).modal.conceal(); } catch(e) { modal.close(); }
+                } else {
+                    modal.close();
+                }
+
+                inputStartTime.classList.add('fr-input--valid');
+                setTimeout(() => inputStartTime.classList.remove('fr-input--valid'), 2000);
+            });
+
+            // Logique participants (Conservée)
+            const addBtn = document.getElementById('add-participant-btn');
+            const list = document.getElementById('participants-list');
+            if (addBtn && list) {
+                addBtn.addEventListener('click', () => {
+                    const prototype = list.dataset.prototype;
+                    const index = list.querySelectorAll('.participant-item').length;
+                    const newForm = prototype.replace(/__name__/g, index);
+
+                    const div = document.createElement('div');
+                    div.classList.add('fr-input-group', 'fr-mb-1w', 'participant-item');
+                    div.innerHTML = `<div class="fr-grid-row fr-grid-row--middle"><div class="fr-col">${newForm}</div><div class="fr-col-auto fr-pl-1w"><button type="button" class="fr-btn fr-btn--tertiary fr-icon-delete-line remove-participant">Supprimer</button></div></div>`;
+                    list.appendChild(div);
+                });
+
+                list.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-participant')) e.target.closest('.participant-item').remove();
+                });
+            }
+
+            // ============================================================
+            // VALIDATION CLIENT DES DATES (avertissement immédiat, DSFR)
+            // ============================================================
+            const inputStartDate   = document.getElementById('reservation_quick_start_date');
+            const inputEndDate     = document.getElementById('reservation_quick_end_date');
+            const inputStartTimeEl = document.getElementById('reservation_quick_start_time');
+            const inputEndTimeEl   = document.getElementById('reservation_quick_end_time');
+            const reservationForm  = document.querySelector('form.fr-form');
+
+            const groupStart = document.querySelector('[data-field="start"]');
+            const groupEnd   = document.querySelector('[data-field="end"]');
+            const errStart   = document.querySelector('.js-client-error-start');
+            const errEnd     = document.querySelector('.js-client-error-end');
+
+            const globalAlert    = document.getElementById('form-client-alert');
+            const globalAlertMsg = document.getElementById('form-client-alert-msg');
+
+            function showFieldError(group, errEl, msg) {
+                if (!group || !errEl) return;
+                group.classList.add('fr-input-group--error');
+                group.querySelectorAll('input').forEach(i => i.classList.add('fr-input--error'));
+                errEl.classList.add('fr-error-text');
+                errEl.textContent = msg;
+                errEl.style.display = '';
+            }
+            function clearFieldError(group, errEl) {
+                if (!group || !errEl) return;
+                group.classList.remove('fr-input-group--error');
+                group.querySelectorAll('input').forEach(i => i.classList.remove('fr-input--error'));
+                errEl.classList.remove('fr-error-text');
+                errEl.textContent = '';
+                errEl.style.display = 'none';
+            }
+            function showGlobalAlert(msg) {
+                if (!globalAlert || !globalAlertMsg) return;
+                globalAlertMsg.textContent = msg;
+                globalAlert.hidden = false;
+            }
+            function hideGlobalAlert() {
+                if (!globalAlert) return;
+                globalAlert.hidden = true;
+            }
+
+            // Construit un Date complet à partir d'un input date + input time
+            function buildDate(dateInput, timeInput) {
+                if (!dateInput || !dateInput.value) return null;
+                const t = (timeInput && timeInput.value) ? timeInput.value : '00:00';
+                const tt = t.length === 5 ? t + ':00' : t;
+                const d = new Date(dateInput.value + 'T' + tt);
+                return isNaN(d.getTime()) ? null : d;
+            }
+
+            function validateDates(triggerSource) {
+                clearFieldError(groupStart, errStart);
+                clearFieldError(groupEnd, errEnd);
+
+                const start = buildDate(inputStartDate, inputStartTimeEl);
+                const end   = buildDate(inputEndDate, inputEndTimeEl);
+
+                const errors = [];
+
+                if (start) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (start < today) {
+                        showFieldError(groupStart, errStart, 'Date dans le passé : choisissez aujourd\u2019hui ou plus tard.');
+                        errors.push('date de début');
+                    }
+                }
+
+                if (start && end && end <= start) {
+                    showFieldError(groupEnd, errEnd, 'La fin doit être postérieure au début.');
+                    errors.push('date de fin');
+                }
+
+                if (errors.length === 0) {
+                    hideGlobalAlert();
+                    return true;
+                }
+                hideGlobalAlert();
+                return false;
+            }
+
+            // Validation à la volée (change/blur) — sans afficher l'alerte globale tant qu'on n'a pas soumis
+            [inputStartDate, inputEndDate, inputStartTimeEl, inputEndTimeEl].forEach(el => {
+                if (!el) return;
+                el.addEventListener('change', () => validateDates('change'));
+                el.addEventListener('blur',   () => validateDates('blur'));
+            });
+
+            // Bloque le submit si erreurs (le serveur revalide aussi en 422)
+            if (reservationForm) {
+                reservationForm.addEventListener('submit', (e) => {
+                    if (!validateDates('submit')) {
+                        e.preventDefault();
+                        if (globalAlert) globalAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const firstErr = document.querySelector('.fr-input--error');
+                        if (firstErr) firstErr.focus();
+                    }
+                });
+            }
+        })();
+    </script>
+{% endblock %}

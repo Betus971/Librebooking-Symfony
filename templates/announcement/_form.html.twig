@@ -1,0 +1,61 @@
+{#
+  Formulaire d'annonce (création et édition).
+
+  Layout DSFR structuré :
+    - largeur cadrée par fr-col-md-8 (évite les champs pleine page)
+    - dates côte-à-côte en grid responsive
+    - boutons groupés en bas à droite
+#}
+
+{{ form_start(form) }}
+
+<div class="fr-grid-row fr-grid-row--center">
+    <div class="fr-col-12 fr-col-md-10 fr-col-lg-8">
+
+        <div class="fr-background-alt--grey fr-p-4w">
+
+            {# --- Message --- #}
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-12">
+                    {{ form_row(form.message) }}
+                </div>
+            </div>
+
+            {# --- Dates (côte à côte) --- #}
+            <div class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.startDate) }}
+                </div>
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.endDate) }}
+                </div>
+            </div>
+
+            {# --- Priorité --- #}
+            <div class="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+                <div class="fr-col-12 fr-col-md-6">
+                    {{ form_row(form.priority) }}
+                </div>
+            </div>
+
+        </div>
+
+        {# --- Actions --- #}
+        <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline fr-mt-3w">
+            <li>
+                <a href="{{ path('app_announcement_index') }}"
+                   class="fr-btn fr-btn--secondary fr-icon-arrow-left-line fr-btn--icon-left">
+                    Retour à la liste
+                </a>
+            </li>
+            <li>
+                <button type="submit" class="fr-btn fr-icon-save-line fr-btn--icon-left">
+                    {{ button_label|default('Enregistrer') }}
+                </button>
+            </li>
+        </ul>
+
+    </div>
+</div>
+
+{{ form_end(form) }}

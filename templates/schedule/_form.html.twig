@@ -1,0 +1,297 @@
+{% set scheduleVar = schedule is defined ? schedule : null %}
+{% set hasGrid = scheduleVar and scheduleVar.layout is not null %}
+
+{# Gestion des onglets actifs via l'URL (?tab=...) #}
+{% set activeTab = app.request.query.get('tab') ?? (hasGrid ? 'grid' : 'params') %}
+{% set isParams = activeTab == 'params' %}
+{% set isGrid   = activeTab == 'grid' %}
+{% set isPrev   = activeTab == 'preview' %}
+
+<div class="fr-tabs">
+    <ul class="fr-tabs__list" role="tablist" aria-label="Édition planning">
+        <li role="presentation">
+            <button class="fr-tabs__tab" id="tab-params" role="tab" aria-selected="{{ isParams ? 'true' : 'false' }}" aria-controls="panel-params" tabindex="{{ isParams ? '0' : '-1' }}">
+                Paramètres
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab" id="tab-grid" role="tab" {% if not hasGrid %}disabled{% endif %} aria-selected="{{ isGrid ? 'true' : 'false' }}" aria-controls="panel-grid" tabindex="{{ isGrid ? '0' : '-1' }}">
+                Grille d’horaires
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab" id="tab-preview" role="tab" {% if not hasGrid %}disabled{% endif %} aria-selected="{{ isPrev ? 'true' : 'false' }}" aria-controls="panel-preview" tabindex="{{ isPrev ? '0' : '-1' }}">
+                Aperçu
+            </button>
+        </li>
+    </ul>
+
+    {# --- ONGLET 1 : PARAMÈTRES --- #}
+    <div id="panel-params" class="fr-tabs__panel {{ isParams ? 'fr-tabs__panel--selected' }}" role="tabpanel" aria-labelledby="tab-params" tabindex="0">
+        <div class="fr-card fr-p-4w fr-mb-5w">
+            {{ form_start(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.timezone) }}
+
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-12 fr-col-md-6">{{ form_row(form.weekdayStart) }}</div>
+                <div class="fr-col-12 fr-col-md-6">{{ form_row(form.daysVisible) }}</div>
+            </div>
+
+            {{ form_row(form.published) }}
+
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-12 fr-col-md-6">{{ form_row(form.startDate) }}</div>
+                <div class="fr-col-12 fr-col-md-6">{{ form_row(form.endDate) }}</div>
+            </div>
+
+            {{ form_row(form.notes) }}
+
+            <div class="fr-mt-4w">
+                <button class="fr-btn fr-btn--primary fr-icon-check-line fr-btn--icon-left">
+                    {{ button_label|default('Enregistrer') }}
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+        {% if not hasGrid %}
+            <div class="fr-alert fr-alert--info fr-mb-2w">
+                <p>Enregistrez le planning pour activer la grille d’horaires.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# --- ONGLET 2 : GRILLE D'HORAIRES --- #}
+    <div id="panel-grid" class="fr-tabs__panel {{ isGrid ? 'fr-tabs__panel--selected' }}" role="tabpanel" aria-labelledby="tab-grid" tabindex="0">
+        {% if hasGrid %}
+            <div class="fr-card fr-p-4w">
+                <div class="fr-card__body">
+
+                    {# En-tête de l'onglet #}
+                    <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+                        <div class="fr-col">
+                            <h2 class="fr-h4 fr-mb-0">Grille : {{ scheduleVar.layout.name }}</h2>
+                            <p class="fr-text--sm fr-text--mention-grey fr-mt-1v">Gérez les créneaux types disponibles à la réservation.</p>
+                        </div>
+                        <div class="fr-col-auto">
+                            <a class="fr-btn fr-icon-add-line fr-btn--icon-left" href="{{ path('app_schedule_time_block_new', { id: scheduleVar.id }) }}">
+                                Ajouter / Générer
+                            </a>
+                        </div>
+                    </div>
+
+                    {# Récupération des blocs (triés par le controller si dispo) #}
+                    {% set blocks = sortedBlocks|default(scheduleVar.layout.timeBlocks) %}
+
+                    {% if blocks|length > 0 %}
+                        {% set opens = [] %}
+                        {% set closed = [] %}
+                        {% for b in blocks %}
+                            {% if b.availabilityCode == 1 %}
+                                {% set opens = opens|merge([b]) %}
+                            {% else %}
+                                {% set closed = closed|merge([b]) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {# TABLEAU GROUPÉ PAR JOUR (PRO) #}
+                        {% if opens|length > 0 %}
+                            <h3 class="fr-h6 fr-mb-2w">
+                                Créneaux disponibles <span class="fr-badge fr-badge--info fr-badge--sm">{{ opens|length }}</span>
+                            </h3>
+
+                            <div class="fr-table fr-table--bordered fr-table--no-caption fr-mb-3w" style="max-height: 600px; overflow-y: auto;">
+                                <table>
+                                    <thead style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 1px 0 var(--border-default-grey);">
+                                    <tr>
+                                        <th>Horaires</th>
+                                        <th>Libellé</th>
+                                        <th class="fr-text--right">Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% set currentDay = -99 %}
+                                    {% for b in opens %}
+                                        {# Rupture sur le jour #}
+                                        {% set bDay = b.dayOfWeek is not null ? b.dayOfWeek : 99 %}
+
+                                        {% if bDay != currentDay %}
+                                            {% set currentDay = bDay %}
+                                            <tr class="fr-table__header-row" style="background-color: var(--background-alt-blue-france);">
+                                                <td colspan="3" class="fr-text--bold fr-text--md">
+                                                    {% if b.dayOfWeek is not null %}
+                                                        {{ ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][b.dayOfWeek] }}
+                                                    {% else %}
+                                                        🔁 Tous les jours
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+
+                                        <tr>
+                                            <td>
+                                                <span class="fr-icon-time-line fr-icon--sm fr-mr-1v" aria-hidden="true"></span>
+                                                <strong>{{ b.startTime|date('H:i') }}</strong>
+                                                <span class="fr-text--sm fr-text--mention-grey">à</span>
+                                                {{ b.endTime|date('H:i') }}
+                                            </td>
+                                            <td>
+                                                {% if b.label %}
+                                                    <span class="fr-tag fr-tag--sm fr-tag--green-menthe">{{ b.label }}</span>
+                                                {% else %}
+                                                    <span class="fr-text--sm fr-text--mention-grey">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="fr-text--right">
+                                                <a href="{{ path('app_time_block_edit', {id: b.id}) }}" class="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line" title="Modifier"></a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="fr-alert fr-alert--warning fr-mb-2w">Aucun créneau disponible défini.</div>
+                        {% endif %}
+
+                        {# Liste des fermetures (si besoin) #}
+                        {% if closed|length > 0 %}
+                            <details class="fr-mt-2w">
+                                <summary class="fr-btn fr-btn--tertiary-no-outline">Voir les créneaux bloqués ({{ closed|length }})</summary>
+                                <div class="fr-table fr-table--bordered fr-mt-2w">
+                                    <table>
+                                        <thead><tr><th>Jour</th><th>Début</th><th>Fin</th><th>Action</th></tr></thead>
+                                        <tbody>
+                                        {% for b in closed %}
+                                            <tr>
+                                                <td>{{ b.dayOfWeek is not null ? ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'][b.dayOfWeek] : 'Tous' }}</td>
+                                                <td>{{ b.startTime|date('H:i') }}</td>
+                                                <td>{{ b.endTime|date('H:i') }}</td>
+                                                <td><a href="{{ path('app_time_block_edit', {id: b.id}) }}">Modifier</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="fr-callout fr-icon-information-line">
+                            <h3 class="fr-callout__title">La grille est vide</h3>
+                            <p class="fr-callout__text">Commencez par ajouter des créneaux horaires pour définir quand cette ressource est disponible.</p>
+                            <a class="fr-btn fr-btn--secondary fr-mt-2w" href="{{ path('app_schedule_time_block_new', { id: scheduleVar.id }) }}">Générer des créneaux</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <p>Sauvegardez d'abord le planning.</p>
+        {% endif %}
+    </div>
+
+    {# --- ONGLET 3 : APERÇU (FullCalendar) --- #}
+    <div id="panel-preview" class="fr-tabs__panel {{ isPrev ? 'fr-tabs__panel--selected' }}" role="tabpanel" aria-labelledby="tab-preview" tabindex="0">
+        {% if hasGrid %}
+            {{ include('components/_fullcalendar_lib.html.twig') }}
+
+            <div class="fr-card fr-p-4w">
+                <div class="fr-alert fr-alert--info fr-alert--sm fr-mb-2w">
+                    <p>Ceci est une simulation visuelle de la semaine type.</p>
+                </div>
+                <div id="preview-calendar" style="min-height: 600px;"></div>
+            </div>
+
+            {# Données JSON pour FullCalendar #}
+            {% set blocks = scheduleVar.layout.timeBlocks|default([]) %}
+            {% set tb = [] %}
+            {% for b in blocks %}
+                {% if b.availabilityCode == 1 %}
+                    {% set tb = tb|merge([{
+                        'dow': b.dayOfWeek is not null ? b.dayOfWeek : null,
+                        'start': b.startTime|date('H:i'),
+                        'end': b.endTime|date('H:i'),
+                        'label': b.label|default('')
+                    }]) %}
+                {% endif %}
+            {% endfor %}
+
+            <script>
+                (function() {
+                    if (typeof FullCalendar === 'undefined') {
+                        console.error('FullCalendar non chargé.'); return;
+                    }
+                    if (document.getElementById('preview-calendar').dataset.fcInit) return;
+                    document.getElementById('preview-calendar').dataset.fcInit = true;
+
+                    const TB = {{ tb|json_encode|raw }};
+                    const calendarEl = document.getElementById('preview-calendar');
+                    const calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'timeGridWeek',
+                        locale: 'fr',
+                        firstDay: {{ scheduleVar.weekdayStart|default(1) }},
+                        slotMinTime: '06:00:00',
+                        slotMaxTime: '22:00:00',
+                        height: 'auto',
+                        headerToolbar: { left: '', center: 'title', right: 'timeGridWeek,timeGridDay' },
+                        events: function(info, successCallback) {
+                            let events = [];
+                            let start = new Date(info.start);
+                            let end = new Date(info.end);
+
+                            // Logique simple pour répéter les créneaux sur la vue
+                            for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+                                let dow = d.getDay();
+                                let dayBlocks = TB.filter(b => b.dow === null || b.dow === dow);
+
+                                dayBlocks.forEach(b => {
+                                    let sDate = new Date(d);
+                                    let [sh, sm] = b.start.split(':');
+                                    sDate.setHours(sh, sm, 0);
+
+                                    let eDate = new Date(d);
+                                    let [eh, em] = b.end.split(':');
+                                    eDate.setHours(eh, em, 0);
+
+                                    events.push({
+                                        title: b.label || 'Dispo',
+                                        start: sDate,
+                                        end: eDate,
+                                        backgroundColor: 'var(--background-action-low-blue-france)',
+                                        borderColor: 'var(--background-action-high-blue-france)',
+                                        textColor: 'var(--text-action-high-blue-france)'
+                                    });
+                                });
+                            }
+                            successCallback(events);
+                        }
+                    });
+
+                    // Hack pour forcer l'affichage correct si l'onglet était caché au chargement
+                    document.getElementById('tab-preview').addEventListener('click', function() {
+                        setTimeout(() => calendar.render(), 50);
+                    });
+
+                    if (document.getElementById('panel-preview').classList.contains('fr-tabs__panel--selected')) {
+                        calendar.render();
+                    }
+                })();
+            </script>
+        {% endif %}
+    </div>
+</div>
+
+{# Script pour maintenir l'onglet actif dans l'URL #}
+<script>
+    document.querySelectorAll('.fr-tabs__tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const map = {'tab-params':'params','tab-grid':'grid','tab-preview':'preview'};
+            const tab = map[btn.id];
+            if (tab) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('tab', tab);
+                window.history.replaceState({}, '', url);
+            }
+        });
+    });
+</script>

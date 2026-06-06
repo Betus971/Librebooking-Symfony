@@ -1,0 +1,44 @@
+{% block duration_unit_widget %}
+    {# Valeur #}
+    <div class="fr-input-group fr-mb-2w">
+        {{ form_label(form.value, 'Valeur', {'label_attr': {'class':'fr-label'}}) }}
+        {{ form_widget(form.value, {'attr': {'class':'fr-input', 'inputmode':'numeric', 'style':'width:8rem'}}) }}
+        {{ form_errors(form.value) }}
+    </div>
+
+
+    {# Unités (radios) #}
+    <div class="fr-fieldset fr-mb-1w">
+        <legend class="fr-fieldset__legend">Unité</legend>
+
+
+        {% if form.unit is defined %}
+            <div class="fr-fieldset__element fr-fieldset__element--inline">
+                {{ form_widget(form.unit, {
+                    'expanded': true,
+                    'attr': {'class': 'fr-radio-group'}
+                }) }}
+            </div>
+            {{ form_errors(form.unit) }}
+        {% else %}
+            {# Fallback manuel si le sous-champ unit n'existe pas #}
+            <div class="fr-fieldset__element fr-fieldset__element--inline">
+                {% set units = form.vars.allowed_units ?? ['m','h','d'] %}
+                {% set current = attribute(form.vars.value ?? {}, 'unit') ?? 'm' %}
+                {% for u in units %}
+                    <div class="fr-radio-group fr-mr-2w">
+                        <input type="radio"
+                               id="{{ form.vars.id }}_unit_{{ u }}"
+                               name="{{ form.vars.full_name }}[unit]"
+                               value="{{ u }}"
+                               class="fr-radio"
+                               {% if current == u %}checked{% endif %}>
+                        <label class="fr-label" for="{{ form.vars.id }}_unit_{{ u }}">
+                            {{ {'m':'minutes','h':'heures','d':'jours'}[u] ?? u }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

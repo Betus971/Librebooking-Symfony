@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Resource{% endblock %}
+
+{% block body %}
+{#    <div class="fr-container">#}
+
+
+{#    {{ include('resource/_form.html.twig') }}#}
+
+{#    <a href="{{ path('app_resource_index') }}">back to list</a>#}
+{#    </div>#}
+    <div class="fr-container fr-my-4w">
+
+        <h1>Nouvelle ressource</h1>
+
+        {# On inclut ton formulaire existant #}
+        {{ include('resource/_form.html.twig') }}
+
+        <div class="fr-mt-2w">
+            <a href="{{ path('app_resource_index') }}" class="fr-link fr-icon-arrow-left-line fr-link--icon-left">
+                Retour à la liste
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+# ============================================================================
+#  Durcissement du dossier d'uploads (P0.6)
+#  ----------------------------------------------------------------------------
+#  Ce dossier contient des fichiers déposés par les utilisateurs (images de
+#  ressources notamment). On y AUTORISE le service de fichiers statiques mais on
+#  INTERDIT toute exécution de code côté serveur. Empêche un attaquant qui
+#  réussirait à déposer un fichier .php (polyglot, contournement de validation)
+#  de le faire exécuter via une requête web → bloque la RCE.
+#
+#  Cible : Apache (le projet utilise symfony/apache-pack).
+# ============================================================================
+
+# 1) Couper le moteur PHP dans tout le sous-arbre uploads/
+<IfModule mod_php.c>
+    php_admin_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_admin_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_admin_flag engine off
+</IfModule>
+
+# 2) Refuser explicitement les extensions exécutables, quel que soit le handler.
+<FilesMatch "(?i)\.(php\d?|phtml|phar|pht|cgi|pl|py|asp|aspx|jsp|sh|exe)$">
+    Require all denied
+</FilesMatch>
+
+# 3) Ne jamais laisser le navigateur "deviner" un type exécutable.
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# 4) Pas de listing de répertoire.
+Options -Indexes -ExecCGI

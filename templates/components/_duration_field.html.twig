@@ -1,0 +1,57 @@
+
+
+
+{# templates/components/_duration_field.html.twig #}
+{% macro duration_field(form_field, label, help) %}
+    <fieldset
+        class="fr-fieldset"
+        id="{{ form_field.vars.id }}-fieldset"
+        role="group"
+        aria-labelledby="{{ form_field.vars.id }}-fieldset-legend {{ form_field.vars.id }}-fieldset-messages"
+    >
+        <legend class="fr-fieldset__legend" id="{{ form_field.vars.id }}-fieldset-legend">
+            {{ label }}
+            {% if help %}
+                <span class="fr-hint-text">{{ help }}</span>
+            {% endif %}
+        </legend>
+
+        {# Champ "valeur" (ex: 30) #}
+        <div class="fr-fieldset__element fr-fieldset__element--inline">
+            <div class="fr-input-group">
+                {{ form_label(form_field.value, 'Valeur', {
+                    'label_attr': {'class': 'fr-label'}
+                }) }}
+                <span class="fr-hint-text">Exemple : 30</span>
+                {{ form_widget(form_field.value, {
+                    'attr': {
+                        'class': 'fr-input',
+                        'min': '0',
+                        'step': '1',
+                        'placeholder': 'Ex: 30'
+                    }
+                }) }}
+                {{ form_errors(form_field.value) }}
+            </div>
+        </div>
+
+        {# Champ "unité" (ex: minutes/heures) #}
+        <div class="fr-fieldset__element fr-fieldset__element--inline fr-fieldset__element--inline-grow">
+            <div class="fr-input-group">
+                {{ form_label(form_field.unit, 'Unité', {
+                    'label_attr': {'class': 'fr-label'}
+                }) }}
+                <span class="fr-hint-text">Unité de temps</span>
+                {{ form_widget(form_field.unit, {
+                    'attr': {'class': 'fr-select'}
+                }) }}
+                {{ form_errors(form_field.unit) }}
+            </div>
+        </div>
+
+        {# Messages d'erreur #}
+        <div class="fr-messages-group" id="{{ form_field.vars.id }}-fieldset-messages" aria-live="assertive">
+            {{ form_errors(form_field) }}
+        </div>
+    </fieldset>
+{% endmacro %}

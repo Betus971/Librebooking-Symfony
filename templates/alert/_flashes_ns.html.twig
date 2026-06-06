@@ -1,0 +1,22 @@
+{# keys = ['planning.succes','planning.error'] #}
+{% set title = {'success':'Succès','error':'Erreur','warning':'Avertissement','info':'Information'} %}
+
+{% for key in keys|default([]) %}
+    {% for message in app.flashes(key) %}
+        {# déduit la variante DSFR d'après le nom de la clé #}
+        {% set variant = 'info' %}
+        {% if 'success' in key or 'succes' in key %}{% set variant='success' %}
+        {% elseif 'error' in key or 'erreur' in key %}{% set variant='error' %}
+        {% elseif 'warning' in key %}{% set variant='warning' %}{% endif %}
+
+        <div class="fr-alert fr-alert--{{ variant }} fr-mb-3w" role="status">
+            <p class="fr-alert__title">{{ title[variant] }}</p>
+            {# P0.7 — Pas de |raw : un message de flash peut contenir des données
+               saisies par l'utilisateur (titre de réservation, nom de visiteur…).
+               Le |raw permettait une XSS stockée. Twig échappe désormais le message. #}
+            <p>{{ message }}</p>
+            <button class="fr-btn fr-btn--close" type="button" title="Masquer"
+                    onclick="this.closest('.fr-alert').remove()">Masquer</button>
+        </div>
+    {% endfor %}
+{% endfor %}

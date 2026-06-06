@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle annonce{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-6v">
+
+        {# Fil d'Ariane #}
+        <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+            <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-new">Voir le fil d’Ariane</button>
+            <div class="fr-collapse" id="breadcrumb-new">
+                <ol class="fr-breadcrumb__list">
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_announcement_index') }}">Annonces</a></li>
+                    <li><a class="fr-breadcrumb__link" aria-current="page">Nouvelle annonce</a></li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="fr-mb-3w">
+            <h1 class="fr-h3 fr-mb-0">Créer une annonce</h1>
+            <p class="fr-text--sm fr-text--mention-grey fr-mb-0">
+                Rédigez un message qui sera affiché en page d'accueil pendant la période choisie.
+            </p>
+        </div>
+
+        {{ include('announcement/_form.html.twig', {'button_label': 'Publier l\'annonce'}) }}
+
+    </div>
+{% endblock %}

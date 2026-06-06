@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="system">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><rect width=%22128%22 height=%22128%22 fill=%22%23000091%22/></svg>">
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+           {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+    {%  include 'header/menu.html.twig' %}
+
+    {# ===== MESSAGES FLASH GLOBAUX (DSFR) ===== #}
+    {%- set _allFlashes = app.flashes -%}
+    {%- if _allFlashes|length > 0 -%}
+    <div class="fr-container fr-mt-3w" id="flash-messages">
+        {%- for label, messages in _allFlashes -%}
+            {%- for message in messages -%}
+                {%- if message is not empty and message != '…' -%}
+                    {%- set alertType = 'info' -%}
+                    {%- if label == 'success' or 'success' in label or 'succes' in label -%}
+                        {%- set alertType = 'success' -%}
+                    {%- elseif label == 'warning' or 'warning' in label -%}
+                        {%- set alertType = 'warning' -%}
+                    {%- elseif label in ['danger', 'error'] or 'error' in label or 'danger' in label -%}
+                        {%- set alertType = 'error' -%}
+                    {%- endif -%}
+                <div role="alert" class="fr-alert fr-alert--{{ alertType }} fr-alert--sm fr-mb-2w">
+                    <p>{{ message }}</p>
+                </div>
+                {%- endif -%}
+            {%- endfor -%}
+        {%- endfor -%}
+    </div>
+    {%- endif -%}
+
+        {% block body %}{% endblock %}
+    {%  include 'header/footer.html.twig' %}
+
+    <script type="module" src="{{ asset('styles/dsfr/dist/dsfr/dsfr.module.min.js') }}"></script>
+    <script nomodule src="{{ asset('styles/dsfr/dist/dsfr/dsfr.nomodule.min.js') }}"></script>
+    </body>
+</html>
+

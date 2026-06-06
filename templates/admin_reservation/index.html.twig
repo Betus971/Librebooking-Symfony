@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminReservationController!{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-6w">
+    <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+        <div class="fr-col">
+            <h1 class="fr-h3 fr-mb-0">Toutes les réservations</h1>
+            <p class="fr-text--sm fr-text--mention-grey">{{ total }} dossier(s) trouvé(s)</p>
+        </div>
+        <div class="fr-col-auto">
+            <a href="{{ path('admin_reservation_pending') }}" class="fr-btn fr-btn--secondary fr-icon-time-line fr-btn--icon-left">
+                Voir les demandes en attente
+            </a>
+        </div>
+    </div>
+
+    {# --- RECHERCHE --- #}
+    <form method="get" class="fr-search-bar fr-mb-3w" role="search">
+        <label class="fr-label" for="search-input">Rechercher</label>
+        <input class="fr-input" placeholder="Rechercher par titre ou demandeur" type="search" id="search-input" name="q" value="{{ q }}">
+        <button class="fr-btn" title="Rechercher">Rechercher</button>
+    </form>
+
+    {# --- TABLEAU --- #}
+    <div class="fr-table fr-table--bordered fr-table--layout-fixed">
+        <div class="fr-table__wrapper">
+            <div class="fr-table__container">
+                <div class="fr-table__content">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th scope="col" style="width: 25%;">Titre</th>
+                            <th scope="col">Demandeur</th>
+                            <th scope="col" class="fr-text--right">Dates</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="fr-text--right">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for r in rows %}
+                            <tr>
+                                <td>
+                                    <span class="fr-text--bold">{{ r.title }}</span>
+                                    {% if r.resCount > 0 %}
+                                        <br><span class="fr-text--xs fr-text--mention-grey">{{ r.oneName }} {{ r.resCount > 1 ? '(+' ~ (r.resCount - 1) ~ ')' : '' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.ownerName ?: 'Inconnu' }}</td>
+                                <td class="fr-text--right">
+                                    {{ r.firstStart ? r.firstStart|date('d/m/Y H:i') : '-' }}
+                                    <br>au {{ r.lastEnd ? r.lastEnd|date('d/m/Y H:i') : '-' }}
+                                </td>
+                                <td>
+                                    {% set s = r.statusId %}
+                                    {% if s == 1 %}
+                                        <p class="fr-badge fr-badge--warning fr-badge--sm">En attente</p>
+                                    {% elseif s == 2 %}
+                                        <p class="fr-badge fr-badge--success fr-badge--sm">Approuvée</p>
+                                    {% elseif s == 3 %}
+                                        <p class="fr-badge fr-badge--error fr-badge--sm">Refusée</p>
+                                    {% elseif s == 4 %}
+                                        <p class="fr-badge fr-badge--info fr-badge--sm">Annulée</p>
+                                    {% endif %}
+                                </td>
+                                <td class="fr-text--right">
+                                    <a href="{{ path('reservation_show', {uuid: r.uuid}) }}" class="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-eye-line" title="Voir"></a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="fr-text--center">Aucune réservation.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# --- PAGINATION (rendu DSFR unifié via KnpPaginator) --- #}
+    <div class="fr-mt-2w">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+</div>
+{% endblock %}

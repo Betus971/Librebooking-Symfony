@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit TimeBlock{% endblock %}
+
+{% block body %}
+    <div class="fr-container fr-my-4w">
+
+        {# Fil d'ariane #}
+        <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+            <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-1">Voir le fil d’ariane</button>
+            <div class="fr-collapse" id="breadcrumb-1">
+                <ol class="fr-breadcrumb__list">
+                    <li><a class="fr-breadcrumb__link" href="{{ path('app_schedule_index') }}">Plannings</a></li>
+                    {% if layout is defined and layout.schedules|length > 0 %}
+                        {# On essaie de remonter au planning si possible #}
+                        <li><a class="fr-breadcrumb__link" href="{{ path('app_schedule_edit', {id: layout.schedules.first.id, tab: 'grid'}) }}">Grille</a></li>
+                    {% endif %}
+                    <li><a class="fr-breadcrumb__link" aria-current="page">Modifier un créneau</a></li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+            <div class="fr-col">
+                <h1 class="fr-h2 fr-mb-0">Modifier un créneau</h1>
+                <p class="fr-text--sm fr-text--mention-grey">
+                    {{ time_block.layout.name }} —
+                    {{ ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][time_block.dayOfWeek] }}
+                </p>
+            </div>
+            <div class="fr-col-auto">
+                {# Bouton de suppression sécurisé #}
+                <form method="post" action="{{ path('app_time_block_delete', {'id': time_block.id}) }}" onsubmit="return confirm('Supprimer définitivement ce créneau ?');" style="display: inline-block;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_timeblock_' ~ time_block.id) }}">
+                    <button class="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-delete-line fr-text--error">
+                        Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# --- FORMULAIRE D'ÉDITION SIMPLE --- #}
+        {{ form_start(form, { attr: { class: 'fr-form' } }) }}
+
+        <div class="fr-card">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                        {# On cache les champs de génération de masse qui ne servent à rien en édition #}
+                        <div class="fr-sr-only">
+                            {{ form_row(form.days) }}
+                            {{ form_row(form.slotDuration) }}
+                            {{ form_row(form.generate) }}
+                            {{ form_row(form.clear) }}
+                        </div>
+
+                        {# Champs utiles pour l'édition #}
+                        <div class="fr-col-12 fr-col-md-6">
+                            {{ form_row(form.dayOfWeek) }}
+                        </div>
+                        <div class="fr-col-12 fr-col-md-6">
+                            <div class="fr-grid-row fr-grid-row--gutters">
+                                <div class="fr-col-6">
+                                    {{ form_row(form.startTime) }}
+                                </div>
+                                <div class="fr-col-6">
+                                    {{ form_row(form.endTime) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="fr-col-12 fr-col-md-6">
+                            {{ form_row(form.availabilityCode) }}
+                        </div>
+                        <div class="fr-col-12 fr-col-md-6">
+                            {{ form_row(form.label) }}
+                            {{ form_row(form.endLabel) }}
+                        </div>
+                    </div>
+
+                    <div class="fr-mt-3w fr-text--right">
+                        <a href="{{ path('app_schedule_index') }}" class="fr-btn fr-btn--tertiary-no-outline fr-mr-2w">Annuler</a>
+                        {# On utilise le bouton Save du formulaire #}
+                        {{ form_widget(form.save, { label: 'Enregistrer les modifications', attr: { class: 'fr-btn fr-icon-save-line fr-btn--icon-left' } }) }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
