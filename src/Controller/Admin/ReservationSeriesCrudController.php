@@ -58,7 +58,7 @@ class ReservationSeriesCrudController extends AbstractCrudController
             return;
         }
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa fa-info-circle');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa-solid fa-circle-info');
 
         yield TextareaField::new('description', new TranslatableMessage('reservation.field.description'))
             ->setRequired(false)
@@ -71,12 +71,12 @@ class ReservationSeriesCrudController extends AbstractCrudController
             ->setFormat('dd/MM/yyyy HH:mm')
             ->setDisabled();
 
-        yield FormField::addTab(new TranslatableMessage('reservation.instances'))->setIcon('fa fa-calendar');
+        yield FormField::addTab(new TranslatableMessage('reservation.instances'))->setIcon('fa-solid fa-calendar');
 
         yield AssociationField::new('instances', new TranslatableMessage('reservation.instances'))
             ->setDisabled();
 
-        yield FormField::addTab(new TranslatableMessage('reservation.resources'))->setIcon('fa fa-door-open');
+        yield FormField::addTab(new TranslatableMessage('reservation.resources'))->setIcon('fa-solid fa-door-open');
 
         yield AssociationField::new('reservationResources', new TranslatableMessage('reservation.resources'))
             ->setDisabled();

@@ -2,14 +2,8 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Announcement;
-use App\Entity\ReservationSeries;
-use App\Entity\Resource;
-use App\Entity\ResourceCategory;
-use App\Entity\ResourceGroup;
-use App\Entity\Schedule;
-use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -28,6 +22,11 @@ class DashboardController extends AbstractDashboardController
         return $this->redirect($adminUrlGenerator->setController(ResourceCrudController::class)->generateUrl());
     }
 
+    public function configureAssets(): Assets
+    {
+        return Assets::new()->addHtmlContentToHead('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">');
+    }
+
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
@@ -39,22 +38,23 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToRoute(new TranslatableMessage('admin.back_to_site'), 'fa fa-arrow-left', 'app_home');
+        yield MenuItem::linkToRoute(new TranslatableMessage('admin.back_to_site'), 'fa-solid fa-arrow-left', 'app_home');
 
         yield MenuItem::section(new TranslatableMessage('admin.section.reservations'));
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.reservation_series.plural'), 'fa fa-calendar-check', ReservationSeries::class);
+        yield MenuItem::linkTo(ReservationSeriesCrudController::class, new TranslatableMessage('admin.reservation_series.plural'), 'fa-solid fa-calendar-check')->setAction('index');
 
         yield MenuItem::section(new TranslatableMessage('admin.section.resources'));
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.resource.plural'), 'fa fa-door-open', Resource::class);
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.resource_category.plural'), 'fa fa-tags', ResourceCategory::class);
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.resource_group.plural'), 'fa fa-users-cog', ResourceGroup::class);
+        yield MenuItem::linkTo(ResourceCrudController::class, new TranslatableMessage('admin.resource.plural'), 'fa-solid fa-door-open')->setAction('index');
+        yield MenuItem::linkTo(ResourceCategoryCrudController::class, new TranslatableMessage('admin.resource_category.plural'), 'fa-solid fa-tags')->setAction('index');
+        yield MenuItem::linkTo(ResourceGroupCrudController::class, new TranslatableMessage('admin.resource_group.plural'), 'fa-solid fa-users-gear')->setAction('index');
 
         yield MenuItem::section(new TranslatableMessage('admin.section.configuration'));
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.schedule.plural'), 'fa fa-clock', Schedule::class);
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.announcement.plural'), 'fa fa-bullhorn', Announcement::class);
+        yield MenuItem::linkTo(ScheduleCrudController::class, new TranslatableMessage('admin.schedule.plural'), 'fa-solid fa-clock')->setAction('index');
+        yield MenuItem::linkTo(AnnouncementCrudController::class, new TranslatableMessage('admin.announcement.plural'), 'fa-solid fa-bullhorn')->setAction('index');
 
         yield MenuItem::section(new TranslatableMessage('admin.section.system'))->setPermission('ROLE_SUPER_ADMIN');
-        yield MenuItem::linkToCrud(new TranslatableMessage('admin.user.plural'), 'fa fa-users', User::class)
+        yield MenuItem::linkTo(UserCrudController::class, new TranslatableMessage('admin.user.plural'), 'fa-solid fa-users')
+            ->setAction('index')
             ->setPermission('ROLE_SUPER_ADMIN');
     }
 }

@@ -209,7 +209,10 @@
                     dateClick: function(info) {
                         const v = select ? select.value : '';
                         const resourceId = v === '' ? null : parseInt(v, 10);
-                        let url = newUrl + '?date=' + info.dateStr;
+                        const iso = info.dateStr; // e.g. "2026-06-08T09:00:00+02:00" or "2026-06-08"
+                        const datePart = iso.substring(0, 10);
+                        const timePart = iso.length > 10 ? iso.substring(11, 16) : '09:00';
+                        let url = newUrl + '?date=' + datePart + '&start=' + timePart;
                         if (resourceId !== null) url += '&resource=' + resourceId;
                         window.location.href = url;
                     },

@@ -78,79 +78,60 @@ class AvailabilityChecker
             ];
         }
 
-        // 5) Boucle jour par jour
-        $cursor = (clone $start)->setTime(0, 0, 0);
-        $lastDay = (clone $end)->setTime(0, 0, 0);
+        // 5) Vérification des horaires d'ouverture
+        $isMultiDay = $start->format('Y-m-d') !== $end->format('Y-m-d');
 
-        while ($cursor <= $lastDay) {
-            $dayStartDT = (clone $cursor);
-            if ($dayStartDT < $start) { $dayStartDT = clone $start; }
-
-            $endOfDay = (clone $cursor)->setTime(23, 59, 59);
-            $dayEndDT = ($end < $endOfDay) ? clone $end : $endOfDay;
-
-            if ($dayStartDT >= $dayEndDT) {
-                $cursor = (clone $cursor)->modify('+1 day')->setTime(0,0,0);
-                continue;
-            }
-
-            $dow = (int) $cursor->format('w');
-            $needStart = $dayStartDT->format('H:i:s');
-            $needEnd   = $dayEndDT->format('H:i:s');
-
-            // Récupérer les blocs bruts
-            $blocks = ($openByDay['ALL'] ?? []);
-            if (!empty($openByDay[$dow])) {
-                $blocks = array_merge($blocks, $openByDay[$dow]);
-            }
-
-            // --- DEBUT MODIFICATION : Fusionner les blocs contigus ---
-
-            // A. Trier par heure de début
-            usort($blocks, fn($a, $b) => strcmp($a[0], $b[0]));
-
-            // B. Fusionner (Merge)
-            $mergedBlocks = [];
-            foreach ($blocks as $b) {
-                if (empty($mergedBlocks)) {
-                    $mergedBlocks[] = $b;
-                    continue;
-                }
-
-                // Référence au dernier bloc ajouté
-                $lastIndex = count($mergedBlocks) - 1;
-                $last = $mergedBlocks[$lastIndex];
-
-                // Si le bloc actuel commence avant (ou pile quand) le dernier finit
-                if ($b[0] <= $last[1]) {
-                    // On prolonge la fin si nécessaire (ex: 08-09 + 09-10 => 08-10)
-                    if ($b[1] > $last[1]) {
-                        $mergedBlocks[$lastIndex][1] = $b[1];
-                    }
-                } else {
-                    // Sinon c'est un nouveau bloc séparé (il y a un trou)
-                    $mergedBlocks[] = $b;
-                }
-            }
-            // ---------------------------------------------------------
-
-            // Vérifier si notre demande rentre dans l'un des "grands blocs fusionnés"
-            $covered = false;
-            foreach ($mergedBlocks as [$bStart, $bEnd]) {
-                if ($needStart >= $bStart && $needEnd <= $bEnd) {
-                    $covered = true;
-                    break;
-                }
-            }
-
-            if (!$covered) {
+        if ($isMultiDay) {
+            // Résa multi-jours : on vérifie uniquement que l'heure de début tombe dans un
+            // créneau ouvert du premier jour, et que l'heure de fin tombe dans un créneau
+            // ouvert du dernier jour. Les jours intermédiaires sont implicitement bloqués
+            // par la réservation elle-même (pas de contrainte horaire supplémentaire).
+            $startTime = $start->format('H:i:s');
+            if (!$this->fitsInOpenWindows($startTime, $startTime, $openByDay, (int) $start->format('w'))) {
                 return false;
             }
 
-            $cursor = (clone $cursor)->modify('+1 day')->setTime(0, 0, 0);
+            $endTime = $end->format('H:i:s');
+            if (!$this->fitsInOpenWindows($endTime, $endTime, $openByDay, (int) $end->format('w'))) {
+                return false;
+            }
+        } else {
+            // Résa single-day : la plage complète doit rentrer dans un créneau ouvert
+            $dow = (int) $start->format('w');
+            if (!$this->fitsInOpenWindows($start->format('H:i:s'), $end->format('H:i:s'), $openByDay, $dow)) {
+                return false;
+            }
         }
 
         return true;
+    }
+
+    /**
+     * Vérifie que l'intervalle [needStart, needEnd] est couvert par les blocs ouverts
+     * fusionnés du jour donné. Les blocs 'ALL' (dow=null) s'appliquent à tous les jours.
+     * Les fins de blocs à '00:00:00' (minuit) sont normalisées en '24:00:00'.
+     */
+    private function fitsInOpenWindows(string $needStart, string $needEnd, array $openByDay, int $dow): bool
+    {
+        $blocks = array_merge($openByDay['ALL'] ?? [], $openByDay[$dow] ?? []);
+        // Normaliser 00:00:00 → 24:00:00 (minuit stocké comme début de journée suivante)
+        $blocks = array_map(fn($b) => [$b[0], $b[1] === '00:00:00' ? '24:00:00' : $b[1]], $blocks);
+        // Trier puis fusionner les blocs contigus / chevauchants
+        usort($blocks, fn($a, $b) => strcmp($a[0], $b[0]));
+        $merged = [];
+        foreach ($blocks as $b) {
+            if (empty($merged)) { $merged[] = $b; continue; }
+            $last = count($merged) - 1;
+            if ($b[0] <= $merged[$last][1]) {
+                if ($b[1] > $merged[$last][1]) $merged[$last][1] = $b[1];
+            } else {
+                $merged[] = $b;
+            }
+        }
+        foreach ($merged as [$bStart, $bEnd]) {
+            if ($needStart >= $bStart && $needEnd <= $bEnd) return true;
+        }
+        return false;
     }
 
 }

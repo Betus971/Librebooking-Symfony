@@ -36,7 +36,7 @@ class ResourceGroupCrudController extends AbstractCrudController
             return;
         }
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa fa-users');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa-solid fa-users');
 
         yield TextField::new('name', new TranslatableMessage('entity.resource_group.name'))
             ->setRequired(false)

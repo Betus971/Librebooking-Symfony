@@ -45,7 +45,7 @@ class ScheduleCrudController extends AbstractCrudController
             return;
         }
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa fa-calendar');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa-solid fa-calendar');
 
         yield TextField::new('name', new TranslatableMessage('entity.schedule.name'))
             ->setRequired(true);
@@ -57,7 +57,7 @@ class ScheduleCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp(new TranslatableMessage('entity.schedule.layout_help'));
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.availability'))->setIcon('fa fa-clock');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.availability'))->setIcon('fa-solid fa-clock');
 
         yield ChoiceField::new('weekdayStart', new TranslatableMessage('entity.schedule.weekday_start'))
             ->setChoices([
@@ -81,7 +81,7 @@ class ScheduleCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp(new TranslatableMessage('entity.schedule.end_date_help'));
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.advanced'))->setIcon('fa fa-cogs');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.advanced'))->setIcon('fa-solid fa-gears');
 
         yield BooleanField::new('published', new TranslatableMessage('entity.schedule.published'));
 

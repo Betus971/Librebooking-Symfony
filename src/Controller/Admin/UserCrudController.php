@@ -63,7 +63,7 @@ class UserCrudController extends AbstractCrudController
             return;
         }
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.identity'))->setIcon('fa fa-user');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.identity'))->setIcon('fa-solid fa-user');
 
         yield TextField::new('fname', new TranslatableMessage('entity.user.fname'))
             ->setRequired(false);
@@ -83,7 +83,7 @@ class UserCrudController extends AbstractCrudController
         yield TextField::new('phone', new TranslatableMessage('entity.user.phone'))
             ->setRequired(false);
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.permissions'))->setIcon('fa fa-shield-alt');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.permissions'))->setIcon('fa-solid fa-shield-halved');
 
         yield ArrayField::new('roles', new TranslatableMessage('entity.user.roles'))
             ->setHelp(new TranslatableMessage('entity.user.roles_help'));
@@ -91,7 +91,7 @@ class UserCrudController extends AbstractCrudController
         yield AssociationField::new('resourceGroups', new TranslatableMessage('entity.user.resource_groups'))
             ->setHelp(new TranslatableMessage('entity.user.resource_groups_help'));
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.preferences'))->setIcon('fa fa-sliders-h');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.preferences'))->setIcon('fa-solid fa-sliders');
 
         yield ChoiceField::new('language', new TranslatableMessage('entity.user.language'))
             ->setChoices([
@@ -106,9 +106,9 @@ class UserCrudController extends AbstractCrudController
                 'UTC'           => 'UTC',
             ]);
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.activity'))->setIcon('fa fa-clock');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.activity'))->setIcon('fa-solid fa-clock');
 
-        yield DateTimeField::new('date_created', new TranslatableMessage('entity.user.date_created'))
+        yield DateTimeField::new('dateCreated', new TranslatableMessage('entity.user.date_created'))
             ->setFormat('dd/MM/yyyy HH:mm')
             ->setDisabled();
 

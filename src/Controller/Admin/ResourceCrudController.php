@@ -54,7 +54,7 @@ class ResourceCrudController extends AbstractCrudController
             return;
         }
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa fa-info-circle');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.general'))->setIcon('fa-solid fa-circle-info');
 
         yield TextField::new('name', new TranslatableMessage('entity.resource.name'))
             ->setRequired(true)
@@ -85,7 +85,7 @@ class ResourceCrudController extends AbstractCrudController
 
         yield BooleanField::new('isActive', new TranslatableMessage('entity.resource.is_active'));
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.booking_rules'))->setIcon('fa fa-sliders-h');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.booking_rules'))->setIcon('fa-solid fa-sliders');
 
         yield BooleanField::new('requiresApproval', new TranslatableMessage('entity.resource.requires_approval'))
             ->setHelp(new TranslatableMessage('entity.resource.requires_approval_help'));
@@ -110,7 +110,7 @@ class ResourceCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp(new TranslatableMessage('entity.resource.min_notice_time_add_help'));
 
-        yield FormField::addTab(new TranslatableMessage('admin.tab.advanced'))->setIcon('fa fa-cogs');
+        yield FormField::addTab(new TranslatableMessage('admin.tab.advanced'))->setIcon('fa-solid fa-gears');
 
         yield IntegerField::new('sortOrder', new TranslatableMessage('entity.resource.sort_order'))
             ->setRequired(false)

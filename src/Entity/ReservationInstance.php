@@ -51,6 +51,14 @@ class ReservationInstance
         $this->reservationUsers = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        if (isset($this->startDate)) {
+            return $this->startDate->format('d/m/Y H:i') . ' → ' . $this->endDate->format('H:i');
+        }
+        return '#' . ($this->id ?? '?');
+    }
+
     public function getId(): ?int
     {
         return $this->id;

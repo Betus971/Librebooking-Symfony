@@ -122,6 +122,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->resourceGroups = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        $name = trim(($this->fname ?? '') . ' ' . ($this->lname ?? ''));
+        return $name !== '' ? $name : ($this->email ?? '');
+    }
+
     public function getId(): ?int
     {
         return $this->id;

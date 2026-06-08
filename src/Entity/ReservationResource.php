@@ -23,6 +23,11 @@ class ReservationResource
     #[ORM\Column(name: 'resource_level_id', type: 'smallint', options: ['unsigned' => true])]
     private int $resourceLevelId = 1;
 
+    public function __toString(): string
+    {
+        return isset($this->resource) ? (string) $this->resource : '?';
+    }
+
     public function getResourceLevelId(): ?int
     {
         return $this->resourceLevelId;

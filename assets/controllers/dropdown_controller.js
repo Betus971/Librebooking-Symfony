@@ -10,7 +10,7 @@ export default class extends Controller {
     toggle(event) {
         event.stopPropagation();
         this.menuTarget.classList.toggle('hidden');
-        
+
         if (!this.menuTarget.classList.contains('hidden')) {
             document.addEventListener('click', this.close);
         } else {
