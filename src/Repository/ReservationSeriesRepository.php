@@ -256,6 +256,26 @@ class ReservationSeriesRepository extends ServiceEntityRepository
 
         return [$rows, $total];
     }
+    /**
+     * Vrai si au moins une ressource de la série exige une approbation.
+     *
+     * Encapsule la règle utilisée par {@see \App\Domain\Reservation\ReservationWorkflow}.
+     */
+    public function requiresApproval(ReservationSeries $series): bool
+    {
+        $count = (int) $this->getEntityManager()->createQueryBuilder()
+            ->select('COUNT(r.id)')
+            ->from('App\Entity\ReservationResource', 'rr')
+            ->join('rr.resource', 'r')
+            ->where('rr.series = :series')
+            ->andWhere('r.requiresApproval = true')
+            ->setParameter('series', $series)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
     public function findNextForUser($user): ?ReservationSeries
     {
         return $this->createQueryBuilder('s')

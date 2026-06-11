@@ -3,10 +3,11 @@
 namespace App\Domain\Reservation;
 
 use App\Entity\ReservationAuditLog;
-use App\Entity\ReservationResource;
 use App\Entity\ReservationSeries;
 use App\Entity\ReservationStatus;
 use App\Entity\User;
+use App\Repository\ReservationInstanceRepository;
+use App\Repository\ReservationSeriesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -24,8 +25,11 @@ class ReservationWorkflow
         'cancel'  => ['from' => [ReservationStatus::PENDING, ReservationStatus::APPROVED], 'to' => ReservationStatus::CANCELLED],
     ];
 
-    public function __construct(private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private ReservationInstanceRepository $instances,
+        private ReservationSeriesRepository $seriesRepo,
+    ) {
     }
 
     /**
@@ -90,17 +94,7 @@ class ReservationWorkflow
         if (in_array($action, ['approve', 'reject'], true)) {
             $now = new \DateTimeImmutable();
 
-            $hasUpcoming = (int) $this->em->createQueryBuilder()
-                ->select('COUNT(i.id)')
-                ->from(\App\Entity\ReservationInstance::class, 'i')
-                ->where('i.series = :s')
-                ->andWhere('i.startDate > :now')
-                ->setParameter('s', $series)
-                ->setParameter('now', $now)
-                ->getQuery()
-                ->getSingleScalarResult() > 0;
-
-            if (!$hasUpcoming) {
+            if (!$this->instances->hasUpcoming($series, $now)) {
                 throw new \DomainException('Action impossible : la réservation est déjà passée.');
             }
         }
@@ -116,25 +110,8 @@ class ReservationWorkflow
         }
 
         // 3) Règle spécifique : approve ne s'applique que si la ressource l'exige
-        if ($action === 'approve' && !$this->seriesRequiresApproval($series)) {
+        if ($action === 'approve' && !$this->seriesRepo->requiresApproval($series)) {
             throw new \DomainException("Cette réservation n'exige pas d'approbation.");
         }
-    }
-
-    /**
-     * Une série requiert une approbation si au moins une ressource liée
-     * a `requires_approval = true`.
-     */
-    private function seriesRequiresApproval(ReservationSeries $series): bool
-    {
-        return (int) $this->em->createQueryBuilder()
-            ->select('COUNT(r.id)')
-            ->from(ReservationResource::class, 'rr')
-            ->join('rr.resource', 'r')
-            ->where('rr.series = :series')
-            ->andWhere('r.requiresApproval = true')
-            ->setParameter('series', $series)
-            ->getQuery()
-            ->getSingleScalarResult() > 0;
     }
 }

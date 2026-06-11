@@ -25,11 +25,16 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  *   - Owner de la série.
  *   - Super-admin ou gestionnaire du groupe (via MANAGE).
  *   - TODO futur : participants (quand la notion sera matérialisée côté entité).
+ *
+ * CANCEL (annulation d'une série) :
+ *   - Owner de la série (annulation de sa propre demande).
+ *   - Super-admin ou gestionnaire du groupe (via MANAGE).
  */
 final class ReservationSeriesVoter extends Voter
 {
     public const MANAGE       = 'MANAGE';
     public const VIEW_DETAILS = 'VIEW_DETAILS';
+    public const CANCEL       = 'CANCEL';
 
     public function __construct(private readonly Security $security)
     {
@@ -37,7 +42,7 @@ final class ReservationSeriesVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::MANAGE, self::VIEW_DETAILS], true)
+        return in_array($attribute, [self::MANAGE, self::VIEW_DETAILS, self::CANCEL], true)
             && $subject instanceof ReservationSeries;
     }
 
@@ -55,8 +60,20 @@ final class ReservationSeriesVoter extends Voter
         return match ($attribute) {
             self::MANAGE       => $this->canManage($series, $user),
             self::VIEW_DETAILS => $this->canViewDetails($series, $user),
+            self::CANCEL       => $this->canCancel($series, $user),
             default            => false,
         };
+    }
+
+    private function canCancel(ReservationSeries $series, User $user): bool
+    {
+        // Owner : annulation de sa propre demande.
+        if ($series->getOwner() && $series->getOwner()->getId() === $user->getId()) {
+            return true;
+        }
+
+        // Gestionnaire ou super-admin : via MANAGE.
+        return $this->canManage($series, $user);
     }
 
     private function canManage(ReservationSeries $series, User $user): bool

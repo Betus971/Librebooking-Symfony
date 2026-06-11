@@ -1,0 +1,14 @@
+{% extends 'emails/reservation/_layout.html.twig' %}
+
+{% block content %}
+    <h1 style="font-size:20px;margin:0 0 12px;">Demande enregistrée</h1>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Bonjour {{ series.owner.fname|default('') }},
+    </p>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Votre demande de réservation a bien été enregistrée. Si la ressource
+        demandée nécessite une validation, un gestionnaire l'examinera prochainement
+        et vous recevrez un e-mail dès qu'une décision sera prise.
+    </p>
+    {{ include('emails/reservation/_summary.html.twig') }}
+{% endblock %}

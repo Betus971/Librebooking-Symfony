@@ -35,8 +35,12 @@ Librebooking is an open-source web application designed to handle resource reser
    ```
 
 3. **Environment Configuration**
-   Copy the `.env` file to `.env.local` and configure your database and OAuth credentials:
+   Copy `.env.example` to `.env.local` and configure your database and OAuth credentials (`.env.local` is git-ignored, so your secrets stay out of version control):
+   ```bash
+   cp .env.example .env.local
+   ```
    ```env
+   APP_SECRET=your_generated_secret
    DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"
    OAUTH_GOOGLE_ID=your_google_client_id
    OAUTH_GOOGLE_SECRET=your_google_client_secret

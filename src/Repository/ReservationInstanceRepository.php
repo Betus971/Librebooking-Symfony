@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\ReservationInstance;
+use App\Entity\ReservationSeries;
 use App\Entity\ReservationStatus;
+use App\Entity\Resource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -131,5 +133,80 @@ class ReservationInstanceRepository extends ServiceEntityRepository
             ->setParameter('activeStatuses', ReservationStatus::ACTIVE_STATUSES)
             ->getQuery()
             ->getArrayResult();
+    }
+
+    /**
+     * Vrai s'il existe au moins une instance ACTIVE (PENDING|APPROVED) qui
+     * chevauche l'intervalle [start, end) pour la ressource donnée.
+     *
+     * Encapsule la détection de conflit utilisée par {@see \App\Service\AvailabilityChecker::isFree()}.
+     */
+    public function hasOverlapForResource(Resource $resource, \DateTimeInterface $start, \DateTimeInterface $end): bool
+    {
+        $count = (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->join('App\Entity\ReservationResource', 'rr', 'WITH', 'rr.series = i.series')
+            ->join('i.series', 's')
+            ->where('rr.resource = :res')
+            ->andWhere('i.startDate < :end')
+            ->andWhere('i.endDate > :start')
+            ->andWhere('IDENTITY(s.status) IN (:activeStatuses)')
+            ->setParameter('res', $resource)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('activeStatuses', ReservationStatus::ACTIVE_STATUSES)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
+    /**
+     * Vrai s'il reste au moins une instance à venir (startDate > $since) pour la série.
+     *
+     * Encapsule la vérification utilisée par {@see \App\Domain\Reservation\ReservationWorkflow::ensureAllowed()}.
+     */
+    public function hasUpcoming(ReservationSeries $series, \DateTimeInterface $since): bool
+    {
+        $count = (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->where('i.series = :s')
+            ->andWhere('i.startDate > :since')
+            ->setParameter('s', $series)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
+    /**
+     * Instances chevauchant la plage [from, to) pour une liste de ressources,
+     * avec série et ressources préchargées (vue planning API).
+     *
+     * @param int[] $resourceIds
+     *
+     * @return ReservationInstance[]
+     */
+    public function findForPlanningRange(array $resourceIds, \DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        if (empty($resourceIds)) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('ri')
+            ->select('ri', 's', 'rr', 'r2')
+            ->join('ri.series', 's')
+            ->join('s.reservationResources', 'rr')
+            ->join('rr.resource', 'r2')
+            ->andWhere('r2.id IN (:ids)')
+            ->andWhere('ri.endDate  > :from')
+            ->andWhere('ri.startDate < :to')
+            ->setParameter('ids', $resourceIds)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('ri.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

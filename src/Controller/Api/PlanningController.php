@@ -3,8 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Entity\Resource;
-use App\Entity\ReservationInstance;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ReservationInstanceRepository;
+use App\Repository\ResourceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class PlanningController extends AbstractController
 {
     #[Route('/planning', name: 'planning', methods: ['GET'])]
-    public function planning(Request $request, EntityManagerInterface $em): JsonResponse
+    public function planning(Request $request, ResourceRepository $resourceRepo, ReservationInstanceRepository $instances): JsonResponse
     {
         // --- Params ---
         $fromStr = $request->query->get('from');            // YYYY-MM-DD
@@ -41,21 +41,7 @@ final class PlanningController extends AbstractController
         $to   = $from->modify('+' . $days . ' days');
 
         // --- Ressources (filtre catégorie éventuel) ---
-        $qbRes = $em->createQueryBuilder()
-            ->select('r')
-            ->from(Resource::class, 'r')
-            ->orderBy('r.name', 'ASC');
-
-        if ($typeId > 0) {
-            $qbRes->join('r.category', 'rc')
-                ->andWhere('rc.id = :tid')
-                ->setParameter('tid', $typeId);
-        } elseif ($typeId === -1) {
-            // option "Sans catégorie"
-            $qbRes->andWhere('r.category IS NULL');
-        }
-
-        $resources = $qbRes->getQuery()->getResult();
+        $resources = $resourceRepo->findForPlanning($typeId);
 
         if (!$resources) {
             return $this->json([
@@ -67,22 +53,8 @@ final class PlanningController extends AbstractController
 
         $resIds = array_map(fn(Resource $r) => $r->getId(), $resources);
 
-        // --- Réservations : instance -> series -> reservationResources -> resource
-        $bookings = $em->createQueryBuilder()
-            ->select('ri', 's', 'rr', 'r2')
-            ->from(ReservationInstance::class, 'ri')
-            ->join('ri.series', 's')
-            ->join('s.reservationResources', 'rr') // <— la OneToMany que tu as
-            ->join('rr.resource', 'r2')            // <— ManyToOne vers Resource
-            ->andWhere('r2.id IN (:ids)')
-            ->andWhere('ri.endDate  > :from')      // champs exacts (end_date)
-            ->andWhere('ri.startDate < :to')       // champs exacts (start_date)
-            ->setParameter('ids', $resIds)
-            ->setParameter('from', $from)
-            ->setParameter('to', $to)
-            ->orderBy('ri.startDate', 'ASC')
-            ->getQuery()
-            ->getResult();
+        // --- Réservations chevauchant la plage (requête encapsulée côté repository) ---
+        $bookings = $instances->findForPlanningRange($resIds, $from, $to);
 
         // --- Sérialisation ressources ---
         $outResources = array_map(function (Resource $r) {

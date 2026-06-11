@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% trans_default_domain 'messages' %}
+
+{% block title %}{{ ('admin.reservation.confirm.' ~ action ~ '_title')|trans }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-xl mx-auto my-10 px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-6">
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {{ ('admin.reservation.confirm.' ~ action ~ '_title')|trans }}
+            </h1>
+
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                {{ ('admin.reservation.confirm.' ~ action ~ '_intro')|trans }}
+            </p>
+
+            <dl class="text-sm border-y border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 mb-5">
+                <div class="flex justify-between py-2">
+                    <dt class="text-gray-500">{{ 'reservation.field.title'|trans }}</dt>
+                    <dd class="font-medium text-gray-900 dark:text-gray-100">{{ series.title }}</dd>
+                </div>
+                <div class="flex justify-between py-2">
+                    <dt class="text-gray-500">{{ 'reservation.field.owner'|trans }}</dt>
+                    <dd class="text-gray-900 dark:text-gray-100">{{ series.owner.email }}</dd>
+                </div>
+                {% for instance in series.instances %}
+                    <div class="flex justify-between py-2">
+                        <dt class="text-gray-500">{{ 'reservation.instances'|trans }}</dt>
+                        <dd class="text-gray-900 dark:text-gray-100">
+                            {{ instance.startDate|date('d/m/Y H:i') }} → {{ instance.endDate|date('d/m/Y H:i') }}
+                        </dd>
+                    </div>
+                {% endfor %}
+            </dl>
+
+            <form method="post" action="{{ actionUrl }}">
+                <input type="hidden" name="_token" value="{{ csrf_token(csrfId) }}">
+
+                {% if action == 'reject' %}
+                    <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                        {{ 'admin.reservation.confirm.reason_label'|trans }}
+                    </label>
+                    <textarea id="reason" name="reason" rows="3" required
+                              class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 p-2 mb-4"></textarea>
+                {% endif %}
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 rounded-lg text-white font-medium
+                                   {{ action == 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' : (action == 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700') }}">
+                        {{ 'admin.reservation.confirm.submit'|trans }}
+                    </button>
+                    <a href="{{ indexUrl }}"
+                       class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {{ 'admin.reservation.confirm.back'|trans }}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

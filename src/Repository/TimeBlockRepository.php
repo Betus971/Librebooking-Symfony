@@ -45,6 +45,22 @@ use Doctrine\Persistence\ManagerRegistry;
               ->execute();
       }
 
-
+      /**
+       * Créneaux OUVERTS d'un layout, sous forme de lignes brutes :
+       *   [ ['dow' => int|null, 's' => time, 'e' => time], ... ]
+       *
+       * Encapsule la requête utilisée par {@see \App\Service\AvailabilityChecker::isFree()}.
+       */
+      public function findOpenBlocksByLayout(Layout $layout): array
+      {
+          return $this->createQueryBuilder('tb')
+              ->select('tb.dayOfWeek AS dow, tb.startTime AS s, tb.endTime AS e')
+              ->where('tb.layout = :layout')
+              ->andWhere('tb.availabilityCode = :open')
+              ->setParameter('open', TimeBlock::OPEN)
+              ->setParameter('layout', $layout)
+              ->getQuery()
+              ->getArrayResult();
+      }
 
   }

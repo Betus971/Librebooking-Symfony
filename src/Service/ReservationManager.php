@@ -2,93 +2,123 @@
 
 namespace App\Service;
 
-use App\Entity\Resource;
-use App\Entity\User;
-use App\Entity\ReservationSeries;
+use App\Entity\ReservationAuditLog;
 use App\Entity\ReservationInstance;
 use App\Entity\ReservationResource;
-use App\Repository\ReservationInstanceRepository;
+use App\Entity\ReservationSeries;
+use App\Entity\ReservationStatus;
+use App\Entity\ReservationType;
+use App\Entity\Resource;
+use App\Entity\User;
+use App\Service\Exception\ConcurrentBookingException;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Orchestre la création d'une réservation : verrou concurrentiel PostgreSQL,
+ * re-check de disponibilité sous verrou, création des entités (série, instance,
+ * lien ressource, journal d'audit) et persistance atomique.
+ *
+ * Cette logique vivait auparavant dans ReservationController::new() : elle est
+ * désormais isolée ici, le contrôleur se limitant au routage HTTP.
+ */
 final class ReservationManager
 {
     public function __construct(
-        private EntityManagerInterface        $em,
-        private ReservationInstanceRepository $instances
-    )
-    {
+        private readonly EntityManagerInterface $em,
+        private readonly AvailabilityChecker $availability,
+        private readonly ReferenceNumberGenerator $refGen,
+    ) {
     }
 
     /**
-     * Crée une réservation simple (non récurrente).
-     * @throws \InvalidArgumentException si une règle métier est violée.
+     * Crée une réservation simple sous verrou concurrentiel, dans une transaction unique.
+     *
+     * Le statut initial est déterminé par la ressource : PENDING si elle exige une
+     * approbation, APPROVED (auto-validée) sinon.
+     *
+     * @param callable(ReservationSeries):void|null $persistAttachments
+     *        Callback optionnel exécuté DANS la transaction, juste après la persistance
+     *        de la série : permet au contrôleur de rattacher les pièces jointes uploadées.
+     *
+     * @throws ConcurrentBookingException si le créneau a été pris entre le pré-check
+     *                                    et l'acquisition du verrou.
      */
-    public function createSimpleReservation(
-        Resource           $resource,
-        User               $owner,
-        string             $title,
-        \DateTimeImmutable $start,
-        \DateTimeImmutable $end,
-        ?string            $description = null
-    ): ReservationSeries
-    {
-        if ($end <= $start) {
-            throw new \InvalidArgumentException('Heure de fin <= heure de début.');
-        }
+    public function createWithLock(
+        Resource $resource,
+        User $owner,
+        \DateTimeInterface $start,
+        \DateTimeInterface $end,
+        string $title,
+        ?string $description = null,
+        ?callable $persistAttachments = null,
+    ): ReservationSeries {
+        return $this->em->wrapInTransaction(function () use (
+            $resource,
+            $owner,
+            $start,
+            $end,
+            $title,
+            $description,
+            $persistAttachments,
+        ): ReservationSeries {
+            // Verrou Postgres : auto-libéré en fin de transaction.
+            // Namespace arbitraire mais stable (« RESV ») pour éviter les collisions
+            // avec d'autres usages d'advisory locks.
+            $lockNamespace = 0x52455356; // "RESV"
+            $this->em->getConnection()->executeStatement(
+                'SELECT pg_advisory_xact_lock(:ns, :rid)',
+                ['ns' => $lockNamespace, 'rid' => (int) $resource->getId()]
+            );
 
-        // Alignement sur l'incrément (minutes)
-        if (null !== $resource->getMinIncrement()) {
-            $inc = (int)$resource->getMinIncrement();
-            $startMin = (int)$start->format('i');
-            $endMin = (int)$end->format('i');
-            if (($startMin % $inc) !== 0 || ($endMin % $inc) !== 0) {
-                throw new \InvalidArgumentException("Créneaux non alignés sur {$inc} minutes.");
+            // Re-check SOUS verrou : une autre requête a pu insérer entre le
+            // pré-check et l'acquisition du lock. C'est la fenêtre de race fermée ici.
+            if (!$this->availability->isFree($resource, $start, $end)) {
+                throw new ConcurrentBookingException();
             }
-        }
 
-        // Durée min/max
-        $minutes = (int)round(($end->getTimestamp() - $start->getTimestamp()) / 60);
-        if (null !== $resource->getMinDuration() && $minutes < $resource->getMinDuration()) {
-            throw new \InvalidArgumentException("Durée < minimum ({$resource->getMinDuration()} min).");
-        }
-        if (null !== $resource->getMaxDuration() && $minutes > $resource->getMaxDuration()) {
-            throw new \InvalidArgumentException("Durée > maximum ({$resource->getMaxDuration()} min).");
-        }
+            // Statut initial : En attente si approbation requise, Confirmée sinon (auto-approve).
+            $initialStatusId = $resource->isRequiresApproval()
+                ? ReservationStatus::PENDING
+                : ReservationStatus::APPROVED;
 
-        // Multi-jour interdit ?
-        if (!$resource->isAllowMultiday() && $start->format('Y-m-d') !== $end->format('Y-m-d')) {
-            throw new \InvalidArgumentException('Les réservations multi-jours sont interdites pour cette ressource.');
-        }
+            $series = (new ReservationSeries())
+                ->setTitle($title)
+                ->setDescription($description)
+                ->setOwner($owner)
+                ->setType($this->em->getReference(ReservationType::class, ReservationType::STANDARD))
+                ->setStatus($this->em->getReference(ReservationStatus::class, $initialStatusId));
+            $this->em->persist($series);
 
-        // Chevauchement
-        if ($this->instances->hasOverlap($resource, $start, $end, null)) {
-            throw new \InvalidArgumentException('Chevauchement avec une réservation existante.');
-        }
+            // Pièces jointes (gérées par l'appelant, dans la même transaction).
+            if (null !== $persistAttachments) {
+                $persistAttachments($series);
+            }
 
-        // --- Série
-        $series = (new ReservationSeries())
-            ->setTitle($title)
-            ->setDescription($description)
-            ->setOwner($owner);
-        // TODO: status/type si tu as des champs dédiés (PENDING/APPROVED…)
+            $link = (new ReservationResource())
+                ->setSeries($series)
+                ->setResource($resource)
+                ->setResourceLevelId(1);
+            $this->em->persist($link);
 
-        // --- Instance (occurrence réelle)
-        $instance = (new ReservationInstance())
-            ->setSeries($series)
-            ->setStartDate($start)
-            ->setEndDate($end)
-            ->setReferenceNumber(bin2hex(random_bytes(8)));
+            $instance = (new ReservationInstance())
+                ->setSeries($series)
+                ->setStartDate($start)
+                ->setEndDate($end)
+                ->setReferenceNumber($this->refGen->generate());
+            $this->em->persist($instance);
 
-        // --- Lien série <-> ressource
-        $pivot = (new ReservationResource())
-            ->setSeries($series)
-            ->setResource($resource);
+            // Trace d'audit de création dans la même unit-of-work.
+            $this->em->persist(new ReservationAuditLog(
+                series: $series,
+                action: ReservationAuditLog::ACTION_CREATE,
+                actor: $owner,
+                fromStatusId: null,
+                toStatusId: $initialStatusId,
+            ));
 
-        $this->em->persist($series);
-        $this->em->persist($instance);
-        $this->em->persist($pivot);
-        $this->em->flush();
+            $this->em->flush();
 
-        return $series;
+            return $series;
+        });
     }
 }

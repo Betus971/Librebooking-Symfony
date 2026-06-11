@@ -8,6 +8,8 @@ use App\Form\ResourceType;
 use App\Repository\ResourceRepository;
 use App\Repository\ScheduleRepository;
 use App\Security\Voter\ResourceVoter;
+use App\Service\Exception\InvalidMimeTypeException;
+use App\Service\FileUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -15,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/resource')]
 final class ResourceController extends AbstractController
@@ -50,51 +51,23 @@ final class ResourceController extends AbstractController
 
     #[Route('/new', name: 'app_resource_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN_RESSOURCE')]
-    public function new(Request $request, EntityManagerInterface $entityManager,SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, FileUploadService $fileUploader): Response
     {
         $resource = new Resource();
         $form = $this->createForm(ResourceType::class, $resource);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-        // --- 📸 DÉBUT LOGIQUE IMAGE ---
-        // On récupère le fichier depuis le champ 'photo' (mapped: false)
-        $imageFile = $form->get('photo')->getData();
-
-        if ($imageFile) {
-            // P0.6 — validation MIME réelle (finfo) AVANT déplacement : bloque
-            // les polyglots (ex. PHP déguisé en .png) malgré le durcissement htaccess.
-            $detectedMime = $imageFile->getMimeType();
-            if (!in_array($detectedMime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                $this->addFlash('warning', 'Image rejetée (type non autorisé : ' . $detectedMime . ').');
-            } else {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
+            // Image (champ 'photo', mapped: false) : upload centralisé + validation MIME finfo.
+            $imageFile = $form->get('photo')->getData();
+            if ($imageFile) {
                 try {
-                    $imageFile->move(
-                        $this->getParameter('upload_directory'),
-                        $newFilename
+                    $resource->setImageName(
+                        $fileUploader->upload($imageFile, $this->getParameter('upload_directory'), ['image/jpeg', 'image/png', 'image/webp'])
                     );
-                    // On enregistre le NOM du fichier dans la base de données
-                    $resource->setImageName($newFilename);
-
+                } catch (InvalidMimeTypeException $e) {
+                    $this->addFlash('warning', 'Image rejetée (type non autorisé : ' . $e->getMimeType() . ').');
                 } catch (FileException $e) {
                     $this->addFlash('warning', 'Ressource créée mais erreur lors de l\'upload de l\'image.');
-                }
-            }
-        }
-
-            // P3 — visibilité hybride : on tague la ressource avec le code unité
-            // du créateur s'il n'a pas déjà été fixé (et si le créateur en a un).
-            // Ainsi un gestionnaire qui crée une ressource peut la gérer
-            // immédiatement, ainsi que ses collègues de la même unité, sans
-            // aucune action manuelle. Un super-admin garde la main pour
-            // réaffecter ensuite si besoin.
-            if (null === $resource->getCodeUnite()) {
-                $creator = $this->getUser();
-                if ($creator instanceof \App\Entity\User && null !== $creator->getCodeunite()) {
-                    $resource->setCodeUnite($creator->getCodeunite());
                 }
             }
 
@@ -118,7 +91,7 @@ final class ResourceController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_resource_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Resource $resource, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function edit(Request $request, Resource $resource, EntityManagerInterface $entityManager, FileUploadService $fileUploader): Response
     {
         // P3 — visibilité hybride : super-admin OU même code unité OU groupe manuel.
         // Remplace l'ancien check qui ne regardait QUE le ResourceGroup.
@@ -128,33 +101,18 @@ final class ResourceController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // --- 📸 DÉBUT COPIE-COLLÉ DE LA LOGIQUE IMAGE ---
+            // Image (champ 'photo', mapped: false) : même upload centralisé qu'à la création.
             $imageFile = $form->get('photo')->getData();
-
             if ($imageFile) {
-                // P0.6 — même validation finfo qu'à la création.
-                $detectedMime = $imageFile->getMimeType();
-                if (!in_array($detectedMime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                    $this->addFlash('warning', 'Image rejetée (type non autorisé : ' . $detectedMime . ').');
-                } else {
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $slugger->slug($originalFilename);
-                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                    try {
-                        $imageFile->move(
-                            $this->getParameter('upload_directory'),
-                            $newFilename
-                        );
-
-                        // TODO (Optionnel) : Ici tu pourrais supprimer l'ancienne image pour nettoyer le serveur
-                        // if ($resource->getImageName()) { ... unlink ... }
-
-                        $resource->setImageName($newFilename);
-
-                    } catch (FileException $e) {
-                        $this->addFlash('warning', 'Modifications enregistrées, mais erreur lors du changement d\'image.');
-                    }
+                try {
+                    // TODO (Optionnel) : supprimer l'ancienne image pour nettoyer le serveur.
+                    $resource->setImageName(
+                        $fileUploader->upload($imageFile, $this->getParameter('upload_directory'), ['image/jpeg', 'image/png', 'image/webp'])
+                    );
+                } catch (InvalidMimeTypeException $e) {
+                    $this->addFlash('warning', 'Image rejetée (type non autorisé : ' . $e->getMimeType() . ').');
+                } catch (FileException $e) {
+                    $this->addFlash('warning', 'Modifications enregistrées, mais erreur lors du changement d\'image.');
                 }
             }
 

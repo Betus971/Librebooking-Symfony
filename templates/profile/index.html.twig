@@ -3,103 +3,107 @@
 {% block title %}Mon Compte - Librebooking{% endblock %}
 
 {% block body %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow">
+<div class="max-w-4xl mx-auto py-12 w-full flex-grow">
     
     <div class="md:flex md:items-center md:justify-between mb-10">
         <div class="min-w-0 flex-1">
-            <h2 class="text-3xl font-extrabold leading-tight text-slate-900 dark:text-white tracking-tight">
+            <h2 class="text-3xl font-extrabold leading-tight text-base-content tracking-tight">
                 {{ 'profile.title'|trans }}
             </h2>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ 'profile.description'|trans }}</p>
+            <p class="mt-2 text-sm text-base-content/70">{{ 'profile.description'|trans }}</p>
         </div>
     </div>
 
     {% for message in app.flashes('success') %}
-        <div class="mb-8 animate-fade-in-up">
-            <div class="rounded-xl bg-emerald-50 dark:bg-emerald-500/10 p-4 border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-start">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-emerald-500 dark:text-emerald-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Succès</h3>
-                    <p class="mt-1 text-sm text-emerald-700 dark:text-emerald-400">{{ message }}</p>
+        <div class="mb-8">
+            <div class="alert alert-success shadow-sm">
+                <svg class="h-6 w-6 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <div>
+                    <h3 class="font-bold">Succès</h3>
+                    <div class="text-sm">{{ message }}</div>
                 </div>
             </div>
         </div>
     {% endfor %}
 
-    <div class="bg-white dark:bg-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-700 sm:rounded-2xl overflow-hidden transition-all duration-300">
-        <div class="px-4 py-8 sm:p-10">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body px-4 py-8 sm:p-10">
             {{ form_start(form, {'attr': {'class': 'space-y-8'}}) }}
                 
-                <div class="grid grid-cols-1 gap-y-8 gap-x-8 sm:grid-cols-6">
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.fname, 'Prénom', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.fname, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
-                        {{ form_errors(form.fname, {'attr': {'class': 'text-red-500 text-sm mt-2 font-medium'}}) }}
+                <div class="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-6">
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.fname, 'Prénom', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.fname, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        {% if form.fname.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.fname) }}</span></label>
+                        {% endif %}
                     </div>
 
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.lname, 'Nom', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.lname, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
-                        {{ form_errors(form.lname, {'attr': {'class': 'text-red-500 text-sm mt-2 font-medium'}}) }}
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.lname, 'Nom', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.lname, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        {% if form.lname.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.lname) }}</span></label>
+                        {% endif %}
                     </div>
 
-                    <div class="sm:col-span-6 group">
-                        {{ form_label(form.email, 'Adresse email', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2'}}) }}
+                    <div class="sm:col-span-6 form-control w-full">
+                        {{ form_label(form.email, 'Adresse email', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                                <svg class="h-5 w-5 text-base-content/50" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                                 </svg>
                             </div>
-                            {{ form_widget(form.email, {'attr': {'class': 'block w-full pl-11 rounded-xl border-0 py-3 px-4 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/80 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 cursor-not-allowed sm:text-sm sm:leading-6 focus:outline-none'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'input input-bordered w-full pl-11 bg-base-200 cursor-not-allowed'}}) }}
                         </div>
-                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 flex items-center">
-                            <svg class="w-4 h-4 mr-1.5 inline text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Votre adresse e-mail est utilisée pour vous connecter et ne peut être modifiée ici.
-                        </p>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/60 flex items-center">
+                                <svg class="w-4 h-4 mr-1.5 inline text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Votre adresse e-mail est utilisée pour vous connecter et ne peut être modifiée ici.
+                            </span>
+                        </label>
                     </div>
 
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.phone, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.phone, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        {% if form.phone.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.phone) }}</span></label>
+                        {% endif %}
                     </div>
 
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.organization, 'Organisation / Entreprise', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.organization, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.organization, 'Organisation / Entreprise', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.organization, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        {% if form.organization.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.organization) }}</span></label>
+                        {% endif %}
                     </div>
 
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.position, 'Poste / Fonction', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.position, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.position, 'Poste / Fonction', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.position, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        {% if form.position.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.position) }}</span></label>
+                        {% endif %}
                     </div>
 
-                    <div class="sm:col-span-3 group">
-                        {{ form_label(form.timezone, 'Fuseau horaire', {'label_attr': {'class': 'block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-200 mb-2 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.timezone, {'attr': {'class': 'block w-full rounded-xl border-0 py-3 px-4 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all duration-200 hover:bg-white dark:hover:bg-slate-800'}}) }}
-                        </div>
+                    <div class="sm:col-span-3 form-control w-full">
+                        {{ form_label(form.timezone, 'Fuseau horaire', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.timezone, {'attr': {'class': 'select select-bordered w-full'}}) }}
+                        {% if form.timezone.vars.errors|length > 0 %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.timezone) }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
 
-                <div class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-x-6">
-                    <button type="submit" class="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-200 transform hover:-translate-y-0.5">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="mt-10 pt-6 border-t border-base-200 card-actions justify-end">
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         {{ 'profile.save'|trans }}
                     </button>
                 </div>

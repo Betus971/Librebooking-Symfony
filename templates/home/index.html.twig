@@ -6,120 +6,142 @@
 
 {# ── Annonces ────────────────────────────────────────────────────────────── #}
 {% if announcements is defined and announcements|length > 0 %}
-    <div class="mb-8 space-y-4">
+    <div class="mb-8 space-y-3">
         {% for ann in announcements %}
-            {% set alertClass = 'bg-blue-50 border-blue-500 text-blue-800' %}
-            {% set icon = '<svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
+            {% set alertClass = 'alert-info border-info/20 bg-info/5 text-info-content' %}
+            {% set icon = '<svg class="h-5 w-5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
             
             {% if ann.priority == 2 %}
-                {% set alertClass = 'bg-emerald-50 border-emerald-500 text-emerald-800' %}
-                {% set icon = '<svg class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
+                {% set alertClass = 'alert-success border-success/20 bg-success/5 text-success-content' %}
+                {% set icon = '<svg class="h-5 w-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
             {% elseif ann.priority == 3 %}
-                {% set alertClass = 'bg-amber-50 border-amber-500 text-amber-800' %}
-                {% set icon = '<svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>' %}
+                {% set alertClass = 'alert-warning border-warning/20 bg-warning/5 text-warning-content' %}
+                {% set icon = '<svg class="h-5 w-5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>' %}
             {% elseif ann.priority == 4 %}
-                {% set alertClass = 'bg-red-50 border-red-500 text-red-800' %}
-                {% set icon = '<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
+                {% set alertClass = 'alert-error border-error/20 bg-error/5 text-error-content' %}
+                {% set icon = '<svg class="h-5 w-5 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' %}
             {% endif %}
 
-            <div class="border-l-4 p-4 rounded-r-lg shadow-sm {{ alertClass }} transition-all">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        {{ icon|raw }}
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium whitespace-pre-wrap">{{ ann.message }}</p>
-                    </div>
-                </div>
+            <div role="alert" class="alert {{ alertClass }} border rounded-xl shadow-sm flex items-start gap-3 p-4">
+                <div class="shrink-0 mt-0.5">{{ icon|raw }}</div>
+                <div class="font-medium text-sm whitespace-pre-wrap flex-1">{{ ann.message }}</div>
             </div>
         {% endfor %}
     </div>
 {% endif %}
 
-{# ── Layout principal ─────────────────────────── #}
-<div class="flex flex-col md:flex-row gap-8">
-
-    {# ── Sidebar gauche : Prochaine réservation ──────────────────────── #}
-    {% if next_reservation is not null %}
-        <div class="w-full md:w-1/4">
-            <div class="sticky top-24 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 overflow-hidden relative">
-                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                
-                <div class="flex items-center gap-3 text-indigo-600 mb-4">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Prochaine réservation</h3>
-                </div>
-                
-                <h4 class="text-lg font-bold text-slate-900 mb-2 line-clamp-2" title="{{ next_reservation.title }}">{{ next_reservation.title }}</h4>
-                
-                {% set inst = next_reservation.instances|first %}
-                {% if inst %}
-                    <div class="flex items-start gap-2 text-sm text-slate-600 mb-4">
-                        <svg class="w-5 h-5 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <div>
-                            <span class="block font-medium text-slate-700">{{ inst.startDate|date('d/m/Y') }}</span>
-                            <span class="block">{{ inst.startDate|date('H:i') }} – {{ inst.endDate|date('H:i') }}</span>
-                        </div>
-                    </div>
-                {% endif %}
-                
-                <a href="{{ path('reservation_show', {uuid: next_reservation.uuid}) }}" class="mt-2 w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                    Détails
+{# ── Header / Dashboard Greeting ─────────────────────────────────────────── #}
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-base-content/60 font-outfit uppercase">Tableau de bord</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">Gérez vos réservations et planifiez vos ressources</p>
+        </div>
+        {% if app.user %}
+            <div class="flex items-center gap-2">
+                <a href="{{ path('app_calendar') }}" class="btn btn-primary btn-sm rounded-xl font-bold gap-2 px-4 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Nouvelle réservation
                 </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="divider opacity-10 my-4"></div>
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-4">
+        <div>
+            {% if app.user %}
+                <h2 class="text-2xl font-extrabold text-base-content font-outfit">Bonjour, {{ app.user.email|split('@')|first|capitalize }} 👋</h2>
+            {% else %}
+                <h2 class="text-2xl font-extrabold text-base-content font-outfit">Bienvenue sur Librebooking</h2>
+            {% endif %}
+            <p class="text-xs text-base-content/40 mt-1 font-medium">{{ "now"|date('d/m/Y') }}</p>
+        </div>
+    </div>
+</div>
+
+{# ── Main Layout Grid ────────────────────────────────────────────────────── #}
+<div class="flex flex-col lg:flex-row gap-8 items-stretch">
+
+    {# ── Left Sidebar: Next Reservation (Styled like CoachPro upcoming sessions) #}
+    {% if next_reservation is not null %}
+        <div class="w-full lg:w-1/4 shrink-0">
+            <div class="card bg-base-100 border border-base-300 rounded-2xl shadow-sm h-full flex flex-col">
+                <div class="card-body p-6 flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-success/15 text-success">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            </span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-success">Réservation à venir</span>
+                        </div>
+                        
+                        <h3 class="text-lg font-bold font-outfit text-base-content leading-snug line-clamp-2" title="{{ next_reservation.title }}">
+                            {{ next_reservation.title }}
+                        </h3>
+                        
+                        {% set inst = next_reservation.instances|first %}
+                        {% if inst %}
+                            <div class="mt-4 space-y-2 border-l-2 border-primary/30 pl-3">
+                                <p class="text-sm font-semibold text-base-content/85">{{ inst.startDate|date('d/m/Y') }}</p>
+                                <p class="text-xs font-medium text-base-content/60">
+                                    {{ inst.startDate|date('H:i') }} – {{ inst.endDate|date('H:i') }}
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-6">
+                        <a href="{{ path('reservation_show', {uuid: next_reservation.uuid}) }}" class="btn btn-primary btn-sm w-full rounded-xl font-bold shadow-sm hover:shadow-md transition-all">
+                            Voir les détails
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     {% endif %}
 
-    {# ── Contenu principal ────────────────────────────────────────────── #}
-    <div class="w-full {{ next_reservation is not null ? 'md:w-3/4' : '' }}">
-        
-        {# Hero #}
-        <div class="mb-10">
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
-                Services de réservation
-            </h1>
-            <p class="mt-4 text-xl text-slate-500 max-w-3xl">
-                Accédez à toutes vos ressources et espaces au même endroit. Choisissez la catégorie correspondante à votre besoin.
-            </p>
-        </div>
-
-        {# Grille des catégories #}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {# ── Right Content: Resource Categories Grid ─────────────────────────────── #}
+    <div class="flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for item in categories %}
                 {% set cat = item.category %}
                 
-                <a href="{{ path('app_resource_index', {'category': cat.id, 'view': 'cards'}) }}" class="group bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-200 p-6 flex flex-col h-full transition-all duration-200 transform hover:-translate-y-1">
-                    <div class="mb-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                            {{ cat.name }}
-                        </span>
+                <div class="card bg-base-100 border border-base-300 rounded-2xl shadow-sm flex flex-col justify-between hover:border-primary/30">
+                    <div class="card-body p-6 flex flex-col justify-between h-full gap-4">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                                    {{ item.count }} ressource{{ item.count > 1 ? 's' : '' }}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold font-outfit text-base-content mt-3 leading-snug">
+                                {{ cat.name }}
+                            </h3>
+                            
+                            {% if cat.description %}
+                                <p class="text-xs text-base-content/50 mt-2 line-clamp-3 leading-relaxed">
+                                    {{ cat.description }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-actions justify-end mt-2">
+                            <a href="{{ path('app_resource_index', {'category': cat.id, 'view': 'cards'}) }}" class="btn btn-primary btn-sm rounded-xl font-bold w-full sm:w-auto px-4 shadow-sm transition-all">
+                                Découvrir
+                            </a>
+                        </div>
                     </div>
-                    
-                    <h3 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
-                        {{ cat.name }}
-                    </h3>
-                    
-                    {% if cat.description %}
-                        <p class="text-sm text-slate-500 flex-grow line-clamp-3">
-                            {{ cat.description }}
-                        </p>
-                    {% endif %}
-                    
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-400">
-                            {{ item.count }} ressource{{ item.count > 1 ? 's' : '' }}
-                        </span>
-                        <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </div>
-                </a>
+                </div>
             {% else %}
                 <div class="col-span-full">
-                    <div class="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center">
-                        <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-slate-900">Aucun service disponible</h3>
-                        <p class="mt-1 text-sm text-slate-500">Veuillez contacter l'administrateur pour ajouter des ressources.</p>
+                    <div class="card bg-base-100 border border-base-300 rounded-2xl p-10 text-center">
+                        <div class="max-w-md mx-auto py-4">
+                            <h3 class="text-xl font-bold font-outfit text-base-content">Aucun service disponible</h3>
+                            <p class="text-sm text-base-content/50 mt-2">Veuillez contacter l'administrateur pour ajouter des ressources.</p>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

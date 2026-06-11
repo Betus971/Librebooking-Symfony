@@ -166,6 +166,28 @@ admin:
         singular: "Réservation"
         plural: "Historique des réservations"
 
+    reservation:
+        action:
+            approve: "Approuver"
+            reject: "Refuser"
+            cancel: "Annuler"
+        confirm:
+            approve_title: "Approuver cette réservation ?"
+            reject_title: "Refuser cette réservation ?"
+            cancel_title: "Annuler cette réservation ?"
+            approve_intro: "Le demandeur sera notifié de l'approbation par e-mail."
+            reject_intro: "Indiquez le motif du refus. Il sera communiqué au demandeur et conservé dans l'historique."
+            cancel_intro: "Le créneau sera libéré et le demandeur sera notifié de l'annulation."
+            reason_label: "Motif"
+            submit: "Confirmer"
+            back: "Retour"
+        flash:
+            approve_done: "La réservation a été approuvée."
+            reject_done: "La réservation a été refusée."
+            cancel_done: "La réservation a été annulée."
+            reason_required: "Un motif est obligatoire pour refuser une réservation."
+            invalid_token: "Jeton de sécurité invalide. Merci de réessayer."
+
 # ============================================================
 # Entités — libellés de champs
 # ============================================================

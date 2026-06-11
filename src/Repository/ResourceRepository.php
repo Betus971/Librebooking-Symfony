@@ -134,4 +134,28 @@ class ResourceRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Ressources pour la vue planning (API), triées par nom.
+     *
+     * @param int|null $typeId  >0 : filtre sur la catégorie ; -1 : sans catégorie ;
+     *                          null/0 : toutes les ressources.
+     *
+     * @return Resource[]
+     */
+    public function findForPlanning(?int $typeId): array
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->orderBy('r.name', 'ASC');
+
+        if ($typeId > 0) {
+            $qb->join('r.category', 'rc')
+                ->andWhere('rc.id = :tid')
+                ->setParameter('tid', $typeId);
+        } elseif ($typeId === -1) {
+            $qb->andWhere('r.category IS NULL');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 }

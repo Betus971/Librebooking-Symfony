@@ -9,7 +9,6 @@ parameters:
     # Restent dans public/ mais le dossier est durci via public/uploads/.htaccess
     # (exécution PHP coupée) + validation finfo à l'upload (P0.6).
     upload_directory: '%kernel.project_dir%/public/uploads/resources'
-    visitors_directory: '%kernel.project_dir%/var/uploads/visitors'
     # P0.6 — pièces jointes de réservation SORTIES du webroot : elles ne sont
     # servies que via AdminReservationController::downloadAttachment (BinaryFileResponse),
     # jamais en lien direct. Plus aucun risque d'exécution PHP via upload.
@@ -18,6 +17,9 @@ parameters:
     # Pagination : taille par défaut pour TOUTES les listes paginées (admin et user).
     # Injectable dans les controllers via #[Autowire(param: 'app.pagination.per_page')].
     app.pagination.per_page: 25
+
+    # Adresse expéditeur des e-mails de notification de réservation.
+    app.mail.from: 'no-reply@librebooking.local'
 
 
 

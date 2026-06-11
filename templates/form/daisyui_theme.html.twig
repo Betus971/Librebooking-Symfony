@@ -1,0 +1,117 @@
+{% use "form_div_layout.html.twig" %}
+
+{# Widgets #}
+
+{% block form_widget_simple -%}
+    {% set type = type|default('text') %}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' input input-bordered w-full')|trim}) %}
+    {% if type == 'file' %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' file-input file-input-bordered w-full')|trim|replace({'input input-bordered': ''})}) %}
+    {% endif %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' input-error')|trim}) %}
+    {% endif %}
+    {{- parent() -}}
+{%- endblock form_widget_simple %}
+
+{% block textarea_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' textarea textarea-bordered w-full')|trim}) %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' textarea-error')|trim}) %}
+    {% endif %}
+    {{- parent() -}}
+{%- endblock textarea_widget %}
+
+{% block choice_widget_collapsed -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' select select-bordered w-full')|trim}) %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' select-error')|trim}) %}
+    {% endif %}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed %}
+
+{% block checkbox_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' checkbox checkbox-primary')|trim}) %}
+    {{- parent() -}}
+{%- endblock checkbox_widget %}
+
+{% block radio_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' radio radio-primary')|trim}) %}
+    {{- parent() -}}
+{%- endblock radio_widget %}
+
+{# Labels #}
+
+{% block form_label -%}
+    {% set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' label')|trim}) %}
+    {%- if label is not same as(false) -%}
+        {%- if not compound -%}
+            {% set label_attr = label_attr|merge({'for': id}) %}
+        {%- endif -%}
+        {%- if required -%}
+            {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+        {%- endif -%}
+        <label{% with { attr: label_attr } %}{{ block('attributes') }}{% endwith %}>
+            <span class="label-text font-medium text-base-content">{{ translation_domain is same as(false) ? label : label|trans(label_translation_parameters, translation_domain) }}{% if required %} <span class="text-error">*</span>{% endif %}</span>
+        </label>
+    {%- endif -%}
+{%- endblock form_label %}
+
+{% block checkbox_label -%}
+    {{- block('form_label') -}}
+{%- endblock checkbox_label %}
+
+{% block radio_label -%}
+    {{- block('form_label') -}}
+{%- endblock radio_label %}
+
+{# Rows #}
+
+{% block form_row -%}
+    <div class="form-control w-full mb-4">
+        {{- form_label(form) -}}
+        {{- form_widget(form) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row %}
+
+{# Errors #}
+
+{% block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <label class="label pb-0">
+            {%- for error in errors -%}
+                <span class="label-text-alt text-error block mb-1">
+                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ error.message }}
+                </span>
+            {%- endfor -%}
+        </label>
+    {%- endif -%}
+{%- endblock form_errors %}
+
+{# Help #}
+
+{% block form_help -%}
+    {%- if help is not empty -%}
+        {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' label')|trim}) -%}
+        <label{% with { attr: help_attr } %}{{ block('attributes') }}{% endwith %}>
+            <span class="label-text-alt text-base-content/60">
+                {%- if translation_domain is same as(false) -%}
+                    {%- if help_html is same as(false) -%}
+                        {{- help -}}
+                    {%- else -%}
+                        {{- help|raw -}}
+                    {%- endif -%}
+                {%- else -%}
+                    {%- if help_html is same as(false) -%}
+                        {{- help|trans(help_translation_parameters, translation_domain) -}}
+                    {%- else -%}
+                        {{- help|trans(help_translation_parameters, translation_domain)|raw -}}
+                    {%- endif -%}
+                {%- endif -%}
+            </span>
+        </label>
+    {%- endif -%}
+{%- endblock form_help %}

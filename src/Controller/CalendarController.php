@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ResourceRepository;
+use App\Service\IcsGeneratorService;
 use App\Util\WeekHelper;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -105,87 +106,17 @@ final class CalendarController extends AbstractController
      * Displays Resources/Reservations
      */
     #[Route('/calendar/feed.ics', name: 'app_calendar_feed', methods: ['GET'])]
-    public function feed(
-        ResourceRepository $resourceRepository
-        // ReservationRepository $reservationRepository // <-- Injection du repo de réservations
-    ): Response
+    public function feed(IcsGeneratorService $icsGenerator): Response
     {
-        $icsContent = "BEGIN:VCALENDAR\r\n";
-        $icsContent .= "VERSION:2.0\r\n";
-        $icsContent .= "PRODID:-//Librebooking//FR\r\n";
-        $icsContent .= "CALSCALE:GREGORIAN\r\n";
-        $icsContent .= "METHOD:PUBLISH\r\n";
-
-        // ==========================================
-        // 1. GESTION DES RESSOURCES (Salles, etc.)
-        // ==========================================
-        // Si vous avez une entité 'Reservation' liée à une 'Resource'
-        /*
-        $reservations = $reservationRepository->findAll(); // Récupérez vos réservations
-
-        foreach ($reservations as $resa) {
-            // Adaptez les méthodes (getStart, getEnd, getResource...)
-            $resourceName = $resa->getResource() ? $resa->getResource()->getName() : 'Ressource';
-            $summary = "Réservé : " . $resourceName . " (" . $resa->getUser()->getNom() . ")";
-
-            $icsContent .= $this->createIcsEvent(
-                'reservation-' . $resa->getId(),
-                $resa->getDateDebut(), // Vos dates de début
-                $resa->getDateFin(),   // Vos dates de fin
-                $summary,
-                "Réservé par : " . $resa->getUser()->getEmail()
-            );
-        }
-        */
-
-        // ==========================================
-        // 3. (OPTIONNEL) DISPONIBILITÉ DES RESSOURCES
-        // ==========================================
-        // Si vous n'avez pas de réservations mais voulez afficher les ressources comme événements (ex: ouverture)
-        // Vous pouvez boucler sur $resourceRepository->findAll() ici.
-
-        $icsContent .= "END:VCALENDAR";
+        // Aucun événement pour l'instant (cf. TODO ci-dessous) : on expose un
+        // calendrier vide mais valide. Lorsque les réservations seront publiées
+        // dans le flux, construire ici le tableau d'événements et le passer à
+        // $icsGenerator->generate($events).
+        $icsContent = $icsGenerator->generate();
 
         return new Response($icsContent, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="planning_complet.ics"',
         ]);
-    }
-
-    /**
-     * Fonction utilitaire pour générer un bloc VEVENT proprement
-     */
-    private function createIcsEvent(string $uid, \DateTimeInterface $start, \DateTimeInterface $end, string $summary, string $description = ''): string
-    {
-        // Formatage des dates UTC pour ICS (YmdTHisZ est le standard le plus sûr)
-        $dtStart = $start->format('Ymd\THis');
-        $dtEnd   = $end->format('Ymd\THis');
-        $now     = date('Ymd\THis');
-
-        // Nettoyage des textes
-        $summary = $this->escapeIcs($summary);
-        $description = $this->escapeIcs($description);
-
-        return "BEGIN:VEVENT\r\n" .
-            "UID:{$uid}@monapp.local\r\n" .
-            "DTSTAMP:{$now}\r\n" .
-            "DTSTART:{$dtStart}\r\n" .
-            "DTEND:{$dtEnd}\r\n" .
-            "SUMMARY:{$summary}\r\n" .
-            "DESCRIPTION:{$description}\r\n" .
-            "END:VEVENT\r\n";
-    }
-
-    private function escapeIcs(string $string): string
-    {
-        // P1.7 — Robust RFC 5545 escaping against CRLF injection.
-        // Order is important: we treat backslash first, then
-        // CRLF/CR/LF -> "\n", then , and ;.
-        // The old version replaced \r with empty strings.
-        return str_replace(
-            ['\\',   "\r\n", "\r",  "\n",  ',',   ';'],
-            ['\\\\', '\\n',  '\\n', '\\n', '\\,', '\\;'],
-            $string
-        );
     }
 }

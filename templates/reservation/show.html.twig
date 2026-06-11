@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 {% block title %}Réservation - Librebooking{% endblock %}
 {% block body %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto py-8">
 
     {# --- FIL D'ARIANE / RETOUR --- #}
     <div class="mb-8">
-        <a href="{{ path('reservation_mine') }}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-700">
+        <a href="{{ path('reservation_mine') }}" class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content">
             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Retour à mes réservations
         </a>
@@ -19,32 +19,32 @@
         <div class="lg:col-span-2 space-y-8">
             
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                <h1 class="text-3xl font-extrabold text-base-content mb-4 tracking-tight">
                     {{ series.title|default('Réservation sans titre') }}
                 </h1>
 
                 {# --- BADGES STATUT ET TYPE --- #}
                 <div class="flex flex-wrap gap-3 mb-6">
                     {% if series.status %}
-                        {% set badgeClasses = 'bg-blue-100 text-blue-800 border-blue-200' %}
+                        {% set badgeClasses = 'badge-info' %}
                         
                         {% if series.status.id == 1 %}        {# En attente #}
-                            {% set badgeClasses = 'bg-amber-100 text-amber-800 border-amber-200' %}
+                            {% set badgeClasses = 'badge-warning' %}
                         {% elseif series.status.id == 2 %}    {# Approuvée #}
-                            {% set badgeClasses = 'bg-emerald-100 text-emerald-800 border-emerald-200' %}
+                            {% set badgeClasses = 'badge-success' %}
                         {% elseif series.status.id == 3 %}    {# Refusée #}
-                            {% set badgeClasses = 'bg-red-100 text-red-800 border-red-200' %}
+                            {% set badgeClasses = 'badge-error' %}
                         {% elseif series.status.id == 4 %}    {# Annulée #}
-                            {% set badgeClasses = 'bg-slate-100 text-slate-800 border-slate-200' %}
+                            {% set badgeClasses = 'badge-ghost' %}
                         {% endif %}
 
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border {{ badgeClasses }}">
+                        <span class="badge {{ badgeClasses }} badge-lg font-semibold">
                             {{ series.status.label }}
                         </span>
                     {% endif %}
 
                     {% if series.type %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                        <span class="badge badge-outline badge-lg font-medium">
                             {{ series.type.label }}
                         </span>
                     {% endif %}
@@ -52,7 +52,7 @@
 
                 {# --- DESCRIPTION --- #}
                 {% if series.description %}
-                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-md text-indigo-900">
+                    <div class="alert shadow-sm bg-base-200 border-l-4 border-l-primary rounded-none rounded-r-box">
                         <p class="whitespace-pre-wrap">{{ series.description }}</p>
                     </div>
                 {% endif %}
@@ -60,42 +60,44 @@
 
             {# --- LISTE DES SÉANCES --- #}
             <div>
-                <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center">
-                    <svg class="mr-2 h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <h2 class="text-xl font-bold text-base-content mb-4 flex items-center">
+                    <svg class="mr-2 h-6 w-6 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Calendrier des séances
                 </h2>
                 
-                <div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Date</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Horaire</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Référence</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white">
-                            {% for instance in series.instances %}
-                                <tr class="hover:bg-slate-50">
-                                    <td class="py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6 capitalize">
-                                        {{ instance.startDate|format_datetime(locale='fr', pattern='EEEE d MMMM y') }}
-                                    </td>
-                                    <td class="px-3 py-4 text-sm text-slate-500">
-                                        {{ instance.startDate|date('H:i') }} - {{ instance.endDate|date('H:i') }}
-                                    </td>
-                                    <td class="px-3 py-4 text-sm text-slate-500 font-mono">
-                                        {{ instance.referenceNumber|default('-') }}
-                                    </td>
+                <div class="card bg-base-100 shadow-xl border border-base-200">
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full">
+                            <thead>
+                                <tr class="bg-base-200 text-base-content">
+                                    <th>Date</th>
+                                    <th>Horaire</th>
+                                    <th>Référence</th>
                                 </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="3" class="px-3 py-8 text-center text-sm text-slate-500 bg-slate-50">
-                                        Aucune date enregistrée pour cette série.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for instance in series.instances %}
+                                    <tr class="hover">
+                                        <td class="font-bold capitalize">
+                                            {{ instance.startDate|format_datetime(locale='fr', pattern='EEEE d MMMM y') }}
+                                        </td>
+                                        <td class="text-base-content/70">
+                                            {{ instance.startDate|date('H:i') }} - {{ instance.endDate|date('H:i') }}
+                                        </td>
+                                        <td class="text-base-content/60 font-mono text-sm">
+                                            {{ instance.referenceNumber|default('-') }}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-base-content/50 py-8">
+                                            Aucune date enregistrée pour cette série.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,84 +106,86 @@
         {# COLONNE DROITE : Ressources, Contact, Actions #}
         {# ========================================== #}
         <div class="mt-8 lg:mt-0">
-            <div class="bg-white shadow-lg shadow-slate-200/50 rounded-2xl ring-1 ring-slate-200 p-6 sm:p-8 sticky top-8">
+            <div class="card bg-base-100 shadow-xl border border-base-200 sticky top-8">
+                <div class="card-body p-6 sm:p-8">
 
-                {# --- RESSOURCES --- #}
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                        <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        Ressources réservées
-                    </h3>
-                    
-                    {% if series.reservationResources is not empty %}
-                        <div class="flex flex-wrap gap-2">
-                            {% for link in series.reservationResources %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                                    {{ link.resource.name }}
-                                    {% if link.resource.category %}
-                                        <span class="ml-1 text-slate-500 font-normal">({{ link.resource.category.name }})</span>
-                                    {% endif %}
-                                </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-slate-500 italic">Aucune ressource associée.</p>
-                    {% endif %}
-                </div>
-
-                <div class="my-6 border-t border-slate-100"></div>
-
-                {# --- INFORMATIONS & DEMANDEUR --- #}
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                        <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Informations
-                    </h3>
-
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-sm font-medium text-slate-500">Créée le</p>
-                            <p class="mt-1 text-sm text-slate-900 font-medium">{{ series.dateCreated|date('d/m/Y à H:i') }}</p>
-                        </div>
-
-                        {% if series.owner %}
-                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                <p class="text-sm font-medium text-slate-500 mb-1">Demandeur</p>
-                                <p class="text-sm text-slate-900 font-semibold">{{ series.owner.fname|capitalize }} {{ series.owner.lname|upper }}</p>
-                                <a href="mailto:{{ series.owner.email }}" class="text-sm text-indigo-600 hover:text-indigo-500 break-all">{{ series.owner.email }}</a>
+                    {# --- RESSOURCES --- #}
+                    <div>
+                        <h3 class="card-title text-lg mb-4 flex items-center text-primary">
+                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            Ressources réservées
+                        </h3>
+                        
+                        {% if series.reservationResources is not empty %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for link in series.reservationResources %}
+                                    <span class="badge badge-outline badge-lg gap-1">
+                                        {{ link.resource.name }}
+                                        {% if link.resource.category %}
+                                            <span class="opacity-50 text-xs">({{ link.resource.category.name }})</span>
+                                        {% endif %}
+                                    </span>
+                                {% endfor %}
                             </div>
+                        {% else %}
+                            <p class="text-sm text-base-content/50 italic">Aucune ressource associée.</p>
                         {% endif %}
                     </div>
-                </div>
 
-                <div class="my-6 border-t border-slate-100"></div>
+                    <div class="divider my-4"></div>
 
-                {# --- ACTIONS --- #}
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                        <svg class="mr-2 h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                        Actions
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        <button disabled class="w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-400 bg-slate-50 cursor-not-allowed">
-                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Modifier la demande
-                        </button>
+                    {# --- INFORMATIONS & DEMANDEUR --- #}
+                    <div>
+                        <h3 class="card-title text-lg mb-4 flex items-center text-primary">
+                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Informations
+                        </h3>
 
-                        {# On n'affiche le bouton annuler que si ce n'est pas DÉJÀ refusé (3) ou annulé (4) #}
-                        {% if series.status and series.status.id not in [3, 4] %}
-                            <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler définitivement cette réservation ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ series.id) }}">
-                                <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                                    <svg class="mr-2 h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    Annuler la réservation
-                                </button>
-                            </form>
-                        {% endif %}
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm font-medium text-base-content/60">Créée le</p>
+                                <p class="mt-1 text-sm font-bold">{{ series.dateCreated|date('d/m/Y à H:i') }}</p>
+                            </div>
+
+                            {% if series.owner %}
+                                <div class="bg-base-200 rounded-box p-4">
+                                    <p class="text-sm font-medium text-base-content/60 mb-1">Demandeur</p>
+                                    <p class="text-sm font-bold">{{ series.owner.fname|capitalize }} {{ series.owner.lname|upper }}</p>
+                                    <a href="mailto:{{ series.owner.email }}" class="text-sm link link-primary break-all">{{ series.owner.email }}</a>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
 
+                    <div class="divider my-4"></div>
+
+                    {# --- ACTIONS --- #}
+                    <div>
+                        <h3 class="card-title text-lg mb-4 flex items-center text-primary">
+                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            Actions
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <button disabled class="btn btn-disabled w-full">
+                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                Modifier la demande
+                            </button>
+
+                            {# On n'affiche le bouton annuler que si ce n'est pas DÉJÀ refusé (3) ou annulé (4) #}
+                            {% if series.status and series.status.id not in [3, 4] %}
+                                <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler définitivement cette réservation ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ series.id) }}">
+                                    <button type="submit" class="btn btn-outline btn-error w-full">
+                                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Annuler la réservation
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>

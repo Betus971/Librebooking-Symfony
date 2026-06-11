@@ -1,24 +1,50 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Hello ReservationController!{% endblock %}
-
+{% block title %}Réservations - Librebooking{% endblock %}
 {% block body %}
-    {% extends 'base.html.twig' %}
-    {% block title %}Réservations{% endblock %}
-    {% block body %}
-        <h1>Réservations</h1>
-        <p><a class="fr-btn" href="{{ path('reservation_new') }}">Nouvelle réservation</a></p>
+<div class="max-w-7xl mx-auto py-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-base-content">
+                Réservations
+            </h1>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ path('reservation_new') }}" class="btn btn-primary">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Nouvelle réservation
+            </a>
+        </div>
+    </div>
 
-        <ul>
-            {% for s in series %}
-                <li>
-                    <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}">{{ s.title }}</a>
-                    — créée le {{ s.dateCreated|date('Y-m-d H:i') }}
-                </li>
-            {% else %}
-                <li>Aucune réservation.</li>
-            {% endfor %}
-        </ul>
-    {% endblock %}
-
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-base-200 text-base-content">
+                        <th>Titre</th>
+                        <th>Date de création</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in series %}
+                        <tr class="hover">
+                            <td>
+                                <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="font-bold text-primary hover:text-primary-focus">
+                                    {{ s.title }}
+                                </a>
+                            </td>
+                            <td class="text-base-content/70">
+                                {{ s.dateCreated|date('d/m/Y H:i') }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center text-base-content/50 py-4">Aucune réservation.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

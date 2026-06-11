@@ -2,40 +2,24 @@
 namespace App\Service;
 
 use App\Entity\Resource;
-use App\Entity\ReservationStatus;
-use App\Entity\TimeBlock;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ReservationInstanceRepository;
+use App\Repository\TimeBlockRepository;
 
 class AvailabilityChecker
 {
-    public function __construct(private EntityManagerInterface $entityManager) {}
+    public function __construct(
+        private ReservationInstanceRepository $instances,
+        private TimeBlockRepository $timeBlocks,
+    ) {}
 
     /**
      * Retourne true si aucun chevauchement d’instances pour la ressource et l’intervalle [start,end)
      */
-
-
     public function isFree(Resource $resource, \DateTimeInterface $start, \DateTimeInterface $end): bool
     {
         // 1) Conflits existants : on considère comme busy les résa "actives"
         //    (PENDING + APPROVED). REJECTED/CANCELLED ne bloquent rien.
-        $qb = $this->entityManager->createQueryBuilder();
-        $conflictCount = (int) $qb->select('COUNT(i.id)')
-            ->from(\App\Entity\ReservationInstance::class, 'i')
-            ->join(\App\Entity\ReservationResource::class, 'rr', 'WITH', 'rr.series = i.series')
-            ->join('i.series', 's')
-            ->where('rr.resource = :res')
-            ->andWhere('i.startDate < :end')
-            ->andWhere('i.endDate > :start')
-            ->andWhere('IDENTITY(s.status) IN (:activeStatuses)')
-            ->setParameter('res', $resource)
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->setParameter('activeStatuses', ReservationStatus::ACTIVE_STATUSES)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        if ($conflictCount > 0) {
+        if ($this->instances->hasOverlapForResource($resource, $start, $end)) {
             return false;
         }
 
@@ -58,15 +42,7 @@ class AvailabilityChecker
         if (!$layout) return false;
 
         // 3) Précharger les créneaux ouverts
-        $rows = $this->entityManager->createQueryBuilder()
-            ->select('tb.dayOfWeek AS dow, tb.startTime AS s, tb.endTime AS e')
-            ->from(\App\Entity\TimeBlock::class, 'tb')
-            ->where('tb.layout = :layout')
-            ->andWhere('tb.availabilityCode = :open')
-            ->setParameter('open', TimeBlock::OPEN)
-            ->setParameter('layout', $layout)
-            ->getQuery()
-            ->getArrayResult();
+        $rows = $this->timeBlocks->findOpenBlocksByLayout($layout);
 
         // 4) Indexer par jour
         $openByDay = [];

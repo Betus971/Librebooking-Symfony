@@ -39,7 +39,7 @@ The database schema of `Librebooking` **was not designed from scratch**: it is b
 
 Several constraints govern all subsequent choices:
 
-**SSO Authentication.** Authentication is handled via **Google OAuth2 SSO**. The application does not manage local sign-ups or passwords.
+**Authentication.** The application supports two complementary mechanisms: a **local account system** (email / password, hashed via Symfony's password hasher and authenticated through `form_login`) and **Google OAuth2 SSO** (`App\Security\GoogleAuthenticator`, via KnpUOAuth2ClientBundle). An organization can rely on either or both. SSO removes the need to manage passwords; the local system keeps the app usable without an external identity provider.
 
 **Tailwind CSS.** The interface uses **Tailwind CSS v4** to ensure a modern, responsive, and easily maintainable design, fully supporting Dark Mode.
 

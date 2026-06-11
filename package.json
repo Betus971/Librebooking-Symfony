@@ -1,0 +1,30 @@
+{
+  "name": "librebooking-symfony",
+  "version": "1.0.0",
+  "description": "Librebooking is an open-source web application designed to handle resource reservations (meeting rooms, vehicles, IT equipment, etc.) powered by Symfony 7.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Betus971/Librebooking-Symfony.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Betus971/Librebooking-Symfony/issues"
+  },
+  "homepage": "https://github.com/Betus971/Librebooking-Symfony#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "daisyui": "^5.5.1-beta.2",
+    "tailwindcss": "^4.3.0"
+  }
+}

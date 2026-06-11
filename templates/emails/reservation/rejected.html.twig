@@ -1,0 +1,17 @@
+{% extends 'emails/reservation/_layout.html.twig' %}
+
+{% block content %}
+    <h1 style="font-size:20px;margin:0 0 12px;color:#b91c1c;">Réservation refusée</h1>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Bonjour {{ series.owner.fname|default('') }},
+    </p>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Votre demande de réservation n'a pas pu être acceptée.
+    </p>
+    {% if reason is defined and reason %}
+        <p style="margin:0 0 8px;line-height:1.5;padding:12px;background:#fef2f2;border-left:3px solid #b91c1c;border-radius:4px;">
+            <strong>Motif :</strong> {{ reason }}
+        </p>
+    {% endif %}
+    {{ include('emails/reservation/_summary.html.twig') }}
+{% endblock %}

@@ -1,57 +1,59 @@
 
-
-
 {# templates/components/_duration_field.html.twig #}
 {% macro duration_field(form_field, label, help) %}
     <fieldset
-        class="fr-fieldset"
+        class="form-control w-full border border-base-200 rounded-box p-4"
         id="{{ form_field.vars.id }}-fieldset"
         role="group"
         aria-labelledby="{{ form_field.vars.id }}-fieldset-legend {{ form_field.vars.id }}-fieldset-messages"
     >
-        <legend class="fr-fieldset__legend" id="{{ form_field.vars.id }}-fieldset-legend">
+        <legend class="font-bold text-base-content mb-2" id="{{ form_field.vars.id }}-fieldset-legend">
             {{ label }}
             {% if help %}
-                <span class="fr-hint-text">{{ help }}</span>
+                <div class="text-sm text-base-content/60 font-normal">{{ help }}</div>
             {% endif %}
         </legend>
 
-        {# Champ "valeur" (ex: 30) #}
-        <div class="fr-fieldset__element fr-fieldset__element--inline">
-            <div class="fr-input-group">
+        <div class="flex flex-col sm:flex-row gap-4">
+            {# Champ "valeur" (ex: 30) #}
+            <div class="form-control flex-1">
                 {{ form_label(form_field.value, 'Valeur', {
-                    'label_attr': {'class': 'fr-label'}
+                    'label_attr': {'class': 'label font-medium text-base-content'}
                 }) }}
-                <span class="fr-hint-text">Exemple : 30</span>
+                <label class="label pt-0"><span class="label-text-alt text-base-content/60">Exemple : 30</span></label>
                 {{ form_widget(form_field.value, {
                     'attr': {
-                        'class': 'fr-input',
+                        'class': 'input input-bordered w-full',
                         'min': '0',
                         'step': '1',
                         'placeholder': 'Ex: 30'
                     }
                 }) }}
-                {{ form_errors(form_field.value) }}
+                {% if form_field.value.vars.errors|length > 0 %}
+                    <label class="label"><span class="label-text-alt text-error">{{ form_errors(form_field.value) }}</span></label>
+                {% endif %}
             </div>
-        </div>
 
-        {# Champ "unité" (ex: minutes/heures) #}
-        <div class="fr-fieldset__element fr-fieldset__element--inline fr-fieldset__element--inline-grow">
-            <div class="fr-input-group">
+            {# Champ "unité" (ex: minutes/heures) #}
+            <div class="form-control flex-1">
                 {{ form_label(form_field.unit, 'Unité', {
-                    'label_attr': {'class': 'fr-label'}
+                    'label_attr': {'class': 'label font-medium text-base-content'}
                 }) }}
-                <span class="fr-hint-text">Unité de temps</span>
+                <label class="label pt-0"><span class="label-text-alt text-base-content/60">Unité de temps</span></label>
                 {{ form_widget(form_field.unit, {
-                    'attr': {'class': 'fr-select'}
+                    'attr': {'class': 'select select-bordered w-full'}
                 }) }}
-                {{ form_errors(form_field.unit) }}
+                {% if form_field.unit.vars.errors|length > 0 %}
+                    <label class="label"><span class="label-text-alt text-error">{{ form_errors(form_field.unit) }}</span></label>
+                {% endif %}
             </div>
         </div>
 
         {# Messages d'erreur #}
-        <div class="fr-messages-group" id="{{ form_field.vars.id }}-fieldset-messages" aria-live="assertive">
-            {{ form_errors(form_field) }}
+        <div id="{{ form_field.vars.id }}-fieldset-messages" aria-live="assertive">
+            {% if form_field.vars.errors|length > 0 %}
+                <div class="text-error text-sm mt-2">{{ form_errors(form_field) }}</div>
+            {% endif %}
         </div>
     </fieldset>
 {% endmacro %}
