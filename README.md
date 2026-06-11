@@ -16,7 +16,7 @@ Librebooking is an open-source web application designed to handle resource reser
 ## Prerequisites
 
 - PHP 8.4+
-- PostgreSQL
+- Any Doctrine-supported database (SQLite, MySQL, MariaDB, PostgreSQL, etc.)
 - Composer
 - Node.js & npm (for Tailwind CSS)
 
@@ -41,15 +41,35 @@ Librebooking is an open-source web application designed to handle resource reser
    ```
    ```env
    APP_SECRET=your_generated_secret
-   DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"
+
+   # --- DATABASE CONFIGURATION EXAMPLES ---
+   # Example for SQLite (zero-config, perfect for quick local testing)
+   DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
+
+   # Example for PostgreSQL
+   # DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"
+
+   # Example for MySQL / MariaDB
+   # DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=8.0.32&charset=utf8mb4"
+
    OAUTH_GOOGLE_ID=your_google_client_id
    OAUTH_GOOGLE_SECRET=your_google_client_secret
    ```
 
 4. **Database Setup & Fixtures**
+   Librebooking uses **Doctrine ORM**, making it database-agnostic. 
+   
+   If you are running the default **PostgreSQL** setup, run:
    ```bash
    php bin/console doctrine:database:create
    php bin/console doctrine:migrations:migrate
+   php bin/console doctrine:fixtures:load --append
+   ```
+
+   If you are switching to another database engine (like **SQLite** or **MySQL**), the existing PostgreSQL migrations might fail. In this case, initialize the schema directly instead:
+   ```bash
+   php bin/console doctrine:database:create
+   php bin/console doctrine:schema:create
    php bin/console doctrine:fixtures:load --append
    ```
 
