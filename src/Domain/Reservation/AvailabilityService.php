@@ -97,6 +97,54 @@ class AvailabilityService
         return $windows;
     }
 
+    /**
+     * Renvoie TOUTES les fenêtres ouvertes du jour, en indiquant pour chacune
+     * si elle est libre (`available = true`) ou déjà prise/non réservable.
+     * Permet d'afficher les créneaux occupés en grisé.
+     */
+    public function allWindowsForDay(Resource $r, \DateTimeInterface $day, array $busyIndex, ?\DateTimeInterface $now = null): array
+    {
+        $layout = $r->getSchedule()->getLayout();
+        $currentDow = (int) $day->format('w');
+
+        $openBlocks = array_filter(
+            $layout->getTimeBlocks()->toArray(),
+            fn($b) => $b->isOpen()
+                && ($b->getDayOfWeek() === null || $b->getDayOfWeek() === $currentDow)
+        );
+
+        $open = [];
+        foreach ($openBlocks as $b) {
+            $s = (clone $day)->setTime(...$this->hms($b->getStartTime()));
+            $e = (clone $day)->setTime(...$this->hms($b->getEndTime()));
+            $open[] = [$s, $e];
+        }
+
+        $increment = max(15, (int) $r->getMinIncrement() ?: 30);
+        $minDur = max($increment, (int) $r->getMinDuration() ?: $increment);
+
+        // Réutilise la logique stricte pour savoir ce qui est réellement libre.
+        $freeWindows = $this->freeWindowsForDay($r, $day, $busyIndex, $now);
+        $freeMap = [];
+        foreach ($freeWindows as $fw) {
+            $freeMap[$fw->start->format('H:i') . '-' . $fw->end->format('H:i')] = true;
+        }
+
+        $windows = [];
+        foreach ($open as [$s, $e]) {
+            for ($t = clone $s; $t < $e; $t = (clone $t)->modify("+{$increment} minutes")) {
+                $end = (clone $t)->modify("+{$minDur} minutes");
+                if ($end > $e) {
+                    continue;
+                }
+                $key = $t->format('H:i') . '-' . $end->format('H:i');
+                $windows[] = (object) ['start' => clone $t, 'end' => clone $end, 'available' => isset($freeMap[$key])];
+            }
+        }
+
+        return $windows;
+    }
+
     private function subtractMany(array $opens, array $busys): array
     {
         foreach ($busys as [$bs,$be]) {

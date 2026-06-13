@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prestations — Prendre rendez-vous{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-base-content">Prestations</h1>
+        <p class="text-base-content/60 mt-1">Prenez rendez-vous avec un professionnel (coiffeur, coach, formateur…) ou gérez vos prestations.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="{{ path('app_presta_client_prestataire_index') }}" class="card bg-base-100 border border-base-300 shadow-sm hover:border-primary/40 transition-all">
+            <div class="card-body">
+                <h2 class="card-title text-primary">Prendre rendez-vous</h2>
+                <p class="text-sm text-base-content/70">Parcourez l'annuaire des professionnels et réservez un créneau (rendez-vous individuel ou séance de groupe).</p>
+                <div class="card-actions justify-end"><span class="badge badge-info">Utilisateur</span></div>
+            </div>
+        </a>
+
+        <a href="{{ path('app_presta_provider_profile_edit') }}" class="card bg-base-200 border border-base-300 shadow-sm hover:border-primary/40 transition-all">
+            <div class="card-body">
+                <h2 class="card-title">Espace prestataire</h2>
+                <p class="text-sm text-base-content/70">Gérez votre profil, votre catalogue de services, vos plages horaires et vos séances.</p>
+                <div class="card-actions justify-end"><span class="badge badge-secondary">Professionnel</span></div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

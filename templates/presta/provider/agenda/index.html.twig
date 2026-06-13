@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Agenda - Réservations{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .week-view { display:grid; grid-template-columns:100px repeat(7,1fr); border:1px solid var(--fallback-b3,#e0e0e0); }
+    .week-view .time-header { grid-column:1; padding:8px; text-align:right; background:var(--fallback-b2,#f5f5f5); border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; font-weight:500; font-size:.85rem; }
+    .week-view .day-header { text-align:center; padding:12px 8px; background:var(--fallback-b2,#f5f5f5); border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; font-weight:600; }
+    .week-view .day-header .day-name { font-size:.9rem; display:block; }
+    .week-view .day-header .day-date { font-size:.75rem; opacity:.7; display:block; margin-top:2px; }
+    .week-view .slot { min-height:40px; padding:4px; border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; position:relative; font-size:.75rem; }
+    .session-badge { background:#4CAF50; color:#fff; padding:3px 8px; border-radius:12px; font-size:.75rem; margin:2px; display:inline-block; cursor:pointer; line-height:1; font-weight:500; }
+    .session-badge.individual { background:#2196F3; }
+    .session-badge.full { background:#F44336; }
+    .session-badge:hover { opacity:.85; }
+    @media (max-width:768px){ .week-view{ grid-template-columns:60px repeat(7,1fr);} .week-view .slot{ min-height:36px; font-size:.7rem;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li>Mon agenda</li>
+        </ul>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'agenda' }) }}</aside>
+        <div class="md:col-span-3">
+            <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
+                <div>
+                    <h1 class="text-2xl font-bold">Mon agenda</h1>
+                    <p class="text-sm text-base-content/60">Consultez vos réservations et séances.</p>
+                </div>
+                <div class="join">
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'list'}) }}" class="btn btn-sm join-item {{ view != 'week' ? 'btn-primary' : 'btn-ghost' }}">Liste</a>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': currentWeekStart|date('Y-m-d')}) }}" class="btn btn-sm join-item {{ view == 'week' ? 'btn-primary' : 'btn-ghost' }}">Semaine</a>
+                </div>
+            </div>
+
+            {% if view == 'week' %}
+            <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="Semaine précédente">‹</a>
+                    <h3 class="font-semibold text-center">Semaine du {{ currentWeekStart|date('d/m/Y') }} au {{ (currentWeekStart|date_modify('+6 days'))|date('d/m/Y') }}</h3>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="Semaine suivante">›</a>
+                </div>
+                <div class="mb-3 text-sm flex gap-3 flex-wrap">
+                    <span><span class="badge badge-info badge-sm"></span> RDV individuel</span>
+                    <span><span class="badge badge-success badge-sm"></span> Séance groupe</span>
+                    <span><span class="badge badge-error badge-sm"></span> Complet</span>
+                </div>
+
+                <div class="week-view">
+                    <div class="time-header"></div>
+                    {% for day in daysOfWeek %}
+                        <div class="day-header"><span class="day-name">{{ day|date('D') }}</span><span class="day-date">{{ day|date('d/m') }}</span></div>
+                    {% endfor %}
+                </div>
+                <div class="week-view">
+                    {% for hour in 8..19 %}{% for minute in [0, 30] %}
+                        {% set timeStr = hour ~ ':' ~ (minute == 0 ? '00' : '30') %}
+                        <div class="time-header">{{ timeStr }}</div>
+                        {% for day in daysOfWeek %}
+                            {% set dayKey = day|date('Y-m-d') %}
+                            {% set hasSession = sessionsByDayAndTime[dayKey][timeStr]|default(false) %}
+                            <div class="slot" data-day="{{ dayKey }}" data-time="{{ timeStr }}">
+                                {% if hasSession %}{% for session in sessionsByDayAndTime[dayKey][timeStr] %}
+                                    {% set badgeClass = session.service.type == 'INDIVIDUEL' ? 'individual' : 'group' %}
+                                    {% if session.nbInscrits >= session.service.capaciteMax %}{% set badgeClass = badgeClass ~ ' full' %}{% endif %}
+                                    <div class="session-badge {{ badgeClass }}" data-session-id="{{ session.id }}" title="{{ session.service.libelle }} - {{ session.dateDebut|date('d/m H:i') }} - {{ session.nbInscrits }}/{{ session.service.capaciteMax }}">
+                                        {{ session.dateDebut|date('H:i') }} - {{ session.service.type == 'INDIVIDUEL' ? 'Indiv.' : 'Groupe' }}
+                                    </div>
+                                {% endfor %}{% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}{% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card bg-base-100 border border-base-300 shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead><tr><th>Date &amp; heure</th><th>Prestation</th><th>Type</th><th>Clients inscrits</th></tr></thead>
+                        <tbody>
+                        {% for session in sessions %}
+                            <tr>
+                                <td><span class="font-semibold">{{ session.dateDebut|date('d/m/Y') }}</span><br>{{ session.dateDebut|date('H:i') }} - {{ session.dateFin|date('H:i') }}</td>
+                                <td>{{ session.service.libelle }}</td>
+                                <td>
+                                    {% if session.service.type == 'INDIVIDUEL' %}
+                                        <span class="badge badge-info">RDV individuel</span>
+                                    {% else %}
+                                        <span class="badge badge-success">Séance groupe ({{ session.nbInscrits }}/{{ session.service.capaciteMax }})</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <ul class="list-disc pl-4">
+                                    {% for inscription in session.inscriptions %}
+                                        <li>{{ inscription.client.firstname|default('Client') }} {{ inscription.client.lastname|default('') }} <span class="text-xs opacity-60">({{ inscription.statut }})</span></li>
+                                    {% else %}
+                                        <li class="text-xs opacity-60">Aucun inscrit</li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4" class="text-center py-8 text-base-content/60">Aucun rendez-vous ou inscription à venir.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

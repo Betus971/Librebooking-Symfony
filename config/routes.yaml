@@ -3,3 +3,9 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+controllers_presta:
+    resource:
+        path: ../src/Presta/Controller/
+        namespace: App\Presta\Controller
+    type: attribute

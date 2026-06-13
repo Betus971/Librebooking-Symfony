@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_provider_service_index') }}">Mes prestations</a></li>
+            <li>{{ is_edit ? 'Modifier' : 'Ajouter' }}</li>
+        </ul>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}</h1>
+
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.libelle, {attr:{class:'input input-bordered w-full'}}) }}
+            {{ form_row(form.description, {attr:{class:'textarea textarea-bordered w-full', rows:3}}) }}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>{{ form_row(form.type, {attr:{class:'select select-bordered w-full'}}) }}</div>
+                <div>{{ form_row(form.dureeMinutes, {attr:{class:'input input-bordered w-full'}}) }}</div>
+                <div>{{ form_row(form.capaciteMax, {attr:{class:'input input-bordered w-full'}}) }}</div>
+            </div>
+            <div class="my-4">{{ form_row(form.isActive, {attr:{class:'toggle toggle-primary'}}) }}</div>
+            <div class="flex gap-3 mt-2">
+                <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer la prestation' }}</button>
+                <a href="{{ path('app_presta_provider_service_index') }}" class="btn btn-ghost">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

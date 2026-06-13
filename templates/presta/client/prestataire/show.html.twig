@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil de {{ prestataire.prenom }} {{ prestataire.nom }}{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_client_prestataire_index') }}">Annuaire</a></li>
+            <li>{{ prestataire.prenom }} {{ prestataire.nom }}</li>
+        </ul>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-start">
+        <div class="md:col-span-1">
+            {% if prestataire.photo %}
+                <img src="{{ prestataire.photo }}" alt="{{ prestataire.prenom }}" class="w-full rounded-xl">
+            {% else %}
+                <div class="aspect-square rounded-xl bg-base-300 flex items-center justify-center text-base-content/40">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+            {% endif %}
+        </div>
+        <div class="md:col-span-3">
+            <h1 class="text-2xl font-bold">{{ prestataire.prenom }} {{ prestataire.nom }}</h1>
+            <p class="text-base-content/70 mt-2">{{ prestataire.description }}</p>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-bold mb-4">Prestations proposées</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for service in services %}
+            <div class="card bg-base-200 border border-base-300 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">{{ service.libelle }}</h3>
+                    <p class="text-sm text-base-content/70">{{ service.description|default('Aucune description.') }}</p>
+                    <div class="flex gap-2 flex-wrap mt-2">
+                        <span class="badge badge-outline">{{ service.dureeMinutes }} min</span>
+                        {% if service.type == 'INDIVIDUEL' %}
+                            <span class="badge badge-success">Rendez-vous individuel</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Séance de groupe · max {{ service.capaciteMax }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-actions justify-end mt-3">
+                        {% if service.type == 'GROUPE' %}
+                            <a href="{{ path('app_presta_client_booking_group', {'id': service.id}) }}" class="btn btn-primary btn-sm">Voir les prochaines séances</a>
+                        {% else %}
+                            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id}) }}" class="btn btn-primary btn-sm">Prendre rendez-vous</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="md:col-span-2"><p class="text-base-content/60">Ce professionnel n'a pas encore configuré ses prestations.</p></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

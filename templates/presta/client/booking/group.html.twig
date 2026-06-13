@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Séances : {{ service.libelle }}{% endblock %}
+
+{% set moisFr = {'January':'janvier','February':'février','March':'mars','April':'avril','May':'mai','June':'juin','July':'juillet','August':'août','September':'septembre','October':'octobre','November':'novembre','December':'décembre'} %}
+{% set joursCourt = {'Mon':'Lun','Tue':'Mar','Wed':'Mer','Thu':'Jeu','Fri':'Ven','Sat':'Sam','Sun':'Dim'} %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .gcal-week { display:grid; grid-template-columns:repeat(7,1fr); gap:.5rem; margin-top:1rem; }
+    .gcal-day { border:1px solid var(--fallback-b3,#ddd); border-radius:8px; padding:.5rem; min-height:120px; }
+    .gcal-day__head { text-align:center; font-weight:700; padding:.4rem; margin-bottom:.5rem; border-radius:4px; background:var(--fallback-b2,#f6f6f6); }
+    .gcal-day__head small { display:block; font-weight:400; opacity:.6; }
+    .gsession { border:1px solid #eee; border-left-width:4px; border-radius:6px; padding:.5rem; margin-bottom:.5rem; font-size:.8125rem; }
+    .gsession--free { border-left-color:#18753c; background:rgba(24,117,60,.10); }
+    .gsession--full { border-left-color:#ce0500; background:rgba(206,5,0,.10); }
+    .gsession__time { font-weight:600; }
+    .gcal-empty { text-align:center; opacity:.5; font-size:.8125rem; padding:1.25rem 0; }
+    @media (max-width:768px){ .gcal-week{ grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:480px){ .gcal-week{ grid-template-columns:1fr;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_client_prestataire_index') }}">Annuaire</a></li>
+            <li><a href="{{ path('app_presta_client_prestataire_show', {'id': service.prestataire.id}) }}">{{ service.prestataire.prenom }} {{ service.prestataire.nom }}</a></li>
+            <li>{{ service.libelle }}</li>
+        </ul>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-1">Prochaines séances : {{ service.libelle }}</h1>
+    <p class="text-base-content/60 mb-4">{{ service.dureeMinutes }} min · séance de groupe (max {{ service.capaciteMax }} personnes)</p>
+
+    <div role="tablist" class="tabs tabs-boxed w-fit mb-4">
+        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'list'}) }}" class="tab {{ view == 'list' ? 'tab-active' : '' }}">Vue liste</a>
+        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': currentWeekStart|date('Y-m-d')}) }}" class="tab {{ view == 'calendar' ? 'tab-active' : '' }}">Vue calendrier</a>
+    </div>
+
+    {% if view == 'list' %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for session in sessions %}
+            {% set complet = session.nbInscrits >= service.capaciteMax %}
+            {% set restantes = service.capaciteMax - session.nbInscrits %}
+            <div class="card bg-base-200 border border-base-300 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">{{ (joursCourt[session.dateDebut|date('D')] ?? session.dateDebut|date('D'))|capitalize }} {{ session.dateDebut|date('j') }} {{ moisFr[session.dateDebut|date('F')] ?? session.dateDebut|date('F') }}</h2>
+                    <p class="font-semibold">{{ session.dateDebut|date('H:i') }} – {{ session.dateFin|date('H:i') }}</p>
+                    {% if complet %}<span class="badge badge-error badge-sm">Complet</span>{% else %}<span class="badge badge-success badge-sm">{{ restantes }} place{{ restantes > 1 ? 's' : '' }} dispo</span>{% endif %}
+                    <div class="card-actions justify-end mt-2">
+                        {% if complet %}
+                            <button class="btn btn-disabled btn-sm">Séance complète</button>
+                        {% else %}
+                            <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('Confirmer votre inscription à la séance du {{ session.dateDebut|date('d/m/Y') }} à {{ session.dateDebut|date('H:i') }} ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
+                                <button type="submit" class="btn btn-primary btn-sm">S'inscrire</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="md:col-span-3"><div class="alert alert-info"><span>Aucune séance n'est programmée pour le moment.</span></div></div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3">
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">‹ Semaine préc.</a>
+            <h2 class="font-semibold text-center">Semaine du {{ currentWeekStart|date('j') }} {{ moisFr[currentWeekStart|date('F')] ?? currentWeekStart|date('F') }} {{ currentWeekStart|date('Y') }}</h2>
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">Semaine suiv. ›</a>
+        </div>
+        <div class="gcal-week">
+            {% for day in daysOfWeek %}
+                <div class="gcal-day">
+                    <div class="gcal-day__head">{{ joursCourt[day|date('D')] ?? day|date('D') }}<small>{{ day|date('d/m') }}</small></div>
+                    {% set daySessions = sessionsByDay[day|date('Y-m-d')] %}
+                    {% if daySessions|length > 0 %}{% for session in daySessions %}
+                        {% set complet = session.nbInscrits >= service.capaciteMax %}
+                        <div class="gsession {{ complet ? 'gsession--full' : 'gsession--free' }}">
+                            <div class="gsession__time">{{ session.dateDebut|date('H:i') }}–{{ session.dateFin|date('H:i') }}</div>
+                            <div class="text-xs">{% if complet %}Complet{% else %}{{ service.capaciteMax - session.nbInscrits }} place(s){% endif %}</div>
+                            {% if not complet %}
+                                <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('Confirmer votre inscription ?');" class="mt-1">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
+                                    <button type="submit" class="btn btn-primary btn-xs w-full">S'inscrire</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}{% else %}<div class="gcal-empty">—</div>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

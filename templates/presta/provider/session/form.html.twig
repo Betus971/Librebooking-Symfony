@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Modifier' : 'Planifier' }} une séance{% endblock %}
+
+{% block body %}
+<div class="max-w-xl mx-auto">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_provider_session_index') }}">Mes séances</a></li>
+            <li>{{ is_edit ? 'Modifier' : 'Planifier' }}</li>
+        </ul>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'Modifier la séance' : 'Planifier une séance' }}</h1>
+
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.service, {attr:{class:'select select-bordered w-full'}}) }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>{{ form_row(form.dateDebut, {attr:{class:'input input-bordered w-full'}}) }}</div>
+                <div>{{ form_row(form.dateFin, {attr:{class:'input input-bordered w-full'}}) }}</div>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer la séance' }}</button>
+                <a href="{{ path('app_presta_provider_session_index') }}" class="btn btn-ghost">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ menu:
     home: "Home"
     calendar: "Calendar"
     my_reservations: "My reservations"
+    presta: "Services"
     new_reservation: "New reservation"
     resources: "Resources"
     search: "Search"

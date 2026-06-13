@@ -70,16 +70,14 @@ final class AvailabilityController extends AbstractController
     {
         $resource = $repo->find($r->query->getInt('resource'));
         $date = new \DateTimeImmutable($r->query->get('date'));
-        $list = $a->freeWindowsForDay($resource, $date, $a->busyIndex([$resource], $date->setTime(0,0), $date->setTime(23,59,59)));
+        // TOUS les créneaux ouverts du jour, avec leur disponibilité (libre/pris).
+        $list = $a->allWindowsForDay($resource, $date, $a->busyIndex([$resource], $date->setTime(0,0), $date->setTime(23,59,59)));
 
         $payload = array_map(fn($w) => [
-            'label' => $w->start->format('H:i') . '–' . $w->end->format('H:i'),
-            'url'   => $this->generateUrl('reservation_new', [
-                'resource'=>$resource->getId(),
-                'date'=>$w->start->format('Y-m-d'),
-                'start'=>$w->start->format('H:i'),
-                'end'=>$w->end->format('H:i'),
-            ])
+            'label'     => $w->start->format('H:i') . '–' . $w->end->format('H:i'),
+            'start'     => $w->start->format('H:i'),
+            'end'       => $w->end->format('H:i'),
+            'available' => $w->available,
         ], $list);
 
         return $this->json($payload);

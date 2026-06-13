@@ -197,6 +197,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- DATES : aujourd'hui par défaut + fin alignée sur le début ---
+            (function () {
+                const sd = document.getElementById('reservation_quick_start_date');
+                const ed = document.getElementById('reservation_quick_end_date');
+                if (!sd || !ed) return;
+                const today = new Date().toISOString().split('T')[0];
+                if (!sd.value) sd.value = today;
+                if (!ed.value) ed.value = sd.value;
+                // Quand on change la date de début, on aligne la fin (sauf si déjà postérieure).
+                sd.addEventListener('change', () => {
+                    if (!ed.value || ed.value < sd.value) ed.value = sd.value;
+                });
+            })();
+
             // --- GESTION DE LA MODALE DAISYUI ---
             const btnOpenDispo = document.getElementById('btn-open-dispo');
             const modal = document.getElementById('modal-dispo');
@@ -226,18 +240,24 @@
                         .then(r => r.json())
                         .then(list => {
                             if (list.length === 0) {
-                                modalContainer.innerHTML = `<p class="col-span-full text-sm text-base-content/60 text-center py-4">Aucun créneau libre à cette date.</p>`;
+                                modalContainer.innerHTML = `<p class="col-span-full text-sm text-base-content/60 text-center py-4">Aucun créneau d'ouverture à cette date.</p>`;
                                 return;
                             }
 
                             modalContainer.innerHTML = list.map(s => {
-                                const times = s.label.split(' - ');
+                                if (s.available) {
+                                    return `
+                                        <button type="button" class="js-select-slot btn btn-outline btn-primary btn-sm"
+                                                data-start="${s.start}" data-end="${s.end}">
+                                            ${s.label}
+                                        </button>`;
+                                }
+                                // Créneau déjà réservé → grisé, non cliquable
                                 return `
-                                    <button type="button" class="js-select-slot btn btn-outline btn-primary btn-sm"
-                                            data-start="${times[0] ? times[0].trim() : ''}"
-                                            data-end="${times[1] ? times[1].trim() : ''}">
+                                    <span class="btn btn-sm btn-disabled opacity-40 line-through cursor-not-allowed pointer-events-none"
+                                          title="Déjà réservé">
                                         ${s.label}
-                                    </button>`;
+                                    </span>`;
                             }).join('');
                         })
                         .catch(err => {
