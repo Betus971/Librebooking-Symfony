@@ -12,6 +12,7 @@ menu:
     profile: "Mon Profil"
     logout: "Déconnexion"
     login: "Se connecter"
+    toggle_theme: "Basculer le thème clair / sombre"
 
 home:
     title: "Accueil"
@@ -28,6 +29,14 @@ home:
 
 common:
     view_details: "Voir les détails"
+    weekday:
+        monday: "Lundi"
+        tuesday: "Mardi"
+        wednesday: "Mercredi"
+        thursday: "Jeudi"
+        friday: "Vendredi"
+        saturday: "Samedi"
+        sunday: "Dimanche"
     yes: "Oui"
     no: "Non"
     save: "Enregistrer"
@@ -166,7 +175,12 @@ admin:
     schedule:
         singular: "Planning"
         plural: "Plannings"
-        help: "Un planning définit les créneaux d'ouverture associés à une ou plusieurs ressources."
+        help: "Un planning relie une grille horaire (layout) à une ou plusieurs ressources. Les créneaux d'ouverture se définissent dans la grille horaire associée."
+
+    layout:
+        singular: "Grille horaire"
+        plural: "Grilles horaires"
+        help: "Une grille horaire définit les créneaux d'ouverture (jour, heure de début/fin, ouvert ou fermé). Associez-la ensuite à un planning."
 
     announcement:
         singular: "Annonce"
@@ -263,31 +277,9 @@ entity:
         start_date_help: "Les réservations ne sont pas acceptées avant cette date."
         end_date: "Fermeture des réservations"
         end_date_help: "Les réservations ne sont pas acceptées après cette date."
-        layout: "Mise en page (créneaux)"
-        layout_help: "Définit les blocs horaires disponibles (ex : 08h-12h, 14h-18h)."
+        layout: "Grille horaire (créneaux)"
+        layout_help: "Sélectionnez la grille horaire. Les créneaux (ex : 08h-12h, 14h-18h) se définissent dans le menu « Grilles horaires »."
         published: "Publié"
         allow_concurrent: "Autoriser les réservations simultanées"
         allow_concurrent_help: "Plusieurs utilisateurs peuvent réserver la même ressource sur le même créneau."
-        total_concurrent: "Nb max de réservations simultanées"
-        max_resources: "Nb max de ressources par réservation"
-        notes: "Notes"
-
-    announcement:
-        message: "Message de l'annonce"
-        message_help: "Texte affiché sur la page d'accueil."
-        start_date: "Début de diffusion"
-        start_date_help: "L'annonce est visible à partir de cette date. Laisser vide pour afficher immédiatement."
-        end_date: "Fin de diffusion"
-        end_date_help: "L'annonce disparaît automatiquement après cette date."
-        priority: "Priorité"
-        priority_help: "Les annonces sont affichées par ordre de priorité croissant (0 = plus haute priorité)."
-
-    resource_group:
-        name: "Nom du groupe"
-        name_help: "Ex : Salles de réunion, Véhicules, Amphithéâtres."
-        managers: "Gestionnaires"
-        managers_help: "Utilisateurs ayant le rôle ROLE_ADMIN_RESSOURCE sur ce groupe."
-
-    resource_category:
-        name: "Nom de la catégorie"
-        description: "Description"
+ 

@@ -12,6 +12,7 @@ menu:
     profile: "My Profile"
     logout: "Log out"
     login: "Log in"
+    toggle_theme: "Toggle light / dark theme"
 
 home:
     title: "Home"
@@ -28,6 +29,14 @@ home:
 
 common:
     view_details: "View details"
+    weekday:
+        monday: "Monday"
+        tuesday: "Tuesday"
+        wednesday: "Wednesday"
+        thursday: "Thursday"
+        friday: "Friday"
+        saturday: "Saturday"
+        sunday: "Sunday"
     yes: "Yes"
     no: "No"
     save: "Save"
@@ -166,7 +175,12 @@ admin:
     schedule:
         singular: "Schedule"
         plural: "Schedules"
-        help: "A schedule defines the opening time slots for one or more resources."
+        help: "A schedule links a time layout to one or more resources. Opening slots are defined in the associated time layout."
+
+    layout:
+        singular: "Time layout"
+        plural: "Time layouts"
+        help: "A time layout defines the opening slots (day, start/end time, open or closed). Then assign it to a schedule."
 
     announcement:
         singular: "Announcement"
@@ -263,31 +277,9 @@ entity:
         start_date_help: "Reservations are not accepted before this date."
         end_date: "Bookings close after"
         end_date_help: "Reservations are not accepted after this date."
-        layout: "Layout (time slots)"
-        layout_help: "Defines the available time blocks (e.g. 08:00–12:00, 14:00–18:00)."
+        layout: "Time layout (slots)"
+        layout_help: "Select the time layout. Slots (e.g. 08:00–12:00, 14:00–18:00) are defined under the « Time layouts » menu."
         published: "Published"
         allow_concurrent: "Allow concurrent bookings"
         allow_concurrent_help: "Multiple users can book the same resource at the same time."
-        total_concurrent: "Max concurrent bookings"
-        max_resources: "Max resources per reservation"
-        notes: "Notes"
-
-    announcement:
-        message: "Announcement text"
-        message_help: "Text displayed on the homepage."
-        start_date: "Show from"
-        start_date_help: "The announcement is visible from this date. Leave empty to show immediately."
-        end_date: "Hide after"
-        end_date_help: "The announcement disappears automatically after this date."
-        priority: "Priority"
-        priority_help: "Announcements are sorted by ascending priority (0 = highest)."
-
-    resource_group:
-        name: "Group name"
-        name_help: "E.g. Meeting rooms, Vehicles, Auditoriums."
-        managers: "Managers"
-        managers_help: "Users with the ROLE_ADMIN_RESSOURCE role for this group."
-
-    resource_category:
-        name: "Category name"
-        description: "Description"
+ 

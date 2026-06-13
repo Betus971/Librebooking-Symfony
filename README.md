@@ -1,114 +1,83 @@
+<div align="center">
 
-# Librebooking - Resource Management System
+# 📅 Librebooking
 
-Librebooking is an open-source web application designed to handle resource reservations (meeting rooms, vehicles, IT equipment, etc.) powered by Symfony 7.
+**A modern, open-source resource reservation system** — book meeting rooms, vehicles, equipment, and any shared resource over time slots.
 
-## Features 🚀
+[![Symfony](https://img.shields.io/badge/Symfony-7.4-000000?style=flat-square&logo=symfony&logoColor=white)](https://symfony.com/)
+[![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net/)
+[![Doctrine](https://img.shields.io/badge/Doctrine_ORM-3.6-FC6A31?style=flat-square&logo=doctrine&logoColor=white)](https://www.doctrine-project.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![EasyAdmin](https://img.shields.io/badge/EasyAdmin-5-000000?style=flat-square&logo=symfony&logoColor=white)](https://symfony.com/bundles/EasyAdminBundle/current/index.html)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![DaisyUI](https://img.shields.io/badge/DaisyUI-5-5A0EF8?style=flat-square&logo=daisyui&logoColor=white)](https://daisyui.com/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=flat-square)](./LICENSE)
 
-- **Resource Management**: Manage meeting rooms, company vehicles, and equipment effortlessly.
-- **Admin Dashboard**: Easy creation, modification, and deletion of resources, users, and schedules powered by EasyAdmin 5.
-- **User Portal**: Make reservations, manage your profile, and view your bookings through an interactive calendar.
-- **Dark Mode**: A beautiful, modern, and responsive user interface built with Tailwind CSS v4, featuring a seamless Dark Mode toggle.
-- **Authentication**:
-  - Classic account system (Email / Password).
-  - Google OAuth2 Single Sign-On (SSO) integration.
-- **Internationalization (i18n)**: Fully localized in both English and French.
+</div>
 
-## Prerequisites
+---
 
-- PHP 8.4+
-- Any Doctrine-supported database (SQLite, MySQL, MariaDB, PostgreSQL, etc.)
+## ✨ Features
+
+### Reservations
+- **Booking workflow** — request a slot for a resource, with live availability checking (conflicts, opening hours, blackout periods) and file attachments.
+- **Concurrency-safe** — slot creation is serialized per resource with a PostgreSQL advisory lock to prevent double-booking under load.
+- **Admin moderation** — approve / reject (with reason) / cancel reservations, scoped per resource group, with a full audit log.
+- **Waitlist** — when a slot is full, users join a waitlist and are notified automatically when it frees up.
+- **Email notifications** — confirmation, approval, rejection, cancellation, and reminders.
+- **Check-in & auto-release** — confirm attendance; unconfirmed slots are released automatically after a configurable delay.
+
+### Resources & scheduling
+- **Resource catalog** organized by **categories** and **approval groups**, with search and filtering.
+- **Time layouts** — define opening slots (day, start/end time, open/closed) in the admin and assign them to schedules.
+- **iCal subscription** — every resource exposes a calendar feed (`webcal`/`.ics`) for Outlook, Google Calendar, or Thunderbird.
+
+### Experience
+- **Admin dashboard** powered by **EasyAdmin 5**.
+- **Modern UI** built with **Tailwind CSS v4** + **DaisyUI**, with a seamless **light / dark theme** toggle.
+- **Internationalization (i18n)** — French & English.
+- **Authentication** — local email / password **and** Google OAuth2 SSO (use either or both).
+
+---
+
+## 🧱 Tech stack
+
+| Layer | Technology |
+|---|---|
+| Language | PHP 8.4+ |
+| Framework | Symfony 7.4 (LTS) |
+| ORM | Doctrine ORM 3.6 |
+| Database | PostgreSQL 16+ (recommended) — Doctrine-agnostic |
+| Back-office | EasyAdmin 5 |
+| Styling | Tailwind CSS v4 + DaisyUI 5 |
+| Front interactions | Symfony UX (Turbo + Stimulus), FullCalendar |
+| SSO | Google OAuth2 (KnpUOAuth2ClientBundle) |
+| iCal | spatie/icalendar-generator |
+| PDF | dompdf |
+
+---
+
+## 🚀 Getting started
+
+### Prerequisites
+- PHP **8.4+**
 - Composer
-- Node.js & npm (for Tailwind CSS)
+- Node.js & npm (for Tailwind / DaisyUI)
+- A database — **PostgreSQL 16+** recommended (some features such as the booking advisory lock are PostgreSQL-specific)
 
-## Installation 🛠️
+### Installation
 
-1. **Clone the repository**
+1. **Clone & install dependencies**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/Betus971/Librebooking-Symfony.git
    cd Librebooking-Symfony
-   ```
-
-2. **Install PHP and JS dependencies**
-   ```bash
    composer install
    npm install
    ```
 
-3. **Environment Configuration**
-   Copy `.env.example` to `.env.local` and configure your database and OAuth credentials (`.env.local` is git-ignored, so your secrets stay out of version control):
+2. **Configure your environment** — copy the example file (your secrets stay in the git-ignored `.env.local`):
    ```bash
    cp .env.example .env.local
    ```
    ```env
-   APP_SECRET=your_generated_secret
-
-   # --- DATABASE CONFIGURATION EXAMPLES ---
-   # Example for SQLite (zero-config, perfect for quick local testing)
-   DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
-
-   # Example for PostgreSQL
-   # DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"
-
-   # Example for MySQL / MariaDB
-   # DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=8.0.32&charset=utf8mb4"
-
-   OAUTH_GOOGLE_ID=your_google_client_id
-   OAUTH_GOOGLE_SECRET=your_google_client_secret
-   ```
-
-4. **Database Setup & Fixtures**
-   Librebooking uses **Doctrine ORM**, making it database-agnostic. 
-   
-   If you are running the default **PostgreSQL** setup, run:
-   ```bash
-   php bin/console doctrine:database:create
-   php bin/console doctrine:migrations:migrate
-   php bin/console doctrine:fixtures:load --append
-   ```
-
-   If you are switching to another database engine (like **SQLite** or **MySQL**), the existing PostgreSQL migrations might fail. In this case, initialize the schema directly instead:
-   ```bash
-   php bin/console doctrine:database:create
-   php bin/console doctrine:schema:create
-   php bin/console doctrine:fixtures:load --append
-   ```
-
-5. **Build Tailwind Assets**
-   ```bash
-   npm run build
-   ```
-
-6. **Start the Development Server**
-   ```bash
-   symfony server:start
-   ```
-
-## Screenshots 📸
-
-### Homepage
-![Homepage](./docs/homepage.png)
-
-### Resource Catalog
-![Catalog](./docs/catalog.png)
-
-### Resource Detail
-![Resource Detail](./docs/resource-detail.png)
-
-*(Feel free to replace these placeholder images in the `docs/` folder with your own screenshots!)*
-
-## Technologies Used
-
-- [Symfony 7](https://symfony.com/) (PHP Framework)
-- [EasyAdmin 5](https://symfony.com/bundles/EasyAdminBundle/current/index.html) (Back-office)
-- [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
-- [Doctrine ORM](https://www.doctrine-project.org/) (Database)
-- [KnpUOAuth2ClientBundle](https://github.com/knpuniversity/oauth2-client-bundle) (SSO)
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
+   APP_SECRET=your_generated_secr

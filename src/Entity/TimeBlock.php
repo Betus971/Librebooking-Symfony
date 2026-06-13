@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity (repositoryClass: TimeBlockRepository::class)]
@@ -159,8 +160,4 @@ class TimeBlock
             if ($this->endTime <= $this->startTime) {
                 $context->buildViolation("L'heure de fin doit être après l'heure de début.")
                     ->atPath('endTime')
-                    ->addViolation();
-            }
-        }
-    }
-}
+                   

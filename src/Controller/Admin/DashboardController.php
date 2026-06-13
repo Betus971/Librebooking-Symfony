@@ -50,11 +50,8 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section(new TranslatableMessage('admin.section.configuration'));
         yield MenuItem::linkTo(ScheduleCrudController::class, new TranslatableMessage('admin.schedule.plural'), 'fa-solid fa-clock')->setAction('index');
+        yield MenuItem::linkTo(LayoutCrudController::class, new TranslatableMessage('admin.layout.plural'), 'fa-solid fa-table-cells')->setAction('index');
         yield MenuItem::linkTo(AnnouncementCrudController::class, new TranslatableMessage('admin.announcement.plural'), 'fa-solid fa-bullhorn')->setAction('index');
 
         yield MenuItem::section(new TranslatableMessage('admin.section.system'))->setPermission('ROLE_SUPER_ADMIN');
-        yield MenuItem::linkTo(UserCrudController::class, new TranslatableMessage('admin.user.plural'), 'fa-solid fa-users')
-            ->setAction('index')
-            ->setPermission('ROLE_SUPER_ADMIN');
-    }
-}
+        yield MenuItem::linkTo(UserCrudController::class, new T

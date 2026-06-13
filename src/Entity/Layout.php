@@ -5,6 +5,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 #[ORM\Table(name: 'layouts')]
 class Layout
@@ -135,9 +136,4 @@ class Layout
             // set the owning side to null (unless already changed)
             if ($timeBlock->getLayout() === $this) {
                 $timeBlock->setLayout(null);
-            }
-        }
-
-        return $this;
-    }
-}
+     
