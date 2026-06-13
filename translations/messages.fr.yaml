@@ -14,10 +14,20 @@ menu:
     login: "Se connecter"
 
 home:
+    title: "Accueil"
     greeting: "Bonjour, %name%"
     welcome: "Bienvenue sur Librebooking"
+    dashboard: "Tableau de bord"
+    subtitle: "Gérez vos réservations et planifiez vos ressources"
+    upcoming: "Réservation à venir"
+    discover: "Découvrir"
+    resource_singular: "ressource"
+    resource_plural: "ressources"
+    empty_title: "Aucun service disponible"
+    empty_text: "Veuillez contacter l'administrateur pour ajouter des ressources."
 
 common:
+    view_details: "Voir les détails"
     yes: "Oui"
     no: "Non"
     save: "Enregistrer"

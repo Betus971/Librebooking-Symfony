@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil - Librebooking{% endblock %}
+{% block title %}{{ 'home.title'|trans }} - Librebooking{% endblock %}
 
 {% block body %}
 
@@ -34,14 +34,14 @@
 <div class="mb-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-xl font-bold tracking-tight text-base-content/60 font-outfit uppercase">Tableau de bord</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Gérez vos réservations et planifiez vos ressources</p>
+            <h1 class="text-xl font-bold tracking-tight text-base-content/60 font-outfit uppercase">{{ 'home.dashboard'|trans }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ 'home.subtitle'|trans }}</p>
         </div>
         {% if app.user %}
             <div class="flex items-center gap-2">
                 <a href="{{ path('reservation_new') }}" class="btn btn-primary btn-sm rounded-xl font-bold gap-2 px-4 shadow-sm hover:shadow-md transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    Nouvelle réservation
+                    {{ 'menu.new_reservation'|trans }}
                 </a>
             </div>
         {% endif %}
@@ -74,7 +74,7 @@
                             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-success/15 text-success">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                             </span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-success">Réservation à venir</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-success">{{ 'home.upcoming'|trans }}</span>
                         </div>
                         
                         <h3 class="text-lg font-bold font-outfit text-base-content leading-snug line-clamp-2" title="{{ next_reservation.title }}">
@@ -94,7 +94,7 @@
                     
                     <div class="mt-6">
                         <a href="{{ path('reservation_show', {uuid: next_reservation.uuid}) }}" class="btn btn-primary btn-sm w-full rounded-xl font-bold shadow-sm hover:shadow-md transition-all">
-                            Voir les détails
+                            {{ 'common.view_details'|trans }}
                         </a>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                         <div>
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                                    {{ item.count }} ressource{{ item.count > 1 ? 's' : '' }}
+                                    {{ item.count }} {{ (item.count > 1 ? 'home.resources_plural' : 'home.resource_singular')|trans }}
                                 </span>
                             </div>
                             
@@ -130,7 +130,7 @@
                         
                         <div class="card-actions justify-end mt-2">
                             <a href="{{ path('app_resource_index', {'category': cat.id, 'view': 'cards'}) }}" class="btn btn-primary btn-sm rounded-xl font-bold w-full sm:w-auto px-4 shadow-sm transition-all">
-                                Découvrir
+                                {{ 'home.discover'|trans }}
                             </a>
                         </div>
                     </div>
@@ -139,8 +139,8 @@
                 <div class="col-span-full">
                     <div class="card bg-base-100 border border-base-300 rounded-2xl p-10 text-center">
                         <div class="max-w-md mx-auto py-4">
-                            <h3 class="text-xl font-bold font-outfit text-base-content">Aucun service disponible</h3>
-                            <p class="text-sm text-base-content/50 mt-2">Veuillez contacter l'administrateur pour ajouter des ressources.</p>
+                            <h3 class="text-xl font-bold font-outfit text-base-content">{{ 'home.empty_title'|trans }}</h3>
+                            <p class="text-sm text-base-content/50 mt-2">{{ 'home.empty_text'|trans }}</p>
                         </div>
                     </div>
                 </div>
