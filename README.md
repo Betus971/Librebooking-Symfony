@@ -80,4 +80,62 @@
    cp .env.example .env.local
    ```
    ```env
-   APP_SECRET=your_generated_secr
+   APP_SECRET=your_generated_secret
+   DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"
+   # Leave the OAuth values empty to use email/password only
+   OAUTH_GOOGLE_ID=your_google_client_id
+   OAUTH_GOOGLE_SECRET=your_google_client_secret
+   ```
+
+3. **Create the database & schema** (migrations include the required reference data — reservation statuses & types):
+   ```bash
+   php bin/console doctrine:database:create
+   php bin/console doctrine:migrations:migrate
+   php bin/console doctrine:fixtures:load --append   # optional demo data
+   ```
+
+4. **Build the front-end assets**
+   ```bash
+   npm run build          # or: php bin/console tailwind:build
+   ```
+
+5. **Run the app**
+   ```bash
+   symfony server:start
+   ```
+
+### ⏰ Scheduled tasks (cron)
+
+Two console commands power the time-based features — add them to your scheduler:
+
+```cron
+*/15 * * * *  php /path/to/app/bin/console app:reservations:send-reminders
+*/5  * * * *  php /path/to/app/bin/console app:reservations:auto-release
+```
+
+| Command | Role |
+|---|---|
+| `app:reservations:send-reminders` | Sends reminder emails before upcoming reservations (lead time configurable via `app.reminder.lead_minutes`). |
+| `app:reservations:auto-release` | Cancels approved-but-unconfirmed reservations once `auto_release_minutes` has elapsed, and notifies the waitlist. |
+
+---
+
+## 📸 Screenshots
+
+| Homepage | Catalog | Resource detail |
+|---|---|---|
+| ![Homepage](./docs/homepage.png) | ![Catalog](./docs/catalog.png) | ![Resource detail](./docs/resource-detail.png) |
+
+---
+
+## 🗺️ Roadmap
+
+See [`docs/roadmap.md`](./docs/roadmap.md) for the prioritized feature roadmap. Architecture notes live in [`docs/01-architecture.md`](./docs/01-architecture.md), and the open-source extension strategy in [`docs/12-strategie-open-source.md`](./docs/12-strategie-open-source.md).
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change. Code follows the **PSR-12** standard — see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+## 📄 License
+
+Distributed under the **GNU General Public License v3.0**. See [`LICENSE`](./LICENSE) for details.

@@ -282,4 +282,43 @@ entity:
         published: "Published"
         allow_concurrent: "Allow concurrent bookings"
         allow_concurrent_help: "Multiple users can book the same resource at the same time."
- 
+        total_concurrent: "Max concurrent bookings"
+        max_resources: "Max resources per reservation"
+        notes: "Notes"
+
+    layout:
+        name: "Name"
+        timezone: "Timezone"
+        timezone_help: "E.g. Europe/Paris. Slot times are interpreted in this timezone."
+        blocks: "Slots"
+        blocks_help: "Add one slot per time range. Leave the day empty to apply it to every day. Mark « Closed » to block a range."
+
+    timeblock:
+        day: "Day"
+        day_all: "Every day"
+        start: "Start time"
+        end: "End time"
+        availability: "Availability"
+        open: "Open"
+        closed: "Closed"
+        label: "Label (optional)"
+
+    announcement:
+        message: "Announcement text"
+        message_help: "Text displayed on the homepage."
+        start_date: "Show from"
+        start_date_help: "The announcement is visible from this date. Leave empty to show immediately."
+        end_date: "Hide after"
+        end_date_help: "The announcement disappears automatically after this date."
+        priority: "Priority"
+        priority_help: "Announcements are sorted by ascending priority (0 = highest)."
+
+    resource_group:
+        name: "Group name"
+        name_help: "E.g. Meeting rooms, Vehicles, Auditoriums."
+        managers: "Managers"
+        managers_help: "Users with the ROLE_ADMIN_RESSOURCE role for this group."
+
+    resource_category:
+        name: "Category name"
+        description: "Description"

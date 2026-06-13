@@ -136,4 +136,9 @@ class Layout
             // set the owning side to null (unless already changed)
             if ($timeBlock->getLayout() === $this) {
                 $timeBlock->setLayout(null);
-     
+            }
+        }
+
+        return $this;
+    }
+}

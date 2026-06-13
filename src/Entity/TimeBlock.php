@@ -160,4 +160,8 @@ class TimeBlock
             if ($this->endTime <= $this->startTime) {
                 $context->buildViolation("L'heure de fin doit être après l'heure de début.")
                     ->atPath('endTime')
-                   
+                    ->addViolation();
+            }
+        }
+    }
+}

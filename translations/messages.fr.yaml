@@ -282,4 +282,43 @@ entity:
         published: "Publié"
         allow_concurrent: "Autoriser les réservations simultanées"
         allow_concurrent_help: "Plusieurs utilisateurs peuvent réserver la même ressource sur le même créneau."
- 
+        total_concurrent: "Nb max de réservations simultanées"
+        max_resources: "Nb max de ressources par réservation"
+        notes: "Notes"
+
+    layout:
+        name: "Nom"
+        timezone: "Fuseau horaire"
+        timezone_help: "Ex : Europe/Paris. Les heures des créneaux sont interprétées dans ce fuseau."
+        blocks: "Créneaux"
+        blocks_help: "Ajoutez un créneau par plage horaire. Laissez le jour vide pour qu'il s'applique à tous les jours. Marquez « Fermé » pour bloquer une plage."
+
+    timeblock:
+        day: "Jour"
+        day_all: "Tous les jours"
+        start: "Heure de début"
+        end: "Heure de fin"
+        availability: "Disponibilité"
+        open: "Ouvert"
+        closed: "Fermé"
+        label: "Libellé (optionnel)"
+
+    announcement:
+        message: "Message de l'annonce"
+        message_help: "Texte affiché sur la page d'accueil."
+        start_date: "Début de diffusion"
+        start_date_help: "L'annonce est visible à partir de cette date. Laisser vide pour afficher immédiatement."
+        end_date: "Fin de diffusion"
+        end_date_help: "L'annonce disparaît automatiquement après cette date."
+        priority: "Priorité"
+        priority_help: "Les annonces sont affichées par ordre de priorité croissant (0 = plus haute priorité)."
+
+    resource_group:
+        name: "Nom du groupe"
+        name_help: "Ex : Salles de réunion, Véhicules, Amphithéâtres."
+        managers: "Gestionnaires"
+        managers_help: "Utilisateurs ayant le rôle ROLE_ADMIN_RESSOURCE sur ce groupe."
+
+    resource_category:
+        name: "Nom de la catégorie"
+        description: "Description"

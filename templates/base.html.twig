@@ -79,4 +79,8 @@
         function syncThemeToggle() {
             applyThemeIcons(localStorage.getItem('theme') || 'dark');
         }
-        document.addEventListener('DOMC
+        document.addEventListener('DOMContentLoaded', syncThemeToggle);
+        document.addEventListener('turbo:load', syncThemeToggle);
+    </script>
+</body>
+</html>
