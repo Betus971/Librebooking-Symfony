@@ -1,31 +1,37 @@
 import { Controller } from '@hotwired/stimulus';
 
+/**
+ * Bascule de thème clair/sombre.
+ *
+ * Source de vérité unique : l'attribut data-theme sur <html>, lu par DaisyUI.
+ * On synchronise aussi la classe .dark (pour les utilitaires Tailwind dark:)
+ * et l'affichage des icônes soleil/lune.
+ */
 export default class extends Controller {
     static targets = ["iconLight", "iconDark"];
 
     connect() {
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            this.iconLightTarget.classList.add('hidden');
-            this.iconDarkTarget.classList.remove('hidden');
-        } else {
-            document.documentElement.classList.remove('dark');
-            this.iconDarkTarget.classList.add('hidden');
-            this.iconLightTarget.classList.remove('hidden');
-        }
+        const stored = localStorage.getItem('color-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.apply(stored ? stored === 'dark' : prefersDark);
     }
 
     toggle() {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-            this.iconDarkTarget.classList.add('hidden');
-            this.iconLightTarget.classList.remove('hidden');
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-            this.iconLightTarget.classList.add('hidden');
-            this.iconDarkTarget.classList.remove('hidden');
+        const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+        localStorage.setItem('color-theme', dark ? 'dark' : 'light');
+        this.apply(dark);
+    }
+
+    apply(dark) {
+        const root = document.documentElement;
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        root.classList.toggle('dark', dark);
+
+        if (this.hasIconLightTarget) {
+            this.iconLightTarget.classList.toggle('hidden', dark);
+        }
+        if (this.hasIconDarkTarget) {
+            this.iconDarkTarget.classList.toggle('hidden', !dark);
         }
     }
 }

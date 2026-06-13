@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\ReservationInstance;
+
 /**
  * Génère un flux iCalendar (RFC 5545) consommable par Thunderbird / Outlook /
  * Google Calendar.
@@ -41,6 +43,28 @@ final class IcsGeneratorService
         $ics .= "END:VCALENDAR";
 
         return $ics;
+    }
+
+    /**
+     * Construit le flux ICS à partir d'instances de réservation.
+     *
+     * @param iterable<ReservationInstance> $instances
+     */
+    public function generateForReservations(iterable $instances): string
+    {
+        $events = [];
+        foreach ($instances as $instance) {
+            $series = $instance->getSeries();
+            $events[] = [
+                'uid'         => 'reservation-' . $instance->getId(),
+                'start'       => $instance->getStartDate(),
+                'end'         => $instance->getEndDate(),
+                'summary'     => $series?->getTitle() ?: 'Réservation',
+                'description' => $series?->getDescription() ?: '',
+            ];
+        }
+
+        return $this->generate($events);
     }
 
     /**

@@ -77,7 +77,8 @@ final class ReservationRequestValidator
         if (!$this->availability->isFree($resource, $start, $end)) {
             return new ReservationValidationError(
                 'formError',
-                'Ce créneau n\'est pas disponible : la ressource est déjà réservée ou hors des horaires d\'ouverture.'
+                'Ce créneau n\'est pas disponible : la ressource est déjà réservée ou hors des horaires d\'ouverture.',
+                'unavailable'
             );
         }
 

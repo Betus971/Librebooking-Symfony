@@ -1,0 +1,25 @@
+{% extends 'emails/reservation/_layout.html.twig' %}
+
+{% block content %}
+    <h1 style="font-size:20px;margin:0 0 12px;color:#047857;">Un créneau s'est libéré</h1>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Bonjour {{ waitlist.user.fname|default('') }},
+    </p>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Le créneau que vous suiviez en liste d'attente vient de se libérer.
+        Dépêchez-vous de le réserver, il reste disponible jusqu'à ce qu'une
+        autre personne le prenne.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse;">
+        <tr>
+            <td style="padding:8px 0;color:#6b7280;width:140px;">Ressource</td>
+            <td style="padding:8px 0;font-weight:bold;">{{ waitlist.resource.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding:8px 0;color:#6b7280;">Créneau</td>
+            <td style="padding:8px 0;">
+                du {{ waitlist.startDate|date('d/m/Y H:i') }} au {{ waitlist.endDate|date('d/m/Y H:i') }}
+            </td>
+        </tr>
+    </table>
+{% endblock %}

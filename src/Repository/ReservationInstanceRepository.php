@@ -209,4 +209,51 @@ class ReservationInstanceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Instances à venir nécessitant un rappel : série APPROUVÉE, pas encore
+     * rappelée, démarrant dans la fenêtre ]now, until].
+     *
+     * @return ReservationInstance[]
+     */
+    public function findInstancesToRemind(\DateTimeInterface $now, \DateTimeInterface $until): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.series', 's')
+            ->andWhere('IDENTITY(s.status) = :approved')
+            ->andWhere('i.reminderSentAt IS NULL')
+            ->andWhere('i.startDate > :now')
+            ->andWhere('i.startDate <= :until')
+            ->setParameter('approved', ReservationStatus::APPROVED)
+            ->setParameter('now', $now)
+            ->setParameter('until', $until)
+            ->orderBy('i.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Candidats à la libération automatique : série APPROUVÉE, déjà commencée,
+     * non pointée (checkinDate NULL), sur une ressource avec check-in activé et
+     * un délai de libération défini. Le filtrage fin (start + délai < now) est
+     * fait en PHP (DQL ne gère pas l'arithmétique d'intervalle par colonne).
+     *
+     * @return ReservationInstance[]
+     */
+    public function findCheckinCandidates(\DateTimeInterface $now): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.series', 's')
+            ->join('App\Entity\ReservationResource', 'rr', 'WITH', 'rr.series = s')
+            ->join('rr.resource', 'r')
+            ->andWhere('IDENTITY(s.status) = :approved')
+            ->andWhere('i.checkinDate IS NULL')
+            ->andWhere('i.startDate < :now')
+            ->andWhere('r.enableCheckIn = true')
+            ->andWhere('r.autoReleaseMinutes IS NOT NULL')
+            ->setParameter('approved', ReservationStatus::APPROVED)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+    }
 }

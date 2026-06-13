@@ -13,6 +13,7 @@ use App\Notification\ReservationNotifier;
 use App\Security\Voter\ReservationSeriesVoter;
 use App\Service\Exception\ConcurrentBookingException;
 use App\Service\ReservationManager;
+use App\Service\WaitlistService;
 use App\Validator\ReservationRequestValidator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -119,10 +120,18 @@ final class ReservationController extends AbstractController
             // En cas d'échec : 422 pour que Turbo Drive remplace le DOM et affiche l'erreur
             // (sur 200, Turbo ignore la réponse des POST).
             if ($error = $validator->validate($resource, $dto->start, $dto->end)) {
-                return $this->render('reservation/new.html.twig', [
-                    'form'        => $form,
-                    $error->field => $error->message,
-                ], new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY));
+                $params = ['form' => $form, $error->field => $error->message];
+
+                // Créneau indisponible → on propose l'inscription en liste d'attente.
+                if ('unavailable' === $error->code) {
+                    $params['waitlist'] = [
+                        'resource' => $resource->getId(),
+                        'start'    => $dto->start->format('c'),
+                        'end'      => $dto->end->format('c'),
+                    ];
+                }
+
+                return $this->render('reservation/new.html.twig', $params, new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY));
             }
 
             // --- Création sous verrou concurrentiel (transaction + audit) ---
@@ -245,6 +254,7 @@ final class ReservationController extends AbstractController
         #[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series,
         ReservationWorkflow $workflow,
         ReservationNotifier $notifier,
+        WaitlistService $waitlist,
     ): Response {
         $this->denyAccessUnlessGranted(ReservationSeriesVoter::CANCEL, $series);
 
@@ -260,10 +270,45 @@ final class ReservationController extends AbstractController
 
             // Notification (non bloquante) au demandeur.
             $notifier->cancelled($series);
+
+            // Liste d'attente : prévenir les personnes en attente sur ce créneau.
+            $waitlist->notifyForFreedSeries($series);
         } catch (\LogicException $e) {
             $this->addFlash('warning', $e->getMessage());
         }
 
         return $this->redirectToRoute('reservation_mine');
+    }
+
+    #[Route('/reservation/{uuid}/checkin', name: 'reservation_checkin', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function checkin(
+        Request $request,
+        #[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series,
+        EntityManagerInterface $em,
+    ): Response {
+        $this->denyAccessUnlessGranted(ReservationSeriesVoter::CANCEL, $series);
+
+        if (!$this->isCsrfTokenValid('checkin'.$series->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $now  = new \DateTime();
+        $done = false;
+        foreach ($series->getInstances() as $instance) {
+            if (null === $instance->getCheckinDate()) {
+                $instance->setCheckinDate($now);
+                $done = true;
+            }
+        }
+
+        if ($done) {
+            $em->flush();
+            $this->addFlash('success', 'Arrivée confirmée : votre réservation ne sera pas libérée automatiquement.');
+        } else {
+            $this->addFlash('info', 'Le check-in a déjà été effectué.');
+        }
+
+        return $this->redirectToRoute('reservation_show', ['uuid' => $series->getUuid()]);
     }
 }

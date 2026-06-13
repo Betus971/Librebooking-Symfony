@@ -13,6 +13,10 @@ menu:
     logout: "Log out"
     login: "Log in"
 
+home:
+    greeting: "Hello, %name%"
+    welcome: "Welcome to Librebooking"
+
 common:
     yes: "Yes"
     no: "No"

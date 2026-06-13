@@ -21,6 +21,10 @@ parameters:
     # Adresse expéditeur des e-mails de notification de réservation.
     app.mail.from: 'no-reply@librebooking.local'
 
+    # Délai (minutes) avant le début d'une réservation pour l'envoi du rappel
+    # (commande app:reservations:send-reminders, à planifier en cron).
+    app.reminder.lead_minutes: 1440 # 24 h
+
 
 
 services:

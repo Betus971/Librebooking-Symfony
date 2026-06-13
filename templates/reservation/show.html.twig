@@ -172,6 +172,17 @@
                                 Modifier la demande
                             </button>
 
+                            {# Check-in : visible pour une réservation approuvée (statut 2) #}
+                            {% if series.status and series.status.id == 2 %}
+                                <form method="post" action="{{ path('reservation_checkin', {'uuid': series.uuid}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('checkin' ~ series.id) }}">
+                                    <button type="submit" class="btn btn-outline btn-success w-full">
+                                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        Confirmer mon arrivée (check-in)
+                                    </button>
+                                </form>
+                            {% endif %}
+
                             {# On n'affiche le bouton annuler que si ce n'est pas DÉJÀ refusé (3) ou annulé (4) #}
                             {% if series.status and series.status.id not in [3, 4] %}
                                 <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler définitivement cette réservation ?');">

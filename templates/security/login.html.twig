@@ -12,71 +12,75 @@
                 </svg>
             </div>
         </div>
-        <h2 class="text-3xl font-extrabold text-base-content tracking-tight">
+        <h2 class="text-3xl font-extrabold text-base-content tracking-tight font-outfit">
             {{ 'login.title'|trans }}
         </h2>
         <p class="mt-2 text-sm text-base-content/70">
             Ou
-            <a href="#" class="link link-primary font-medium transition-colors">
-                demandez un accès administrateur
+            <a href="{{ path('app_register') }}" class="link link-primary font-semibold transition-colors">
+                créez un compte gratuitement
             </a>
         </p>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card bg-base-100 shadow-xl border border-base-300">
             <div class="card-body sm:p-10">
                 <form class="space-y-6" method="post">
                     {% if error %}
-                        <div class="alert alert-error shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span class="text-sm">{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+                        <div class="alert alert-error border border-error/20 bg-error/5 text-error-content shadow-sm p-4 rounded-xl">
+                            <div class="flex items-center gap-2 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+                            </div>
                         </div>
                     {% endif %}
 
                     {% if app.user %}
-                        <div class="alert alert-info shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="text-sm">
-                                Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
-                                <a href="{{ path('app_logout') }}" class="font-bold underline hover:text-info-content/80">Se déconnecter</a>
-                            </span>
+                        <div class="alert alert-info border border-info/20 bg-info/5 text-info-content shadow-sm p-4 rounded-xl">
+                            <div class="flex items-center gap-2 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>
+                                    Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
+                                    <a href="{{ path('app_logout') }}" class="font-bold underline hover:text-info-content/80">Se déconnecter</a>
+                                </span>
+                            </div>
                         </div>
                     {% endif %}
 
                     <div class="form-control w-full">
                         <label for="inputEmail" class="label">
-                            <span class="label-text font-medium text-base-content">Adresse email</span>
+                            <span class="label-text font-semibold text-base-content/80">Adresse email</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <svg class="h-4 w-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                                 </svg>
                             </div>
-                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="input input-bordered w-full pl-10" placeholder="vous@exemple.com" autocomplete="email" required autofocus>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="vous@exemple.com" autocomplete="email" required autofocus>
                         </div>
                     </div>
 
                     <div class="form-control w-full">
                         <label for="inputPassword" class="label">
-                            <span class="label-text font-medium text-base-content">Mot de passe</span>
+                            <span class="label-text font-semibold text-base-content/80">Mot de passe</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <svg class="h-4 w-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <input type="password" name="password" id="inputPassword" class="input input-bordered w-full pl-10" placeholder="••••••••" autocomplete="current-password" required>
+                            <input type="password" name="password" id="inputPassword" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="••••••••" autocomplete="current-password" required>
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between">
                         <label class="label cursor-pointer justify-start gap-3">
-                            <input id="remember_me" name="_remember_me" type="checkbox" class="checkbox checkbox-primary checkbox-sm">
-                            <span class="label-text text-base-content">Se souvenir de moi</span>
+                            <input id="remember_me" name="_remember_me" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md">
+                            <span class="label-text text-base-content/80 font-medium">Se souvenir de moi</span>
                         </label>
 
                         <div class="text-sm">
@@ -86,14 +90,14 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-full mt-2">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-xl w-full mt-2 font-bold shadow-sm hover:shadow-md transition-all">
                         {{ 'login.sign_in'|trans }}
                     </button>
                     
-                    <div class="divider text-base-content/50 text-sm my-6">Ou</div>
+                    <div class="divider text-base-content/30 text-xs my-6">Ou</div>
 
-                    <a href="{{ path('connect_google_start') }}" class="btn btn-outline w-full bg-base-100 hover:bg-base-200 text-base-content border-base-300">
-                        <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <a href="{{ path('connect_google_start') }}" class="btn btn-outline btn-sm rounded-xl w-full bg-base-100 hover:bg-base-200 text-base-content border-base-300 font-bold">
+                        <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>

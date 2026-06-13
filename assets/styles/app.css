@@ -1,9 +1,13 @@
-/* HELLO WORLD COMPILING CSS TEST */
 @import "tailwindcss";
 
 @source "../../templates";
 @source "../../src";
 @source "../../assets";
+
+/* Tailwind v4 : relie le variant `dark:` à l'attribut data-theme (piloté par
+   DaisyUI et le contrôleur Stimulus), au lieu du défaut prefers-color-scheme.
+   Ainsi `dark:` et DaisyUI partagent la même source de vérité. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @plugin "daisyui" {
   themes: dark --default, light;

@@ -1,7 +1,9 @@
 <?php
 namespace App\Notification;
 
+use App\Entity\ReservationInstance;
 use App\Entity\ReservationSeries;
+use App\Entity\WaitlistRequest;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
@@ -30,18 +32,50 @@ final class ReservationNotifier
     public function cancelled(ReservationSeries $s): void { $this->send($s, 'cancelled'); }
     public function rejected(ReservationSeries $s, string $reason): void { $this->send($s, 'rejected', ['reason' => $reason]); }
 
+    /**
+     * Rappel avant le début d'une réservation. $instance est l'occurrence concernée.
+     */
+    public function reminder(ReservationSeries $s, ReservationInstance $instance): void
+    {
+        $this->send($s, 'reminder', ['instance' => $instance]);
+    }
+
+    /**
+     * Notifie un demandeur en liste d'attente qu'un créneau s'est libéré.
+     */
+    public function waitlistOpened(WaitlistRequest $w): void
+    {
+        $this->dispatch(
+            $w->getUser()->getEmail(),
+            'emails/waitlist/opened',
+            ['waitlist' => $w]
+        );
+    }
+
     private function send(ReservationSeries $s, string $tpl, array $ctx = []): void
     {
-        $to = $s->getOwner()?->getEmail();
+        $this->dispatch(
+            $s->getOwner()?->getEmail(),
+            "emails/reservation/{$tpl}",
+            $ctx + ['series' => $s]
+        );
+    }
+
+    /**
+     * Rendu + envoi générique, tolérant aux pannes (un échec n'interrompt
+     * jamais l'action métier appelante).
+     *
+     * @param array<string,mixed> $context
+     */
+    private function dispatch(?string $to, string $templateBase, array $context): void
+    {
         if (!$to) {
             return; // pas de destinataire → rien à envoyer.
         }
 
         try {
-            $ctx += ['series' => $s];
-
-            $subject = $this->twig->render("emails/reservation/{$tpl}_subject.txt.twig", $ctx);
-            $html    = $this->twig->render("emails/reservation/{$tpl}.html.twig", $ctx);
+            $subject = $this->twig->render("{$templateBase}_subject.txt.twig", $context);
+            $html    = $this->twig->render("{$templateBase}.html.twig", $context);
 
             $email = (new Email())
                 ->from($this->from)
@@ -51,9 +85,8 @@ final class ReservationNotifier
 
             $this->mailer->send($email);
         } catch (\Throwable $e) {
-            $this->logger?->error('Échec de notification de réservation', [
-                'template'  => $tpl,
-                'series_id' => $s->getId(),
+            $this->logger?->error('Échec d\'envoi de notification', [
+                'template'  => $templateBase,
                 'exception' => $e,
             ]);
         }

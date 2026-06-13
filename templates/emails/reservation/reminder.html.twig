@@ -1,0 +1,25 @@
+{% extends 'emails/reservation/_layout.html.twig' %}
+
+{% block content %}
+    <h1 style="font-size:20px;margin:0 0 12px;">Rappel de réservation</h1>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Bonjour {{ series.owner.fname|default('') }},
+    </p>
+    <p style="margin:0 0 8px;line-height:1.5;">
+        Petit rappel : votre réservation approche.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse;">
+        <tr>
+            <td style="padding:8px 0;color:#6b7280;width:140px;">Demande</td>
+            <td style="padding:8px 0;font-weight:bold;">{{ series.title|default('Réservation') }}</td>
+        </tr>
+        {% if instance is defined %}
+            <tr>
+                <td style="padding:8px 0;color:#6b7280;">Créneau</td>
+                <td style="padding:8px 0;">
+                    du {{ instance.startDate|date('d/m/Y H:i') }} au {{ instance.endDate|date('d/m/Y H:i') }}
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+{% endblock %}

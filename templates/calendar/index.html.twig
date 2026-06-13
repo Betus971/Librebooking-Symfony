@@ -6,8 +6,8 @@
     {{ parent() }}
     <style>
         #calendar { max-width: 1200px; margin: 0 auto; }
-        
-        /* Personnalisation Tailwind pour FullCalendar */
+
+        /* Personnalisation Tailwind pour FullCalendar (thème clair par défaut) */
         .fc-theme-standard td, .fc-theme-standard th {
             border-color: #e2e8f0;
         }
@@ -46,6 +46,35 @@
         .fc-day-today {
             background-color: #f8fafc !important;
         }
+
+        /* ── Thème sombre : FullCalendar suit le data-theme de DaisyUI ── */
+        [data-theme="dark"] #calendar {
+            --fc-border-color: #1f2937;        /* slate-800 */
+            --fc-page-bg-color: transparent;
+            --fc-neutral-bg-color: #111827;    /* slate-900 */
+            --fc-today-bg-color: rgba(99, 102, 241, 0.12);
+            --fc-now-indicator-color: #ef4444;
+            color: #e5e7eb;                    /* texte par défaut clair */
+        }
+        [data-theme="dark"] .fc-theme-standard td,
+        [data-theme="dark"] .fc-theme-standard th,
+        [data-theme="dark"] .fc-theme-standard .fc-scrollgrid {
+            border-color: #1f2937;
+        }
+        [data-theme="dark"] .fc-toolbar-title {
+            color: #f3f4f6;                    /* gris-100, lisible sur fond sombre */
+        }
+        [data-theme="dark"] .fc-col-header-cell-cushion,
+        [data-theme="dark"] .fc-timegrid-slot-label-cushion,
+        [data-theme="dark"] .fc-timegrid-axis-cushion,
+        [data-theme="dark"] .fc-daygrid-day-number,
+        [data-theme="dark"] .fc-list-day-text,
+        [data-theme="dark"] .fc-list-event-title {
+            color: #cbd5e1;                    /* slate-300 */
+        }
+        [data-theme="dark"] .fc-day-today {
+            background-color: rgba(99, 102, 241, 0.12) !important;
+        }
     </style>
 {% endblock %}
 
@@ -53,10 +82,10 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="md:flex md:items-center md:justify-between mb-8">
         <div class="flex-1 min-w-0">
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 class="text-3xl font-extrabold text-base-content tracking-tight">
                 {{ pageTitle }}
             </h1>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm text-base-content/60">
                 Consultez la disponibilité des ressources en temps réel.
             </p>
         </div>
@@ -66,9 +95,9 @@
                 <label for="resource-select" class="sr-only">Filtrer par ressource</label>
                 <div class="relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        <svg class="h-5 w-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                     </div>
-                    <select id="resource-select" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-slate-300 rounded-md py-2 pr-10 border bg-white">
+                    <select id="resource-select" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-base-300 rounded-md py-2 pr-10 border bg-base-100 text-base-content">
                         <option value="" {{ currentResourceId is null ? 'selected' : '' }}>Toutes les ressources</option>
                         {% for res in resources %}
                             <option value="{{ res.id }}" {{ currentResourceId == res.id ? 'selected' : '' }}>{{ res.name }}</option>
@@ -79,7 +108,7 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-xl shadow-slate-200/50 rounded-2xl p-4 sm:p-6 border border-slate-100">
+    <div class="bg-base-100 shadow-xl shadow-base-300/30 rounded-2xl p-4 sm:p-6 border border-base-300">
         <div id="calendar"
              data-resource-id="{{ resourceId is not null ? resourceId : '' }}"
              data-week-start="{{ weekStart }}"

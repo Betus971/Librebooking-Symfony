@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\ReservationInstanceRepository;
 use App\Repository\ResourceRepository;
 use App\Service\IcsGeneratorService;
 use App\Util\WeekHelper;
@@ -117,6 +118,34 @@ final class CalendarController extends AbstractController
         return new Response($icsContent, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="planning_complet.ics"',
+        ]);
+    }
+
+    /**
+     * Flux iCal abonnable d'UNE ressource, identifiée par son public_id
+     * (URL non énumérable). Couvre une fenêtre glissante (passé proche → +90 j).
+     */
+    #[Route('/calendar/feed/{publicId}.ics', name: 'app_calendar_feed_resource', methods: ['GET'])]
+    public function resourceFeed(
+        string $publicId,
+        ResourceRepository $resources,
+        ReservationInstanceRepository $instances,
+        IcsGeneratorService $icsGenerator,
+    ): Response {
+        $resource = $resources->findOneBy(['publicId' => $publicId]);
+        if (null === $resource) {
+            throw $this->createNotFoundException('Ressource introuvable.');
+        }
+
+        $from = (new \DateTimeImmutable('today'))->modify('-7 days');
+        $to   = (new \DateTimeImmutable('today'))->modify('+90 days');
+
+        $events  = $instances->findOverlappingForResource((int) $resource->getId(), $from, $to);
+        $content = $icsGenerator->generateForReservations($events);
+
+        return new Response($content, 200, [
+            'Content-Type'        => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => sprintf('attachment; filename="resource-%d.ics"', $resource->getId()),
         ]);
     }
 }

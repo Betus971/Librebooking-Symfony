@@ -39,7 +39,7 @@
         </div>
         {% if app.user %}
             <div class="flex items-center gap-2">
-                <a href="{{ path('app_calendar') }}" class="btn btn-primary btn-sm rounded-xl font-bold gap-2 px-4 shadow-sm hover:shadow-md transition-all">
+                <a href="{{ path('reservation_new') }}" class="btn btn-primary btn-sm rounded-xl font-bold gap-2 px-4 shadow-sm hover:shadow-md transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Nouvelle réservation
                 </a>
@@ -52,9 +52,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-4">
         <div>
             {% if app.user %}
-                <h2 class="text-2xl font-extrabold text-base-content font-outfit">Bonjour, {{ app.user.email|split('@')|first|capitalize }} 👋</h2>
+                <h2 class="text-2xl font-extrabold text-base-content font-outfit">{{ 'home.greeting'|trans({'%name%': app.user.email|split('@')|first|capitalize}) }}</h2>
             {% else %}
-                <h2 class="text-2xl font-extrabold text-base-content font-outfit">Bienvenue sur Librebooking</h2>
+                <h2 class="text-2xl font-extrabold text-base-content font-outfit">{{ 'home.welcome'|trans }}</h2>
             {% endif %}
             <p class="text-xs text-base-content/40 mt-1 font-medium">{{ "now"|date('d/m/Y') }}</p>
         </div>

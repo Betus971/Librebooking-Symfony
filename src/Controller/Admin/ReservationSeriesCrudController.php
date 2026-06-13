@@ -8,6 +8,7 @@ use App\Entity\ReservationStatus;
 use App\Entity\User;
 use App\Notification\ReservationNotifier;
 use App\Security\Voter\ReservationSeriesVoter;
+use App\Service\WaitlistService;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -120,8 +121,9 @@ class ReservationSeriesCrudController extends AbstractCrudController
         ReservationWorkflow $workflow,
         ReservationNotifier $notifier,
         AdminUrlGenerator $urlGenerator,
+        WaitlistService $waitlist,
     ): Response {
-        return $this->handleTransition('approve', $context, $request, $workflow, $notifier, $urlGenerator);
+        return $this->handleTransition('approve', $context, $request, $workflow, $notifier, $urlGenerator, $waitlist);
     }
 
     public function reject(
@@ -130,8 +132,9 @@ class ReservationSeriesCrudController extends AbstractCrudController
         ReservationWorkflow $workflow,
         ReservationNotifier $notifier,
         AdminUrlGenerator $urlGenerator,
+        WaitlistService $waitlist,
     ): Response {
-        return $this->handleTransition('reject', $context, $request, $workflow, $notifier, $urlGenerator);
+        return $this->handleTransition('reject', $context, $request, $workflow, $notifier, $urlGenerator, $waitlist);
     }
 
     public function cancelReservation(
@@ -140,8 +143,9 @@ class ReservationSeriesCrudController extends AbstractCrudController
         ReservationWorkflow $workflow,
         ReservationNotifier $notifier,
         AdminUrlGenerator $urlGenerator,
+        WaitlistService $waitlist,
     ): Response {
-        return $this->handleTransition('cancel', $context, $request, $workflow, $notifier, $urlGenerator);
+        return $this->handleTransition('cancel', $context, $request, $workflow, $notifier, $urlGenerator, $waitlist);
     }
 
     /**
@@ -159,6 +163,7 @@ class ReservationSeriesCrudController extends AbstractCrudController
         ReservationWorkflow $workflow,
         ReservationNotifier $notifier,
         AdminUrlGenerator $urlGenerator,
+        WaitlistService $waitlist,
     ): Response {
         /** @var ReservationSeries $series */
         $series = $context->getEntity()->getInstance();
@@ -200,6 +205,11 @@ class ReservationSeriesCrudController extends AbstractCrudController
                     'cancel'  => $notifier->cancelled($series),
                     default   => null,
                 };
+
+                // Liste d'attente : à l'annulation, prévenir les personnes en attente.
+                if ('cancel' === $action) {
+                    $waitlist->notifyForFreedSeries($series);
+                }
 
                 $this->addFlash('success', new TranslatableMessage('admin.reservation.flash.'.$action.'_done'));
             } catch (\DomainException|\LogicException $e) {

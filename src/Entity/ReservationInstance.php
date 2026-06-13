@@ -43,6 +43,9 @@ class ReservationInstance
     #[ORM\Column(name: 'previous_end_date', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $previousEndDate = null;
 
+    #[ORM\Column(name: 'reminder_sent_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $reminderSentAt = null;
+
     #[ORM\OneToMany(mappedBy: 'reservationInstance', targetEntity: ReservationUser::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $reservationUsers;
 
@@ -129,6 +132,17 @@ class ReservationInstance
     public function setPreviousEndDate(?\DateTimeInterface $d): self
     {
         $this->previousEndDate = $d;
+        return $this;
+    }
+
+    public function getReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->reminderSentAt;
+    }
+
+    public function setReminderSentAt(?\DateTimeImmutable $d): self
+    {
+        $this->reminderSentAt = $d;
         return $this;
     }
 

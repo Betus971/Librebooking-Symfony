@@ -83,8 +83,15 @@ final class ResourceController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_resource_show', methods: ['GET'])]
-    public function show(Resource $resource): Response
+    public function show(Resource $resource, EntityManagerInterface $entityManager): Response
     {
+        // Backfill ponctuel : garantit un public_id (URL non énumérable) pour
+        // l'abonnement iCal, y compris sur les ressources créées avant la feature.
+        if (null === $resource->getPublicId()) {
+            $resource->setPublicId(bin2hex(random_bytes(10))); // 20 caractères hex
+            $entityManager->flush();
+        }
+
         return $this->render('resource/show.html.twig', [
             'resource' => $resource,
         ]);

@@ -102,7 +102,15 @@
                 </div>
             </div>
 
-            <div class="card-actions justify-end mt-auto pt-8 border-t border-base-200">
+            <div class="card-actions justify-between items-center mt-auto pt-8 border-t border-base-200">
+                {% if resource.publicId %}
+                    <a href="{{ url('app_calendar_feed_resource', {'publicId': resource.publicId}) }}"
+                       class="btn btn-ghost btn-sm gap-2 text-base-content/70"
+                       title="Ajouter cet agenda à Outlook, Google Agenda ou Thunderbird">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        S'abonner à l'agenda (iCal)
+                    </a>
+                {% endif %}
                 <a href="{{ path('reservation_new', {'resource': resource.id}) }}" class="btn btn-primary btn-lg w-full sm:w-auto">
                     <svg class="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Réserver cette ressource

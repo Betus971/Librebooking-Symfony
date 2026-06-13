@@ -13,6 +13,10 @@ menu:
     logout: "Déconnexion"
     login: "Se connecter"
 
+home:
+    greeting: "Bonjour, %name%"
+    welcome: "Bienvenue sur Librebooking"
+
 common:
     yes: "Oui"
     no: "Non"

@@ -1,3 +1,4 @@
+
 # Librebooking - Resource Management System
 
 Librebooking is an open-source web application designed to handle resource reservations (meeting rooms, vehicles, IT equipment, etc.) powered by Symfony 7.
