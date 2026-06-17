@@ -6,7 +6,6 @@ use App\Repository\ReservationInstanceRepository;
 use App\Repository\ResourceRepository;
 use App\Service\IcsGeneratorService;
 use App\Util\WeekHelper;
-use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CalendarController extends AbstractController
 {
     #[Route('/calendar', name: 'app_calendar')]
-    public function index(Request $request,ResourceRepository $resourceRepo, WeekHelper $weeks): Response
+    public function index(Request $request, ResourceRepository $resourceRepo, WeekHelper $weeks): Response
     {
 
         $isoWeek = $request->query->get('week') ?? $weeks->isoWeekString(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')));
@@ -29,7 +28,7 @@ final class CalendarController extends AbstractController
             'weekStart'  => $wk->startOfWeek('Europe/Paris')->format('Y-m-d'),
             'prevWeek'   => $wk->prev()->toString(),
             'nextWeek'   => $wk->next()->toString(),
-            'pageTitle'  => "Planning — toutes ressources",
+            'pageTitle'  => 'Planning — toutes ressources',
 
 
         ]);
@@ -67,7 +66,7 @@ final class CalendarController extends AbstractController
             'weekStart'         => $wk->startOfWeek('Europe/Paris')->format('Y-m-d'),
             'prevWeek'          => $wk->prev()->toString(),
             'nextWeek'          => $wk->next()->toString(),
-            'pageTitle'         => "Planning — Aperçu V2",
+            'pageTitle'         => 'Planning — Aperçu V2',
         ]);
     }
 

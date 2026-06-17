@@ -18,12 +18,12 @@ class ServiceType extends AbstractType
         $builder
             ->add('libelle', TextType::class, [
                 'label' => 'Nom de la prestation (ex: Coupe Homme, Séance CrossFit)',
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description détaillée',
                 'required' => false,
-                'attr' => ['class' => 'fr-input', 'rows' => 3]
+                'attr' => ['class' => 'fr-input', 'rows' => 3],
             ])
             ->add('type', ChoiceType::class, [
                 'label' => 'Type de prestation',
@@ -31,20 +31,20 @@ class ServiceType extends AbstractType
                     'Individuel (Le client réserve un créneau dans vos horaires)' => Service::TYPE_INDIVIDUEL,
                     'Groupe (Vous créez des séances à horaires fixes)' => Service::TYPE_GROUPE,
                 ],
-                'attr' => ['class' => 'fr-select']
+                'attr' => ['class' => 'fr-select'],
             ])
             ->add('dureeMinutes', IntegerType::class, [
                 'label' => 'Durée (en minutes)',
-                'attr' => ['class' => 'fr-input', 'min' => 5]
+                'attr' => ['class' => 'fr-input', 'min' => 5],
             ])
             ->add('capaciteMax', IntegerType::class, [
                 'label' => 'Capacité maximale (Nombre de personnes)',
-                'attr' => ['class' => 'fr-input', 'min' => 1]
+                'attr' => ['class' => 'fr-input', 'min' => 1],
             ])
             ->add('isActive', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
                 'label' => 'Prestation active (visible pour les clients)',
                 'required' => false,
-                'attr' => ['class' => 'fr-toggle__input']
+                'attr' => ['class' => 'fr-toggle__input'],
             ])
         ;
     }

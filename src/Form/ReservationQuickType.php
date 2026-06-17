@@ -1,23 +1,23 @@
 <?php
+
 namespace App\Form;
 
 use App\Dto\ReservationQuickDto;
 use App\Entity\Resource;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\File;
 
 class ReservationQuickType extends AbstractType
 {
@@ -51,13 +51,13 @@ class ReservationQuickType extends AbstractType
                 'label' => 'Date de début',
                 'widget' => 'single_text',
                 'mapped' => false, // Virtuel
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('startTime', TimeType::class, [
                 'label' => 'Heure de début',
                 'widget' => 'single_text',
                 'mapped' => false,
-                'attr' => ['class' => 'fr-input', 'step' => 1800] // 30 min
+                'attr' => ['class' => 'fr-input', 'step' => 1800], // 30 min
             ])
 
             // --- FIN (On rajoute la date de fin) ---
@@ -65,13 +65,13 @@ class ReservationQuickType extends AbstractType
                 'label' => 'Date de fin',
                 'widget' => 'single_text',
                 'mapped' => false, // Virtuel
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('endTime', TimeType::class, [
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
                 'mapped' => false,
-                'attr' => ['class' => 'fr-input', 'step' => 1800]
+                'attr' => ['class' => 'fr-input', 'step' => 1800],
             ])
 
             // 👥 LISTE DES PARTICIPANTS (Collection)
@@ -79,7 +79,7 @@ class ReservationQuickType extends AbstractType
                 'entry_type' => EmailType::class, // Ou un UserAutocompleteType plus tard
                 'entry_options' => [
                     'label' => false,
-                    'attr' => ['placeholder' => 'nom@domaine.fr']
+                    'attr' => ['placeholder' => 'nom@domaine.fr'],
                 ],
                 'allow_add' => true,
                 'allow_delete' => true,
@@ -131,9 +131,9 @@ class ReservationQuickType extends AbstractType
                         'maxSize' => '25M',
                         'mimeTypes' => ['application/pdf', 'image/jpeg', 'image/png'],
                         'mimeTypesMessage' => 'Format invalide.',
-                    ])
-                ]
-            ])
+                    ]),
+                ],
+            ]),
         ],
     ]);
 

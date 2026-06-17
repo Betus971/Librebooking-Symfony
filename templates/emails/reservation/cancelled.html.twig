@@ -1,12 +1,12 @@
 {% extends 'emails/reservation/_layout.html.twig' %}
 
 {% block content %}
-    <h1 style="font-size:20px;margin:0 0 12px;color:#b45309;">Réservation annulée</h1>
+    <h1 style="font-size:20px;margin:0 0 12px;color:#b45309;">{{ 'email.cancelled_title'|trans }}</h1>
     <p style="margin:0 0 8px;line-height:1.5;">
-        Bonjour {{ series.owner.fname|default('') }},
+        {{ 'email.greeting'|trans({'%name%': series.owner.fname|default('')}) }}
     </p>
     <p style="margin:0 0 8px;line-height:1.5;">
-        Votre réservation a été annulée. Le créneau est de nouveau disponible.
+        {{ 'email.cancelled_body'|trans }}
     </p>
     {{ include('emails/reservation/_summary.html.twig') }}
 {% endblock %}

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use App\Entity\Resource;
@@ -10,7 +11,8 @@ class AvailabilityChecker
     public function __construct(
         private ReservationInstanceRepository $instances,
         private TimeBlockRepository $timeBlocks,
-    ) {}
+    ) {
+    }
 
     /**
      * Retourne true si aucun chevauchement d’instances pour la ressource et l’intervalle [start,end)
@@ -25,7 +27,9 @@ class AvailabilityChecker
 
         // 2) Layout de la ressource
         $schedule = $resource->getSchedule();
-        if (!$schedule) return false;
+        if (!$schedule) {
+            return false;
+        }
 
         // 2b) Vérification de la plage de validité du planning (startDate / endDate)
         $scheduleStart = $schedule->getStartDate();
@@ -39,7 +43,9 @@ class AvailabilityChecker
         }
 
         $layout = $schedule->getLayout();
-        if (!$layout) return false;
+        if (!$layout) {
+            return false;
+        }
 
         // 3) Précharger les créneaux ouverts
         $rows = $this->timeBlocks->findOpenBlocksByLayout($layout);
@@ -91,21 +97,28 @@ class AvailabilityChecker
     {
         $blocks = array_merge($openByDay['ALL'] ?? [], $openByDay[$dow] ?? []);
         // Normaliser 00:00:00 → 24:00:00 (minuit stocké comme début de journée suivante)
-        $blocks = array_map(fn($b) => [$b[0], $b[1] === '00:00:00' ? '24:00:00' : $b[1]], $blocks);
+        $blocks = array_map(fn ($b) => [$b[0], $b[1] === '00:00:00' ? '24:00:00' : $b[1]], $blocks);
         // Trier puis fusionner les blocs contigus / chevauchants
-        usort($blocks, fn($a, $b) => strcmp($a[0], $b[0]));
+        usort($blocks, fn ($a, $b) => strcmp($a[0], $b[0]));
         $merged = [];
         foreach ($blocks as $b) {
-            if (empty($merged)) { $merged[] = $b; continue; }
+            if (empty($merged)) {
+                $merged[] = $b;
+                continue;
+            }
             $last = count($merged) - 1;
             if ($b[0] <= $merged[$last][1]) {
-                if ($b[1] > $merged[$last][1]) $merged[$last][1] = $b[1];
+                if ($b[1] > $merged[$last][1]) {
+                    $merged[$last][1] = $b[1];
+                }
             } else {
                 $merged[] = $b;
             }
         }
         foreach ($merged as [$bStart, $bEnd]) {
-            if ($needStart >= $bStart && $needEnd <= $bEnd) return true;
+            if ($needStart >= $bStart && $needEnd <= $bEnd) {
+                return true;
+            }
         }
         return false;
     }

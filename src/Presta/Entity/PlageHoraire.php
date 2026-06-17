@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Presta\Entity;
 
 use Doctrine\DBAL\Types\Types;

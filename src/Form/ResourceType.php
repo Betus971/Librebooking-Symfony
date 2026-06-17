@@ -4,16 +4,14 @@ namespace App\Form;
 
 use App\Entity\Resource;
 use App\Entity\ResourceCategory;
-use App\Entity\Schedule;
-use App\Form\Type\DurationSimpleType;
 use App\Entity\ResourceGroup;
+use App\Entity\Schedule;
 use App\Form\Type\DurationUnitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -24,7 +22,7 @@ class ResourceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $toggle = fn(string $label) => [
+        $toggle = fn (string $label) => [
             'label' => $label,
             'required' => false,
             // PAS de classe fr-toggle, PAS de data-dsfr-toggle
@@ -33,7 +31,7 @@ class ResourceType extends AbstractType
         ];
 
         // Options communes pour les inputs/textarea DSFR
-        $inputOptions = fn(string $label, bool $required = false, ?string $help = null) => [
+        $inputOptions = fn (string $label, bool $required = false, ?string $help = null) => [
             'label' => $label,
             'required' => $required,
             'attr' => ['class' => 'fr-input'],
@@ -42,7 +40,7 @@ class ResourceType extends AbstractType
         ];
 
         // Options pour les EntityType (select)
-        $entityOptions = fn(string $label, string $placeholder, string $class, bool $required = false) => [
+        $entityOptions = fn (string $label, string $placeholder, string $class, bool $required = false) => [
             'class' => $class,
             'choice_label' => 'name',
             'placeholder' => $placeholder,
@@ -89,7 +87,7 @@ class ResourceType extends AbstractType
             ->add('description', TextareaType::class, array_merge(
                 $inputOptions('Description', false),
                 ['attr' => ['class' => 'fr-textarea']]
-        ))
+            ))
         ->add('notes', TextareaType::class, [
             'label'      => 'Équipements & caractéristiques',
             'required'   => false,
@@ -105,7 +103,7 @@ class ResourceType extends AbstractType
         ->add('maxParticipants', IntegerType::class, $inputOptions('Participants maximum', false))
         ->add('isActive', CheckboxType::class, $toggle('Actif'));
 
-// --- Règles d’accès (essentiel) ---
+        // --- Règles d’accès (essentiel) ---
         $builder
             ->add('requiresApproval', CheckboxType::class, $toggle('Approbation requise'))
             ->add('allowMultiday', CheckboxType::class, $toggle('Autoriser les réservations multi-jours'))
@@ -204,7 +202,7 @@ class ResourceType extends AbstractType
                 'default_unit' => 'd',
                 'help' => 'Ex. 90 j : on ne peut pas réserver plus de 90 jours à l’avance. Laisser vide = illimité.',
             ]);
- }
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {

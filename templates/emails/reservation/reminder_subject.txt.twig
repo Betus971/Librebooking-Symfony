@@ -1,1 +1,1 @@
-[Librebooking] Rappel — {{ series.title|default('Réservation') }} {{ instance.startDate|date('d/m à H:i') }}
+{{ 'email.subject_reminder'|trans({'%title%': series.title|default('email.default_title'|trans), '%when%': instance.startDate|date('d/m H:i')}) }}

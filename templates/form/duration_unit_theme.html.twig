@@ -1,10 +1,9 @@
 {% block duration_unit_widget %}
-    <div class="fr-grid-row fr-grid-row--gutters" style="margin-top: 0; padding-top: 0;">
-        <div class="fr-col-7 fr-col-md-8">
-            {# On utilise children['value'] avec des crochets pour éviter que Twig ne confonde avec le mot réservé ! #}
+    <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-7 md:col-span-8">
             {{ form_widget(form.children['value']) }}
         </div>
-        <div class="fr-col-5 fr-col-md-4">
+        <div class="col-span-5 md:col-span-4">
             {{ form_widget(form.children['unit']) }}
         </div>
     </div>

@@ -1,45 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Catalogue des ressources - Librebooking{% endblock %}
+{% block title %}{{ 'resource.catalog_title'|trans }} - Librebooking{% endblock %}
 
 {% block body %}
 <div class="max-w-7xl mx-auto py-8">
 
-    {# --- EN-TÊTE --- #}
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h2 class="text-3xl font-bold text-base-content">
-                Catalogue des ressources
-            </h2>
+            <h2 class="text-3xl font-bold text-base-content">{{ 'resource.catalog_title'|trans }}</h2>
             <div class="mt-2 flex items-center gap-2 text-sm text-base-content/70">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                <span>{{ resources|length }} ressource(s) trouvée(s)</span>
+                <span>{{ 'resource.count'|trans({'%count%': resources|length}) }}</span>
             </div>
         </div>
     </div>
 
-    {# --- BARRE DE FILTRES --- #}
     <div class="card bg-base-100 shadow-md border border-base-200 mb-8">
         <div class="card-body p-6">
             <form method="get" class="flex flex-col md:flex-row gap-4 items-end">
                 <div class="form-control w-full flex-1">
-                    <label for="q" class="label">
-                        <span class="label-text font-medium">Rechercher</span>
-                    </label>
+                    <label for="q" class="label"><span class="label-text font-medium">{{ 'resource.search'|trans }}</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
-                        <input type="text" name="q" id="q" value="{{ filters.q ?? '' }}" class="input input-bordered w-full pl-10" placeholder="Nom, lieu...">
+                        <input type="text" name="q" id="q" value="{{ filters.q ?? '' }}" class="input input-bordered w-full pl-10" placeholder="{{ 'resource.search_placeholder'|trans }}">
                     </div>
                 </div>
 
                 <div class="form-control w-full flex-1">
-                    <label for="schedule" class="label">
-                        <span class="label-text font-medium">Planning</span>
-                    </label>
+                    <label for="schedule" class="label"><span class="label-text font-medium">{{ 'resource.schedule'|trans }}</span></label>
                     <select id="schedule" name="schedule" class="select select-bordered w-full">
-                        <option value="">Tous les plannings</option>
+                        <option value="">{{ 'resource.all_schedules'|trans }}</option>
                         {% for s in schedules %}
                             <option value="{{ s.id }}" {{ (filters.schedule ?? null) == s.id ? 'selected' }}>{{ s.name }}</option>
                         {% endfor %}
@@ -47,51 +39,41 @@
                 </div>
 
                 <div class="form-control w-full flex-1">
-                    <label for="status" class="label">
-                        <span class="label-text font-medium">Statut</span>
-                    </label>
+                    <label for="status" class="label"><span class="label-text font-medium">{{ 'resource.status'|trans }}</span></label>
                     <select id="status" name="status" class="select select-bordered w-full">
                         {% set st = filters.status ?? 'active' %}
-                        <option value="all" {{ st == 'all' ? 'selected' }}>Tous</option>
-                        <option value="active" {{ st == 'active' ? 'selected' }}>Actives uniquement</option>
-                        <option value="inactive" {{ st == 'inactive' ? 'selected' }}>Inactives / Archivées</option>
+                        <option value="all" {{ st == 'all' ? 'selected' }}>{{ 'resource.status_all'|trans }}</option>
+                        <option value="active" {{ st == 'active' ? 'selected' }}>{{ 'resource.status_active'|trans }}</option>
+                        <option value="inactive" {{ st == 'inactive' ? 'selected' }}>{{ 'resource.status_inactive'|trans }}</option>
                     </select>
                 </div>
 
                 <div class="flex gap-2 w-full md:w-auto">
-                    <button type="submit" class="btn btn-primary flex-1 md:flex-none">
-                        Filtrer
-                    </button>
+                    <button type="submit" class="btn btn-primary flex-1 md:flex-none">{{ 'resource.filter'|trans }}</button>
                     {% if filters.q or filters.schedule or (filters.status and filters.status != 'all') %}
-                        <a href="{{ path('app_resource_index') }}" class="btn btn-outline flex-1 md:flex-none">
-                            Effacer
-                        </a>
+                        <a href="{{ path('app_resource_index') }}" class="btn btn-outline flex-1 md:flex-none">{{ 'resource.clear'|trans }}</a>
                     {% endif %}
                 </div>
-                
+
                 <input type="hidden" name="view" value="{{ view }}">
             </form>
         </div>
     </div>
 
-    {# --- VUES TOGGLE --- #}
     <div class="flex justify-end mb-4">
         <div class="join">
             <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'view': 'table'})) }}" class="btn join-item {{ view == 'table' ? 'btn-active' : '' }}">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                Tableau
+                {{ 'resource.view_table'|trans }}
             </a>
             <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'view': 'cards'})) }}" class="btn join-item {{ view == 'cards' ? 'btn-active' : '' }}">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                Cartes
+                {{ 'resource.view_cards'|trans }}
             </a>
         </div>
     </div>
 
-    {# === CONTENU === #}
-
     {% if view == 'cards' %}
-        {# --- VUE CARTES --- #}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {% for resource in resources %}
                 <div class="card bg-base-100 shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-base-200">
@@ -104,9 +86,7 @@
                             </div>
                         {% endif %}
                         <div class="absolute inset-0 bg-base-content/50 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-sm">
-                            <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="btn btn-primary shadow-lg">
-                                Voir détails
-                            </a>
+                            <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="btn btn-primary shadow-lg">{{ 'resource.view_details'|trans }}</a>
                         </div>
                     </figure>
                     <div class="card-body p-5">
@@ -115,16 +95,12 @@
                                 <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="hover:text-primary transition-colors">{{ resource.name }}</a>
                             </h3>
                             {% if resource.isActive %}
-                                <div class="badge badge-success badge-sm whitespace-nowrap">Active</div>
+                                <div class="badge badge-success badge-sm whitespace-nowrap">{{ 'resource.active'|trans }}</div>
                             {% else %}
-                                <div class="badge badge-ghost badge-sm whitespace-nowrap">Inactive</div>
+                                <div class="badge badge-ghost badge-sm whitespace-nowrap">{{ 'resource.inactive'|trans }}</div>
                             {% endif %}
                         </div>
-                        
-                        <p class="text-sm text-base-content/70 line-clamp-2 mb-4">
-                            {{ resource.description }}
-                        </p>
-                        
+                        <p class="text-sm text-base-content/70 line-clamp-2 mb-4">{{ resource.description }}</p>
                         <div class="mt-auto space-y-2 text-sm text-base-content/80">
                             {% if resource.location %}
                                 <div class="flex items-center">
@@ -135,7 +111,7 @@
                             {% if resource.maxParticipants %}
                                 <div class="flex items-center">
                                     <svg class="mr-1.5 h-4 w-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                    Jusqu'à {{ resource.maxParticipants }} pers.
+                                    {{ 'resource.up_to_people'|trans({'%count%': resource.maxParticipants}) }}
                                 </div>
                             {% endif %}
                         </div>
@@ -146,11 +122,9 @@
                     <div class="hero bg-base-100 rounded-box py-12 border-2 border-dashed border-base-300">
                         <div class="hero-content text-center">
                             <div class="max-w-md">
-                                <svg class="mx-auto h-12 w-12 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                                <h3 class="mt-2 text-lg font-bold">Aucune ressource trouvée</h3>
-                                <p class="py-2 text-base-content/60">Essayez de modifier vos filtres de recherche.</p>
+                                <svg class="mx-auto h-12 w-12 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                <h3 class="mt-2 text-lg font-bold">{{ 'resource.empty_title'|trans }}</h3>
+                                <p class="py-2 text-base-content/60">{{ 'resource.empty_text'|trans }}</p>
                             </div>
                         </div>
                     </div>
@@ -158,18 +132,17 @@
             {% endfor %}
         </div>
     {% else %}
-        {# --- VUE TABLEAU --- #}
         <div class="overflow-x-auto bg-base-100 rounded-box shadow-md border border-base-200">
             <table class="table table-zebra w-full">
                 <thead>
                     <tr>
-                        <th class="w-16">Image</th>
-                        <th class="w-1/4">Nom</th>
-                        <th class="hidden md:table-cell">Catégorie</th>
-                        <th class="hidden sm:table-cell">Lieu</th>
-                        <th class="text-center hidden lg:table-cell">Capacité</th>
-                        <th class="text-center">Statut</th>
-                        <th class="text-right">Actions</th>
+                        <th class="w-16">{{ 'resource.th_image'|trans }}</th>
+                        <th class="w-1/4">{{ 'resource.th_name'|trans }}</th>
+                        <th class="hidden md:table-cell">{{ 'resource.th_category'|trans }}</th>
+                        <th class="hidden sm:table-cell">{{ 'resource.th_location'|trans }}</th>
+                        <th class="text-center hidden lg:table-cell">{{ 'resource.th_capacity'|trans }}</th>
+                        <th class="text-center">{{ 'reservation.field.status'|trans }}</th>
+                        <th class="text-right">{{ 'common.actions'|trans }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -193,9 +166,7 @@
                                     <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="hover:text-primary transition-colors">{{ resource.name }}</a>
                                 </div>
                                 {% if resource.requiresApproval %}
-                                    <div class="mt-1">
-                                        <div class="badge badge-info badge-sm">Approbation requise</div>
-                                    </div>
+                                    <div class="mt-1"><div class="badge badge-info badge-sm">{{ 'resource.requires_approval'|trans }}</div></div>
                                 {% endif %}
                             </td>
                             <td class="hidden md:table-cell">
@@ -205,38 +176,31 @@
                                     <span class="text-base-content/50">-</span>
                                 {% endif %}
                             </td>
-                            <td class="hidden sm:table-cell text-base-content/80">
-                                {{ resource.location ?? '-' }}
-                            </td>
+                            <td class="hidden sm:table-cell text-base-content/80">{{ resource.location ?? '-' }}</td>
                             <td class="text-center hidden lg:table-cell text-base-content/80">
                                 {% if resource.maxParticipants %}
-                                    {{ resource.maxParticipants }} <span class="text-xs">pers.</span>
+                                    {{ resource.maxParticipants }} <span class="text-xs">{{ 'resource.people_short'|trans }}</span>
                                 {% else %}
                                     <span class="text-base-content/50">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if resource.isActive %}
-                                    <div class="badge badge-success badge-sm">Active</div>
+                                    <div class="badge badge-success badge-sm">{{ 'resource.active'|trans }}</div>
                                 {% else %}
-                                    <div class="badge badge-ghost badge-sm">Inactive</div>
+                                    <div class="badge badge-ghost badge-sm">{{ 'resource.inactive'|trans }}</div>
                                 {% endif %}
                             </td>
                             <td class="text-right">
-                                <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="btn btn-ghost btn-sm text-primary">Voir</a>
+                                <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="btn btn-ghost btn-sm text-primary">{{ 'resource.view'|trans }}</a>
                             </td>
                         </tr>
                     {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center py-12 text-base-content/60">
-                                Aucune ressource ne correspond à votre recherche.
-                            </td>
-                        </tr>
+                        <tr><td colspan="7" class="text-center py-12 text-base-content/60">{{ 'resource.no_match'|trans }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     {% endif %}
-
 </div>
 {% endblock %}

@@ -3,11 +3,11 @@
 namespace App\DataFixtures;
 
 use App\Entity\Layout;
+use App\Entity\ReservationStatus;
+use App\Entity\ReservationType;
 use App\Entity\Resource;
 use App\Entity\ResourceCategory;
 use App\Entity\ResourceGroup;
-use App\Entity\ReservationStatus;
-use App\Entity\ReservationType;
 use App\Entity\Schedule;
 use App\Entity\TimeBlock;
 use App\Entity\User;

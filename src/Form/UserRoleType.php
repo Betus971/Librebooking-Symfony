@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Form;
 
 use App\Entity\User;
@@ -32,7 +31,7 @@ class UserRoleType extends AbstractType
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer les droits',
-                'attr' => ['class' => 'fr-btn']
+                'attr' => ['class' => 'fr-btn'],
             ])
         ;
     }

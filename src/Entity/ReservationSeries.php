@@ -1,21 +1,20 @@
 <?php
+
 namespace App\Entity;
 
 use App\Repository\ReservationSeriesRepository;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity (repositoryClass: ReservationSeriesRepository::class)]
+#[ORM\Entity(repositoryClass: ReservationSeriesRepository::class)]
 #[ORM\Table(name: 'reservation_series')]
 class ReservationSeries
 {
     #[ORM\Id]
-    #[ORM\Column( type: 'integer', options: ['unsigned' => true])]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
     #[ORM\GeneratedValue]
     private ?int $id = null;
 

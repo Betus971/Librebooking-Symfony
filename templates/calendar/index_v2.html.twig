@@ -22,19 +22,15 @@
 {% endblock %}
 
 {% block body %}
-    <div class="fr-container fr-my-4w">
+    <div class="max-w-7xl mx-auto">
 
         {# ---- En-tête ---- #}
-        <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mb-3w">
-            <div class="fr-col-12 fr-col-md-6">
-                <h1 class="fr-h3 fr-mb-1w">{{ pageTitle }}</h1>
-                <p class="fr-badge fr-badge--info fr-badge--no-icon">Aperçu — ne remplace pas le planning principal</p>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <div>
+                <h1 class="text-2xl font-bold">{{ pageTitle }}</h1>
+                <span class="badge badge-info badge-sm mt-1">Aperçu — ne remplace pas le planning principal</span>
             </div>
-            <div class="fr-col-12 fr-col-md-6 fr-text--right">
-                <a href="{{ path('app_calendar') }}" class="fr-btn fr-btn--secondary fr-btn--sm fr-icon-arrow-left-line fr-btn--icon-left">
-                    Revenir au planning classique
-                </a>
-            </div>
+            <a href="{{ path('app_calendar') }}" class="btn btn-ghost btn-sm">‹ Revenir au planning classique</a>
         </div>
 
         {# ---- Carte calendrier ---- #}
@@ -44,8 +40,8 @@
             <div class="cal2-topbar">
                 <div class="cal2-topbar-left">
                     <h2 id="cal2-title" class="cal2-title"></h2>
-                    <button class="cal2-btn-icon" id="cal2-prev" aria-label="Précédent"><span class="fr-icon-arrow-left-s-line"></span></button>
-                    <button class="cal2-btn-icon" id="cal2-next" aria-label="Suivant"><span class="fr-icon-arrow-right-s-line"></span></button>
+                    <button class="cal2-btn-icon" id="cal2-prev" aria-label="Précédent">‹</button>
+                    <button class="cal2-btn-icon" id="cal2-next" aria-label="Suivant">›</button>
                     <button class="cal2-btn-today" id="cal2-today">Aujourd'hui</button>
                 </div>
                 <div class="cal2-topbar-right">
@@ -63,18 +59,14 @@
             </div>
 
             {# Sélecteur de ressource #}
-            <div class="fr-grid-row fr-mb-2w">
-                <div class="fr-col-12 fr-col-md-6">
-                    <div class="fr-select-group fr-mb-0">
-                        <label class="fr-label" for="resource-select-v2">Filtrer par ressource</label>
-                        <select class="fr-select" id="resource-select-v2">
-                            <option value="" selected>Toutes les ressources</option>
-                            {% for res in resources %}
-                                <option value="{{ res.id }}">{{ res.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+            <div class="mb-3 max-w-sm">
+                <label class="label" for="resource-select-v2"><span class="label-text">Filtrer par ressource</span></label>
+                <select class="select select-bordered w-full" id="resource-select-v2">
+                    <option value="" selected>Toutes les ressources</option>
+                    {% for res in resources %}
+                        <option value="{{ res.id }}">{{ res.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             {# Le calendrier FullCalendar s'injecte ici #}
@@ -84,10 +76,7 @@
                  data-new-url="{{ path('reservation_new') }}"
                  data-events-url="/fc-load-events"></div>
 
-            <p class="cal2-hint">
-                <span class="fr-icon-information-line" aria-hidden="true"></span>
-                Cliquez sur un créneau pour ajouter un événement.
-            </p>
+            <p class="cal2-hint">ℹ Cliquez sur un créneau pour ajouter un événement.</p>
         </div>
     </div>
 

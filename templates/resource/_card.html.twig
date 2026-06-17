@@ -1,74 +1,31 @@
-<div class="fr-grid-row fr-grid-row--gutters">
-    <div class="fr-col-12 fr-col-md-12">
+<div id="card-{{ resource.id }}" class="card md:card-side bg-base-100 border border-base-300 shadow-sm">
+    <figure class="md:w-64 shrink-0">
+        <img class="w-full h-48 md:h-full object-cover" src="{{ asset('image/amphi.jpg') }}" alt="Photo de {{ resource.name }}">
+    </figure>
+    <div class="card-body">
+        <h3 class="card-title">
+            <a href="{{ path('app_resource_show', {'id': resource.id}) }}" class="hover:text-primary">{{ resource.name }}</a>
+        </h3>
 
-<div id="card-{{ resource.id }}" class="fr-card fr-card--lg fr-card--horizontal">
-    <div class="fr-card__body">
-        <div class="fr-card__content">
-            <h3 class="fr-card__title">
-                <a href="{{ path('app_resource_show', {'id': resource.id}) }}">
-                    {{ resource.name }}
-                </a>
-            </h3>
+        {% if resource.description %}
+            <p class="text-sm text-base-content/70">{{ resource.description }}</p>
+        {% endif %}
 
-            {% if resource.description %}
-                <p class="fr-card__desc">{{ resource.description }}</p>
+        <div class="flex flex-wrap gap-2 mt-1">
+            {% if resource.maxParticipants is not null %}<span class="badge badge-outline">{{ resource.maxParticipants }} {{ 'common.places'|trans }}</span>{% endif %}
+            {% if resource.unitCost is not null %}<span class="badge badge-outline">{{ resource.unitCost }} €</span>{% endif %}
+            {% if resource.isActive %}
+                <span class="badge badge-success">{{ 'common.available'|trans }}</span>
+            {% else %}
+                <span class="badge badge-ghost">{{ 'common.unavailable'|trans }}</span>
             {% endif %}
-
-            <div class="fr-card__start">
-                <ul class="fr-tags-group">
-                    {% if resource.maxParticipants is not null %}
-                        <li><p class="fr-tag">{{ resource.maxParticipants }} places</p></li>
-                    {% endif %}
-                    {% if resource.unitCost is not null %}
-                        <li><p class="fr-tag">{{ resource.unitCost }} €</p></li>
-                    {% endif %}
-                    {% if resource.isActive %}
-                        <li><p class="fr-tag">Disponible</p></li>
-                    {% else %}
-                        <li><p class="fr-tag">Indisponible</p></li>
-                    {% endif %}
-                </ul>
-
-                {% if resource.contactInfo %}
-                    <p class="fr-card__detail fr-icon-mail-line">
-                        {{ resource.contactInfo }}
-                    </p>
-                {% endif %}
-            </div>
-
-            <div class="fr-card__end">
-                {% if resource.location %}
-                    <p class="fr-card__detail fr-icon-map-pin-2-line">
-                        {{ resource.location }}
-                    </p>
-                {% endif %}
-            </div>
         </div>
 
-        <div class="fr-card__footer">
-            <ul class="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-{#                <li>#}
-{#                    <a href="{{ path('app_resource_show', {'id': resource.id}) }}" class="fr-btn">#}
-{#                        Voir la fiche#}
-{#                    </a>#}
-{#                </li>#}
-                <li>
-                    <a href="#" class="fr-btn fr-btn--secondary">
-                        Réserver
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
+        {% if resource.contactInfo %}<p class="text-xs text-base-content/60 mt-2">✉ {{ resource.contactInfo }}</p>{% endif %}
+        {% if resource.location %}<p class="text-xs text-base-content/60">📍 {{ resource.location }}</p>{% endif %}
 
-    <div class="fr-card__header">
-        <div class="fr-card__img">
-            {# Image fixe en dur dans public/image/ (pas en DB) #}
-            <img class="fr-responsive-img"
-                 src="{{ asset('image/amphi.jpg') }}"
-                 alt="Photo de {{ resource.name }}" />
+        <div class="card-actions justify-end mt-3">
+            <a href="{{ path('reservation_new', {'resource': resource.id}) }}" class="btn btn-primary btn-sm">{{ 'common.book'|trans }}</a>
         </div>
-    </div>
-</div>
     </div>
 </div>

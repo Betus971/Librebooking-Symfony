@@ -26,8 +26,12 @@ final class PlanningController extends AbstractController
         $days    = (int) $request->query->get('days', 7);   // 1..31
         $typeId  = $request->query->getInt('typeId', 0);    // id de catégorie Ressource (optionnel)
 
-        if ($days < 1)  { $days = 1; }
-        if ($days > 31) { $days = 31; }
+        if ($days < 1) {
+            $days = 1;
+        }
+        if ($days > 31) {
+            $days = 31;
+        }
 
         // from = lundi de la semaine si vide
         if (!$fromStr) {
@@ -51,7 +55,7 @@ final class PlanningController extends AbstractController
             ], 200, [], ['json_encode_options' => \JSON_UNESCAPED_UNICODE]);
         }
 
-        $resIds = array_map(fn(Resource $r) => $r->getId(), $resources);
+        $resIds = array_map(fn (Resource $r) => $r->getId(), $resources);
 
         // --- Réservations chevauchant la plage (requête encapsulée côté repository) ---
         $bookings = $instances->findForPlanningRange($resIds, $from, $to);
@@ -92,9 +96,13 @@ final class PlanningController extends AbstractController
             // pour chaque ressource rattachée via la série
             foreach ($ri->getSeries()->getReservationResources() as $link) {
                 $res = $link->getResource();
-                if (!$res) continue;
+                if (!$res) {
+                    continue;
+                }
                 $rid = $res->getId();
-                if (!isset($resourceIdSet[$rid])) continue; // filtrage cohérent avec la liste
+                if (!isset($resourceIdSet[$rid])) {
+                    continue;
+                } // filtrage cohérent avec la liste
 
                 $outBookings[] = [
                     'resourceId' => $rid,
@@ -113,4 +121,3 @@ final class PlanningController extends AbstractController
         ], 200, [], ['json_encode_options' => \JSON_UNESCAPED_UNICODE]);
     }
 }
-

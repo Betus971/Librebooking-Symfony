@@ -103,7 +103,7 @@ class ReservationWorkflow
         if (!$this->can($action, $series)) {
             throw new \DomainException(match ($action) {
                 'approve' => "Action impossible : la réservation n'est pas en attente.",
-                'reject'  => "Action impossible : seule une réservation en attente peut être refusée.",
+                'reject'  => 'Action impossible : seule une réservation en attente peut être refusée.',
                 'cancel'  => "Action impossible : statut incompatible avec l'annulation.",
                 default   => "Transition interdite: $action",
             });

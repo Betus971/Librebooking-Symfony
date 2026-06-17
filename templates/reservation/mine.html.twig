@@ -1,37 +1,30 @@
 {% extends 'base.html.twig' %}
-{% block title %}Mes réservations - Librebooking{% endblock %}
+{% block title %}{{ 'reservation.my'|trans }} - Librebooking{% endblock %}
 {% block body %}
 <div class="max-w-7xl mx-auto py-8">
-
-    {# --- EN-TÊTE --- #}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-base-content">
-                Mes réservations
-            </h1>
-            <p class="mt-2 text-sm text-base-content/70">
-                Suivez l'état de vos demandes de ressources.
-            </p>
+            <h1 class="text-3xl font-extrabold text-base-content">{{ 'reservation.my'|trans }}</h1>
+            <p class="mt-2 text-sm text-base-content/70">{{ 'reservation.page.mine_subtitle'|trans }}</p>
         </div>
         <div class="flex gap-3">
             <a href="{{ path('reservation_index') }}" class="btn btn-ghost border border-base-300">
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Retour
+                {{ 'common.back'|trans }}
             </a>
             <a href="{{ path('reservation_new') }}" class="btn btn-primary">
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Nouvelle demande
+                {{ 'reservation.action.new'|trans }}
             </a>
         </div>
     </div>
 
-    {# --- CONTENU --- #}
     {% if series is empty %}
         <div class="alert alert-info shadow-sm bg-info/10 text-info border border-info/20">
             <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <div>
-                <h3 class="font-bold">Aucune réservation</h3>
-                <div class="text-sm">Vous n'avez effectué aucune demande de réservation pour le moment.</div>
+                <h3 class="font-bold">{{ 'reservation.page.empty_title'|trans }}</h3>
+                <div class="text-sm">{{ 'reservation.page.empty_text'|trans }}</div>
             </div>
         </div>
     {% else %}
@@ -40,43 +33,29 @@
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr class="bg-base-200 text-base-content">
-                            <th class="w-1/3">Titre de la réservation</th>
-                            <th>Ressource(s)</th>
-                            <th>Prochaine séance</th>
-                            <th>Statut</th>
-                            <th class="text-right">Actions</th>
+                            <th class="w-1/3">{{ 'reservation.field.title'|trans }}</th>
+                            <th>{{ 'reservation.resources'|trans }}</th>
+                            <th>{{ 'reservation.page.next_session'|trans }}</th>
+                            <th>{{ 'reservation.field.status'|trans }}</th>
+                            <th class="text-right">{{ 'common.actions'|trans }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for s in series %}
                             <tr class="hover">
-                                {# TITRE & TYPE #}
                                 <td>
-                                    <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="font-bold text-primary hover:text-primary-focus">
-                                        {{ s.title|default('Série #' ~ s.id) }}
-                                    </a>
-                                    {% if s.type %}
-                                        <div class="text-xs text-base-content/60 mt-1">{{ s.type.label }}</div>
-                                    {% endif %}
+                                    <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="font-bold text-primary hover:text-primary-focus">{{ s.title|default('#' ~ s.id) }}</a>
+                                    {% if s.type %}<div class="text-xs text-base-content/60 mt-1">{{ s.type.label }}</div>{% endif %}
                                 </td>
-
-                                {# RESSOURCES #}
                                 <td>
                                     <div class="flex flex-wrap gap-2">
                                         {% for lien in s.reservationResources %}
-                                            <span class="badge badge-primary badge-outline badge-sm">
-                                                {{ lien.resource.name }}
-                                                {% if lien.resource.category %}
-                                                    ({{ lien.resource.category.name }})
-                                                {% endif %}
-                                            </span>
+                                            <span class="badge badge-primary badge-outline badge-sm">{{ lien.resource.name }}{% if lien.resource.category %} ({{ lien.resource.category.name }}){% endif %}</span>
                                         {% else %}
                                             <span class="text-base-content/40">-</span>
                                         {% endfor %}
                                     </div>
                                 </td>
-
-                                {# PROCHAINE SÉANCE #}
                                 <td>
                                     {% set next = s.nextReservation %}
                                     {% if next %}
@@ -84,43 +63,28 @@
                                             <svg class="mr-1.5 h-4 w-4 mt-0.5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                             <div>
                                                 <div class="font-bold">{{ next.startDate|date('d/m/Y') }}</div>
-                                                <div class="text-xs opacity-70">à {{ next.startDate|date('H:i') }}</div>
+                                                <div class="text-xs opacity-70">{{ next.startDate|date('H:i') }}</div>
                                             </div>
                                         </div>
                                     {% else %}
-                                        <span class="badge badge-ghost badge-sm">
-                                            Terminée / Passée
-                                        </span>
+                                        <span class="badge badge-ghost badge-sm">{{ 'reservation.page.past'|trans }}</span>
                                     {% endif %}
                                 </td>
-
-                                {# STATUT #}
                                 <td>
                                     {% if s.status %}
                                         {% set badgeClasses = 'badge-info' %}
-                                        
-                                        {% if s.status.id == 1 %}        {# En attente #}
-                                            {% set badgeClasses = 'badge-warning' %}
-                                        {% elseif s.status.id == 2 %}    {# Approuvée #}
-                                            {% set badgeClasses = 'badge-success' %}
-                                        {% elseif s.status.id == 3 %}    {# Refusée #}
-                                            {% set badgeClasses = 'badge-error' %}
-                                        {% elseif s.status.id == 4 %}    {# Annulée #}
-                                            {% set badgeClasses = 'badge-ghost' %}
-                                        {% endif %}
-
-                                        <span class="badge {{ badgeClasses }} badge-sm">
-                                            {{ s.status.label }}
-                                        </span>
+                                        {% if s.status.id == 1 %}{% set badgeClasses = 'badge-warning' %}
+                                        {% elseif s.status.id == 2 %}{% set badgeClasses = 'badge-success' %}
+                                        {% elseif s.status.id == 3 %}{% set badgeClasses = 'badge-error' %}
+                                        {% elseif s.status.id == 4 %}{% set badgeClasses = 'badge-ghost' %}{% endif %}
+                                        <span class="badge {{ badgeClasses }} badge-sm">{{ s.status.label }}</span>
                                     {% else %}
                                         <span class="text-base-content/40">-</span>
                                     {% endif %}
                                 </td>
-
-                                {# ACTIONS #}
                                 <td class="text-right">
                                     <a href="{{ path('reservation_show', {uuid: s.uuid}) }}" class="btn btn-sm btn-ghost text-primary">
-                                        Détails
+                                        {{ 'common.details'|trans }}
                                         <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                     </a>
                                 </td>

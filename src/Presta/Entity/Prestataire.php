@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Presta\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\User;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'presta_prestataire')]

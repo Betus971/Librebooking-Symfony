@@ -1,17 +1,15 @@
 {% extends 'base.html.twig' %}
-{% block title %}Réservations - Librebooking{% endblock %}
+{% block title %}{{ 'reservation.page.list_title'|trans }} - Librebooking{% endblock %}
 {% block body %}
 <div class="max-w-7xl mx-auto py-8">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-base-content">
-                Réservations
-            </h1>
+            <h1 class="text-3xl font-extrabold text-base-content">{{ 'reservation.page.list_title'|trans }}</h1>
         </div>
         <div class="flex gap-3">
             <a href="{{ path('reservation_new') }}" class="btn btn-primary">
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Nouvelle réservation
+                {{ 'menu.new_reservation'|trans }}
             </a>
         </div>
     </div>
@@ -21,26 +19,20 @@
             <table class="table table-zebra w-full">
                 <thead>
                     <tr class="bg-base-200 text-base-content">
-                        <th>Titre</th>
-                        <th>Date de création</th>
+                        <th>{{ 'reservation.field.title'|trans }}</th>
+                        <th>{{ 'reservation.field.created_at'|trans }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in series %}
                         <tr class="hover">
                             <td>
-                                <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="font-bold text-primary hover:text-primary-focus">
-                                    {{ s.title }}
-                                </a>
+                                <a href="{{ path('reservation_show', {'uuid': s.uuid}) }}" class="font-bold text-primary hover:text-primary-focus">{{ s.title }}</a>
                             </td>
-                            <td class="text-base-content/70">
-                                {{ s.dateCreated|date('d/m/Y H:i') }}
-                            </td>
+                            <td class="text-base-content/70">{{ s.dateCreated|date('d/m/Y H:i') }}</td>
                         </tr>
                     {% else %}
-                        <tr>
-                            <td colspan="2" class="text-center text-base-content/50 py-4">Aucune réservation.</td>
-                        </tr>
+                        <tr><td colspan="2" class="text-center text-base-content/50 py-4">{{ 'reservation.none'|trans }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

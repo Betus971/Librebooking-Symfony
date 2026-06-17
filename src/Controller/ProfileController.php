@@ -25,7 +25,7 @@ class ProfileController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', $translator->trans('profile.success'));
-            
+
             return $this->redirectToRoute('app_profile');
         }
 

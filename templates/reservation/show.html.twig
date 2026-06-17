@@ -1,56 +1,32 @@
 {% extends 'base.html.twig' %}
-{% block title %}Réservation - Librebooking{% endblock %}
+{% block title %}{{ 'reservation.title'|trans }} - Librebooking{% endblock %}
 {% block body %}
 <div class="max-w-7xl mx-auto py-8">
 
-    {# --- FIL D'ARIANE / RETOUR --- #}
     <div class="mb-8">
         <a href="{{ path('reservation_mine') }}" class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content">
             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Retour à mes réservations
+            {{ 'reservation.page.back_to_mine'|trans }}
         </a>
     </div>
 
     <div class="lg:grid lg:grid-cols-3 lg:gap-8">
-
-        {# ========================================== #}
-        {# COLONNE GAUCHE : Détails et Calendrier     #}
-        {# ========================================== #}
         <div class="lg:col-span-2 space-y-8">
-            
             <div>
-                <h1 class="text-3xl font-extrabold text-base-content mb-4 tracking-tight">
-                    {{ series.title|default('Réservation sans titre') }}
-                </h1>
+                <h1 class="text-3xl font-extrabold text-base-content mb-4 tracking-tight">{{ series.title|default('reservation.page.untitled'|trans) }}</h1>
 
-                {# --- BADGES STATUT ET TYPE --- #}
                 <div class="flex flex-wrap gap-3 mb-6">
                     {% if series.status %}
                         {% set badgeClasses = 'badge-info' %}
-                        
-                        {% if series.status.id == 1 %}        {# En attente #}
-                            {% set badgeClasses = 'badge-warning' %}
-                        {% elseif series.status.id == 2 %}    {# Approuvée #}
-                            {% set badgeClasses = 'badge-success' %}
-                        {% elseif series.status.id == 3 %}    {# Refusée #}
-                            {% set badgeClasses = 'badge-error' %}
-                        {% elseif series.status.id == 4 %}    {# Annulée #}
-                            {% set badgeClasses = 'badge-ghost' %}
-                        {% endif %}
-
-                        <span class="badge {{ badgeClasses }} badge-lg font-semibold">
-                            {{ series.status.label }}
-                        </span>
+                        {% if series.status.id == 1 %}{% set badgeClasses = 'badge-warning' %}
+                        {% elseif series.status.id == 2 %}{% set badgeClasses = 'badge-success' %}
+                        {% elseif series.status.id == 3 %}{% set badgeClasses = 'badge-error' %}
+                        {% elseif series.status.id == 4 %}{% set badgeClasses = 'badge-ghost' %}{% endif %}
+                        <span class="badge {{ badgeClasses }} badge-lg font-semibold">{{ series.status.label }}</span>
                     {% endif %}
-
-                    {% if series.type %}
-                        <span class="badge badge-outline badge-lg font-medium">
-                            {{ series.type.label }}
-                        </span>
-                    {% endif %}
+                    {% if series.type %}<span class="badge badge-outline badge-lg font-medium">{{ series.type.label }}</span>{% endif %}
                 </div>
 
-                {# --- DESCRIPTION --- #}
                 {% if series.description %}
                     <div class="alert shadow-sm bg-base-200 border-l-4 border-l-primary rounded-none rounded-r-box">
                         <p class="whitespace-pre-wrap">{{ series.description }}</p>
@@ -58,42 +34,30 @@
                 {% endif %}
             </div>
 
-            {# --- LISTE DES SÉANCES --- #}
             <div>
                 <h2 class="text-xl font-bold text-base-content mb-4 flex items-center">
                     <svg class="mr-2 h-6 w-6 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Calendrier des séances
+                    {{ 'reservation.page.sessions_calendar'|trans }}
                 </h2>
-                
                 <div class="card bg-base-100 shadow-xl border border-base-200">
                     <div class="overflow-x-auto">
                         <table class="table table-zebra w-full">
                             <thead>
                                 <tr class="bg-base-200 text-base-content">
-                                    <th>Date</th>
-                                    <th>Horaire</th>
-                                    <th>Référence</th>
+                                    <th>{{ 'reservation.page.date'|trans }}</th>
+                                    <th>{{ 'reservation.page.time'|trans }}</th>
+                                    <th>{{ 'reservation.field.reference'|trans }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for instance in series.instances %}
                                     <tr class="hover">
-                                        <td class="font-bold capitalize">
-                                            {{ instance.startDate|format_datetime(locale='fr', pattern='EEEE d MMMM y') }}
-                                        </td>
-                                        <td class="text-base-content/70">
-                                            {{ instance.startDate|date('H:i') }} - {{ instance.endDate|date('H:i') }}
-                                        </td>
-                                        <td class="text-base-content/60 font-mono text-sm">
-                                            {{ instance.referenceNumber|default('-') }}
-                                        </td>
+                                        <td class="font-bold capitalize">{{ instance.startDate|format_datetime(locale=app.request.locale, pattern='EEEE d MMMM y') }}</td>
+                                        <td class="text-base-content/70">{{ instance.startDate|date('H:i') }} - {{ instance.endDate|date('H:i') }}</td>
+                                        <td class="text-base-content/60 font-mono text-sm">{{ instance.referenceNumber|default('-') }}</td>
                                     </tr>
                                 {% else %}
-                                    <tr>
-                                        <td colspan="3" class="text-center text-base-content/50 py-8">
-                                            Aucune date enregistrée pour cette série.
-                                        </td>
-                                    </tr>
+                                    <tr><td colspan="3" class="text-center text-base-content/50 py-8">{{ 'reservation.page.no_dates'|trans }}</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -102,54 +66,40 @@
             </div>
         </div>
 
-        {# ========================================== #}
-        {# COLONNE DROITE : Ressources, Contact, Actions #}
-        {# ========================================== #}
         <div class="mt-8 lg:mt-0">
             <div class="card bg-base-100 shadow-xl border border-base-200 sticky top-8">
                 <div class="card-body p-6 sm:p-8">
-
-                    {# --- RESSOURCES --- #}
                     <div>
                         <h3 class="card-title text-lg mb-4 flex items-center text-primary">
                             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                            Ressources réservées
+                            {{ 'reservation.resources'|trans }}
                         </h3>
-                        
                         {% if series.reservationResources is not empty %}
                             <div class="flex flex-wrap gap-2">
                                 {% for link in series.reservationResources %}
-                                    <span class="badge badge-outline badge-lg gap-1">
-                                        {{ link.resource.name }}
-                                        {% if link.resource.category %}
-                                            <span class="opacity-50 text-xs">({{ link.resource.category.name }})</span>
-                                        {% endif %}
-                                    </span>
+                                    <span class="badge badge-outline badge-lg gap-1">{{ link.resource.name }}{% if link.resource.category %} <span class="opacity-50 text-xs">({{ link.resource.category.name }})</span>{% endif %}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            <p class="text-sm text-base-content/50 italic">Aucune ressource associée.</p>
+                            <p class="text-sm text-base-content/50 italic">{{ 'reservation.page.no_resource'|trans }}</p>
                         {% endif %}
                     </div>
 
                     <div class="divider my-4"></div>
 
-                    {# --- INFORMATIONS & DEMANDEUR --- #}
                     <div>
                         <h3 class="card-title text-lg mb-4 flex items-center text-primary">
                             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Informations
+                            {{ 'reservation.page.info'|trans }}
                         </h3>
-
                         <div class="space-y-4">
                             <div>
-                                <p class="text-sm font-medium text-base-content/60">Créée le</p>
-                                <p class="mt-1 text-sm font-bold">{{ series.dateCreated|date('d/m/Y à H:i') }}</p>
+                                <p class="text-sm font-medium text-base-content/60">{{ 'reservation.field.created_at'|trans }}</p>
+                                <p class="mt-1 text-sm font-bold">{{ series.dateCreated|date('d/m/Y H:i') }}</p>
                             </div>
-
                             {% if series.owner %}
                                 <div class="bg-base-200 rounded-box p-4">
-                                    <p class="text-sm font-medium text-base-content/60 mb-1">Demandeur</p>
+                                    <p class="text-sm font-medium text-base-content/60 mb-1">{{ 'reservation.field.owner'|trans }}</p>
                                     <p class="text-sm font-bold">{{ series.owner.fname|capitalize }} {{ series.owner.lname|upper }}</p>
                                     <a href="mailto:{{ series.owner.email }}" class="text-sm link link-primary break-all">{{ series.owner.email }}</a>
                                 </div>
@@ -159,43 +109,38 @@
 
                     <div class="divider my-4"></div>
 
-                    {# --- ACTIONS --- #}
                     <div>
                         <h3 class="card-title text-lg mb-4 flex items-center text-primary">
                             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                            Actions
+                            {{ 'common.actions'|trans }}
                         </h3>
-                        
                         <div class="space-y-3">
                             <button disabled class="btn btn-disabled w-full">
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                Modifier la demande
+                                {{ 'reservation.page.edit_request'|trans }}
                             </button>
 
-                            {# Check-in : visible pour une réservation approuvée (statut 2) #}
                             {% if series.status and series.status.id == 2 %}
                                 <form method="post" action="{{ path('reservation_checkin', {'uuid': series.uuid}) }}">
                                     <input type="hidden" name="_token" value="{{ csrf_token('checkin' ~ series.id) }}">
                                     <button type="submit" class="btn btn-outline btn-success w-full">
                                         <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                        Confirmer mon arrivée (check-in)
+                                        {{ 'reservation.page.checkin'|trans }}
                                     </button>
                                 </form>
                             {% endif %}
 
-                            {# On n'affiche le bouton annuler que si ce n'est pas DÉJÀ refusé (3) ou annulé (4) #}
                             {% if series.status and series.status.id not in [3, 4] %}
-                                <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler définitivement cette réservation ?');">
+                                <form method="post" action="{{ path('reservation_cancel', {'uuid': series.uuid}) }}" onsubmit="return confirm('{{ 'reservation.page.cancel_confirm'|trans|e('js') }}');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ series.id) }}">
                                     <button type="submit" class="btn btn-outline btn-error w-full">
                                         <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        Annuler la réservation
+                                        {{ 'reservation.action.cancel'|trans }}
                                     </button>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

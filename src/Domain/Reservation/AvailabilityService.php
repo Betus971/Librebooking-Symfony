@@ -4,7 +4,6 @@ namespace App\Domain\Reservation;
 
 use App\Domain\Reservation\Checker\ResourceRulesChecker;
 use App\Entity\Resource;
-use App\Entity\TimeBlock;
 use App\Repository\BlackoutInstanceRepository;
 use App\Repository\ReservationInstanceRepository;
 
@@ -14,12 +13,13 @@ class AvailabilityService
         private ReservationInstanceRepository $instances,
         private BlackoutInstanceRepository $blackouts,
         private ResourceRulesChecker $rules,
-    ) {}
+    ) {
+    }
 
     /** Indexe les périodes occupées (réservations + blackouts) par ressource sur l'intervalle donné. */
     public function busyIndex(array $resources, \DateTimeInterface $start, \DateTimeInterface $end): array
     {
-        $ids = array_map(fn($r) => $r->getId(), $resources);
+        $ids = array_map(fn ($r) => $r->getId(), $resources);
 
         $rows1 = $this->instances->busyIntervalsForResourcesBetween($ids, $start, $end);
         $rows2 = $this->blackouts?->busyIntervalsForResourcesBetween($ids, $start, $end) ?? []; // si pas d’entité → tableau vide
@@ -53,7 +53,7 @@ class AvailabilityService
 
         $openBlocks = array_filter(
             $layout->getTimeBlocks()->toArray(),
-            fn($b) => $b->isOpen()
+            fn ($b) => $b->isOpen()
                 && ($b->getDayOfWeek() === null || $b->getDayOfWeek() === $currentDow)
         );
 
@@ -109,7 +109,7 @@ class AvailabilityService
 
         $openBlocks = array_filter(
             $layout->getTimeBlocks()->toArray(),
-            fn($b) => $b->isOpen()
+            fn ($b) => $b->isOpen()
                 && ($b->getDayOfWeek() === null || $b->getDayOfWeek() === $currentDow)
         );
 
@@ -151,17 +151,27 @@ class AvailabilityService
             $next = [];
             foreach ($opens as [$os,$oe]) {
                 // pas d'overlap
-                if ($be <= $os || $bs >= $oe) { $next[] = [$os,$oe]; continue; }
+                if ($be <= $os || $bs >= $oe) {
+                    $next[] = [$os,$oe];
+                    continue;
+                }
                 // left piece
-                if ($bs > $os) { $next[] = [$os, $bs]; }
+                if ($bs > $os) {
+                    $next[] = [$os, $bs];
+                }
                 // right piece
-                if ($be < $oe) { $next[] = [$be, $oe]; }
+                if ($be < $oe) {
+                    $next[] = [$be, $oe];
+                }
             }
             $opens = $next;
         }
         return $opens;
     }
 
-    private function hms(\DateTimeInterface $t): array { return [(int)$t->format('H'), (int)$t->format('i'), 0]; }
+    private function hms(\DateTimeInterface $t): array
+    {
+        return [(int)$t->format('H'), (int)$t->format('i'), 0];
+    }
 
 }

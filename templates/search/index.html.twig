@@ -1,83 +1,48 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SearchController!{% endblock %}
+{% block title %}{{ 'search.breadcrumb'|trans }} - Librebooking{% endblock %}
 
-{% block body %}<div class="fr-container fr-my-4w">
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-sm breadcrumbs mb-4">
+        <ul>
+            <li><a href="{{ path('app_home') }}">{{ 'common.home'|trans }}</a></li>
+            <li>{{ 'search.breadcrumb'|trans }}</li>
+        </ul>
+    </div>
 
-    {# Fil d'ariane #}
-    <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
-        <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-1">Voir le fil d’ariane</button>
-        <div class="fr-collapse" id="breadcrumb-1">
-            <ol class="fr-breadcrumb__list">
-                <li><a class="fr-breadcrumb__link" href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a class="fr-breadcrumb__link" aria-current="page">Recherche</a></li>
-            </ol>
-        </div>
-    </nav>
-
-    <h1 class="fr-h1 fr-mt-2w">Salles disponibles</h1>
-    <p class="fr-text--lead">
-        Résultats pour le <strong>{{ searched_date|date('d/m/Y') }}</strong>
-    </p>
+    <h1 class="text-3xl font-extrabold mb-1">{{ 'search.title'|trans }}</h1>
+    <p class="text-base-content/60 mb-6">{{ 'search.results_for'|trans }} <strong>{{ searched_date|date('d/m/Y') }}</strong></p>
 
     {% if resources is empty %}
-        <div class="fr-alert fr-alert--warning fr-mb-4w">
-            <h3 class="fr-alert__title">Aucune salle trouvée</h3>
-            <p>Essayez de chercher une autre catégorie.</p>
-            <a href="{{ path('app_home') }}" class="fr-btn fr-btn--secondary fr-mt-2w">Retour à l'accueil</a>
+        <div class="alert alert-warning shadow-sm">
+            <div>
+                <h3 class="font-bold">{{ 'search.empty_title'|trans }}</h3>
+                <p class="text-sm">{{ 'search.empty_text'|trans }} <a href="{{ path('app_home') }}" class="link">{{ 'search.back_home'|trans }}</a></p>
+            </div>
         </div>
     {% else %}
-
-        <div class="fr-grid-row fr-grid-row--gutters">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for resource in resources %}
-                {#
-                ✅ CORRECTION ICI : On utilise 'uploads/resources/' comme dans ta vue qui marche.
-                J'ai gardé le placeholder gris en secours si l'image 'amphi' n'existe pas,
-                mais tu peux remettre ton image par défaut si tu préfères.
-                #}
                 {% set imgPath = resource.imageName ? asset('uploads/resources/' ~ resource.imageName) : 'https://placehold.co/600x400?text=Salle' %}
-
-                <div class="fr-col-12 fr-col-md-6 fr-col-lg-4">
-                    <div class="fr-card fr-enlarge-link">
-
-                        {# 1. BODY (Contenu) #}
-                        <div class="fr-card__body">
-                            <div class="fr-card__content">
-                                <h3 class="fr-card__title">
-                                    <a href="{{ path('app_resource_show', {id: resource.id}) }}">{{ resource.name }}</a>
-                                </h3>
-                                <p class="fr-card__desc">
-                                    {{ resource.description|default('')|u.truncate(80, '...') }}
-                                </p>
-                                <div class="fr-card__start">
-                                    <ul class="fr-tags-group">
-                                        <li><p class="fr-tag fr-tag--sm fr-tag--green-emerald">Disponible</p></li>
-                                        <li><p class="fr-tag fr-tag--sm">{{ resource.category.name ?? 'Autre' }}</p></li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            {# FOOTER (Le bouton SANS icône) #}
-                            <div class="fr-card__footer">
-                                <a href="{{ path('reservation_new', {'resource': resource.id, 'date': searched_date}) }}"
-                                   class="fr-btn fr-btn--secondary">
-                                    Réserver ce jour-là
-                                </a>
-                            </div>
+                <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+                    <figure class="h-48"><img src="{{ imgPath }}" alt="{{ resource.name }}" class="w-full h-full object-cover"></figure>
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <a href="{{ path('app_resource_show', {id: resource.id}) }}" class="hover:text-primary">{{ resource.name }}</a>
+                        </h3>
+                        <p class="text-sm text-base-content/70">{{ resource.description|default('')|u.truncate(80, '...') }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="badge badge-success badge-sm">{{ 'common.available'|trans }}</span>
+                            <span class="badge badge-sm">{{ resource.category.name ?? 'search.other'|trans }}</span>
                         </div>
-
-                        {# 2. HEADER (L'image) - Placé après le body comme dans ton modèle #}
-                        <div class="fr-card__header">
-                            <div class="fr-card__img">
-                                <img src="{{ imgPath }}" class="fr-responsive-img" alt="" style="object-fit: cover; height: 200px; width: 100%;">
-                            </div>
+                        <div class="card-actions justify-end mt-2">
+                            <a href="{{ path('reservation_new', {'resource': resource.id, 'date': searched_date}) }}" class="btn btn-primary btn-sm">{{ 'search.book_that_day'|trans }}</a>
                         </div>
-
                     </div>
                 </div>
             {% endfor %}
         </div>
-
     {% endif %}
-    </div>
+</div>
 {% endblock %}

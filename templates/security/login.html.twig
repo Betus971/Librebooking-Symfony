@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion - Librebooking{% endblock %}
+{% block title %}{{ 'login.title'|trans }} - Librebooking{% endblock %}
 
 {% block body %}
 <div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -16,9 +16,9 @@
             {{ 'login.title'|trans }}
         </h2>
         <p class="mt-2 text-sm text-base-content/70">
-            Ou
+            {{ 'login.or'|trans }}
             <a href="{{ path('app_register') }}" class="link link-primary font-semibold transition-colors">
-                créez un compte gratuitement
+                {{ 'login.create_account'|trans }}
             </a>
         </p>
     </div>
@@ -27,6 +27,7 @@
         <div class="card bg-base-100 shadow-xl border border-base-300">
             <div class="card-body sm:p-10">
                 <form class="space-y-6" method="post">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                     {% if error %}
                         <div class="alert alert-error border border-error/20 bg-error/5 text-error-content shadow-sm p-4 rounded-xl">
                             <div class="flex items-center gap-2 text-sm">
@@ -41,8 +42,8 @@
                             <div class="flex items-center gap-2 text-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span>
-                                    Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
-                                    <a href="{{ path('app_logout') }}" class="font-bold underline hover:text-info-content/80">Se déconnecter</a>
+                                    {{ 'login.connected_as'|trans({'%name%': app.user.userIdentifier}) }}
+                                    <a href="{{ path('app_logout') }}" class="font-bold underline hover:text-info-content/80">{{ 'login.logout'|trans }}</a>
                                 </span>
                             </div>
                         </div>
@@ -50,7 +51,7 @@
 
                     <div class="form-control w-full">
                         <label for="inputEmail" class="label">
-                            <span class="label-text font-semibold text-base-content/80">Adresse email</span>
+                            <span class="label-text font-semibold text-base-content/80">{{ 'login.email_label'|trans }}</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -59,13 +60,13 @@
                                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                                 </svg>
                             </div>
-                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="vous@exemple.com" autocomplete="email" required autofocus>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="{{ 'login.email_placeholder'|trans }}" autocomplete="email" required autofocus>
                         </div>
                     </div>
 
                     <div class="form-control w-full">
                         <label for="inputPassword" class="label">
-                            <span class="label-text font-semibold text-base-content/80">Mot de passe</span>
+                            <span class="label-text font-semibold text-base-content/80">{{ 'login.password_label'|trans }}</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -80,12 +81,12 @@
                     <div class="flex items-center justify-between">
                         <label class="label cursor-pointer justify-start gap-3">
                             <input id="remember_me" name="_remember_me" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md">
-                            <span class="label-text text-base-content/80 font-medium">Se souvenir de moi</span>
+                            <span class="label-text text-base-content/80 font-medium">{{ 'login.remember_me'|trans }}</span>
                         </label>
 
                         <div class="text-sm">
                             <a href="#" class="link link-primary font-medium">
-                                Mot de passe oublié ?
+                                {{ 'login.forgot'|trans }}
                             </a>
                         </div>
                     </div>
@@ -94,7 +95,7 @@
                         {{ 'login.sign_in'|trans }}
                     </button>
                     
-                    <div class="divider text-base-content/30 text-xs my-6">Ou</div>
+                    <div class="divider text-base-content/30 text-xs my-6">{{ 'login.or'|trans }}</div>
 
                     <a href="{{ path('connect_google_start') }}" class="btn btn-outline btn-sm rounded-xl w-full bg-base-100 hover:bg-base-200 text-base-content border-base-300 font-bold">
                         <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

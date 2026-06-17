@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
@@ -106,11 +107,14 @@ final class DurationUnitType extends AbstractType implements DataMapperInterface
 
         // Choix de l'unité "propre"
         if (in_array('d', $allowed, true) && $viewData % 1440 === 0) {
-            $unit  = 'd'; $value = intdiv($viewData, 1440);
+            $unit  = 'd';
+            $value = intdiv($viewData, 1440);
         } elseif (in_array('h', $allowed, true) && $viewData % 60 === 0) {
-            $unit  = 'h'; $value = intdiv($viewData, 60);
+            $unit  = 'h';
+            $value = intdiv($viewData, 60);
         } elseif (in_array('m', $allowed, true)) {
-            $unit  = 'm'; $value = $viewData;
+            $unit  = 'm';
+            $value = $viewData;
         } else {
             $unit   = $allowed[0];
             $factor = $unit === 'd' ? 1440 : 60;
@@ -146,7 +150,9 @@ final class DurationUnitType extends AbstractType implements DataMapperInterface
         }
 
         // Clamp de l’unité
-        if (!$unit) { $unit = $default; }
+        if (!$unit) {
+            $unit = $default;
+        }
         if (!in_array($unit, $allowed, true)) {
             $unit = $allowed[0];
         }
@@ -170,8 +176,14 @@ final class DurationUnitType extends AbstractType implements DataMapperInterface
         ]);
 
         $resolver->setAllowedValues('allowed_units', function ($v) {
-            if (!is_array($v) || empty($v)) return false;
-            foreach ($v as $u) if (!in_array($u, ['m', 'h', 'd'], true)) return false;
+            if (!is_array($v) || empty($v)) {
+                return false;
+            }
+            foreach ($v as $u) {
+                if (!in_array($u, ['m', 'h', 'd'], true)) {
+                    return false;
+                }
+            }
             return true;
         });
 

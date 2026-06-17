@@ -40,7 +40,7 @@ final class IcsGeneratorService
             );
         }
 
-        $ics .= "END:VCALENDAR";
+        $ics .= 'END:VCALENDAR';
 
         return $ics;
     }

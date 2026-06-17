@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Util;
 
 final class WeekHelper
@@ -28,7 +27,9 @@ final class WeekHelper
 
 final class IsoWeek
 {
-    public function __construct(public int $year, public int $week) {}
+    public function __construct(public int $year, public int $week)
+    {
+    }
 
     public function toString(): string
     {

@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\BlackoutInstanceRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BlackoutInstanceRepository::class)]
 #[ORM\Table(name: 'blackout_instances')]
@@ -21,7 +21,7 @@ class BlackoutInstance
     private \DateTimeInterface $endDate;
 
     #[ORM\ManyToOne(targetEntity: BlackoutSeries::class, inversedBy: 'instances')]
-    #[ORM\JoinColumn(name: 'blackout_series_id' , nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'blackout_series_id', nullable: false, onDelete: 'CASCADE')]
     private ?BlackoutSeries $series = null;
 
     public function getId(): ?int
@@ -62,4 +62,3 @@ class BlackoutInstance
         return $this;
     }
 }
-

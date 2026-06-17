@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes disponibilités types{% endblock %}
+{% block title %}{{ 'presta.my_availability'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li>Disponibilités</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li>{{ 'presta.availability_breadcrumb'|trans }}</li>
         </ul>
     </div>
 
@@ -15,36 +15,36 @@
         <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'schedule' }) }}</aside>
         <div class="md:col-span-3">
             <div class="flex items-center justify-between mb-2">
-                <h1 class="text-2xl font-bold">Ma semaine type</h1>
-                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-primary btn-sm">+ Plage horaire</a>
+                <h1 class="text-2xl font-bold">{{ 'presta.my_week'|trans }}</h1>
+                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-primary btn-sm">{{ 'presta.add_slot'|trans }}</a>
             </div>
-            <p class="text-sm text-base-content/60 mb-4">Définissez vos horaires d'ouverture récurrents pour les prestations de type « Individuel ».</p>
+            <p class="text-sm text-base-content/60 mb-4">{{ 'presta.availability_subtitle'|trans }}</p>
 
             <div class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="table">
-                        <thead><tr><th>Jour</th><th>Début</th><th>Fin</th><th class="text-right">Actions</th></tr></thead>
+                        <thead><tr><th>{{ 'presta.th_day'|trans }}</th><th>{{ 'presta.th_start'|trans }}</th><th>{{ 'presta.th_end'|trans }}</th><th class="text-right">{{ 'common.actions'|trans }}</th></tr></thead>
                         <tbody>
-                        {% set jours = {1:'Lundi',2:'Mardi',3:'Mercredi',4:'Jeudi',5:'Vendredi',6:'Samedi',7:'Dimanche'} %}
+                        {% set jourKeys = {1:'monday',2:'tuesday',3:'wednesday',4:'thursday',5:'friday',6:'saturday',7:'sunday'} %}
                         {% for plage in plages %}
                             <tr>
-                                <td class="font-semibold">{{ jours[plage.jourSemaine] }}</td>
+                                <td class="font-semibold">{{ ('common.weekday.' ~ jourKeys[plage.jourSemaine])|trans }}</td>
                                 <td>{{ plage.heureDebut|date('H:i') }}</td>
                                 <td>{{ plage.heureFin|date('H:i') }}</td>
                                 <td class="text-right">
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ path('app_presta_provider_schedule_edit', {'id': plage.id}) }}" class="btn btn-ghost btn-xs" title="Modifier">✎</a>
-                                        <form method="post" action="{{ path('app_presta_provider_schedule_delete', {'id': plage.id}) }}" onsubmit="return confirm('Supprimer cette plage horaire ?');">
+                                        <a href="{{ path('app_presta_provider_schedule_edit', {'id': plage.id}) }}" class="btn btn-ghost btn-xs" title="{{ 'common.edit'|trans }}">✎</a>
+                                        <form method="post" action="{{ path('app_presta_provider_schedule_delete', {'id': plage.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_delete_slot'|trans|e('js') }}');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ plage.id) }}">
-                                            <button class="btn btn-ghost btn-xs text-error" title="Supprimer">🗑</button>
+                                            <button class="btn btn-ghost btn-xs text-error" title="{{ 'common.delete'|trans }}">🗑</button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr><td colspan="4" class="text-center py-8 text-base-content/60">
-                                Aucune plage horaire définie.<br>
-                                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-sm btn-primary mt-3">Ajouter mes horaires</a>
+                                {{ 'presta.no_slot_defined'|trans }}<br>
+                                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-sm btn-primary mt-3">{{ 'presta.add_my_hours'|trans }}</a>
                             </td></tr>
                         {% endfor %}
                         </tbody>

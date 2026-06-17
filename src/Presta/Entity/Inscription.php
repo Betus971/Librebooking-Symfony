@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Presta\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 use Doctrine\DBAL\Types\Types;
-use App\Entity\User; // Link to the generic booking-D user
+use Doctrine\ORM\Mapping as ORM; // Link to the generic booking-D user
 
 #[ORM\Entity]
 #[ORM\Table(name: 'presta_inscription')]

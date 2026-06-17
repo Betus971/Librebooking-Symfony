@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Agenda - Réservations{% endblock %}
+{% block title %}{{ 'presta.my_agenda'|trans }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -23,8 +23,8 @@
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li>Mon agenda</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li>{{ 'presta.my_agenda'|trans }}</li>
         </ul>
     </div>
 
@@ -33,32 +33,32 @@
         <div class="md:col-span-3">
             <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
                 <div>
-                    <h1 class="text-2xl font-bold">Mon agenda</h1>
-                    <p class="text-sm text-base-content/60">Consultez vos réservations et séances.</p>
+                    <h1 class="text-2xl font-bold">{{ 'presta.my_agenda'|trans }}</h1>
+                    <p class="text-sm text-base-content/60">{{ 'presta.agenda_subtitle'|trans }}</p>
                 </div>
                 <div class="join">
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'list'}) }}" class="btn btn-sm join-item {{ view != 'week' ? 'btn-primary' : 'btn-ghost' }}">Liste</a>
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': currentWeekStart|date('Y-m-d')}) }}" class="btn btn-sm join-item {{ view == 'week' ? 'btn-primary' : 'btn-ghost' }}">Semaine</a>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'list'}) }}" class="btn btn-sm join-item {{ view != 'week' ? 'btn-primary' : 'btn-ghost' }}">{{ 'presta.list'|trans }}</a>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': currentWeekStart|date('Y-m-d')}) }}" class="btn btn-sm join-item {{ view == 'week' ? 'btn-primary' : 'btn-ghost' }}">{{ 'presta.week'|trans }}</a>
                 </div>
             </div>
 
             {% if view == 'week' %}
             <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
                 <div class="flex items-center justify-between mb-4">
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="Semaine précédente">‹</a>
-                    <h3 class="font-semibold text-center">Semaine du {{ currentWeekStart|date('d/m/Y') }} au {{ (currentWeekStart|date_modify('+6 days'))|date('d/m/Y') }}</h3>
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="Semaine suivante">›</a>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="{{ 'presta.prev_week_title'|trans }}">‹</a>
+                    <h3 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': currentWeekStart|date('d/m/Y'), '%end%': (currentWeekStart|date_modify('+6 days'))|date('d/m/Y')}) }}</h3>
+                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="{{ 'presta.next_week_title'|trans }}">›</a>
                 </div>
                 <div class="mb-3 text-sm flex gap-3 flex-wrap">
-                    <span><span class="badge badge-info badge-sm"></span> RDV individuel</span>
-                    <span><span class="badge badge-success badge-sm"></span> Séance groupe</span>
-                    <span><span class="badge badge-error badge-sm"></span> Complet</span>
+                    <span><span class="badge badge-info badge-sm"></span> {{ 'presta.legend_individual'|trans }}</span>
+                    <span><span class="badge badge-success badge-sm"></span> {{ 'presta.legend_group'|trans }}</span>
+                    <span><span class="badge badge-error badge-sm"></span> {{ 'presta.legend_full'|trans }}</span>
                 </div>
 
                 <div class="week-view">
                     <div class="time-header"></div>
                     {% for day in daysOfWeek %}
-                        <div class="day-header"><span class="day-name">{{ day|date('D') }}</span><span class="day-date">{{ day|date('d/m') }}</span></div>
+                        <div class="day-header"><span class="day-name">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}</span><span class="day-date">{{ day|date('d/m') }}</span></div>
                     {% endfor %}
                 </div>
                 <div class="week-view">
@@ -73,7 +73,7 @@
                                     {% set badgeClass = session.service.type == 'INDIVIDUEL' ? 'individual' : 'group' %}
                                     {% if session.nbInscrits >= session.service.capaciteMax %}{% set badgeClass = badgeClass ~ ' full' %}{% endif %}
                                     <div class="session-badge {{ badgeClass }}" data-session-id="{{ session.id }}" title="{{ session.service.libelle }} - {{ session.dateDebut|date('d/m H:i') }} - {{ session.nbInscrits }}/{{ session.service.capaciteMax }}">
-                                        {{ session.dateDebut|date('H:i') }} - {{ session.service.type == 'INDIVIDUEL' ? 'Indiv.' : 'Groupe' }}
+                                        {{ session.dateDebut|date('H:i') }} - {{ session.service.type == 'INDIVIDUEL' ? 'presta.indiv_short'|trans : 'presta.group_short'|trans }}
                                     </div>
                                 {% endfor %}{% endif %}
                             </div>
@@ -85,7 +85,7 @@
             <div class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="table">
-                        <thead><tr><th>Date &amp; heure</th><th>Prestation</th><th>Type</th><th>Clients inscrits</th></tr></thead>
+                        <thead><tr><th>{{ 'presta.th_datetime'|trans }}</th><th>{{ 'presta.th_service'|trans }}</th><th>{{ 'presta.th_type'|trans }}</th><th>{{ 'presta.th_clients'|trans }}</th></tr></thead>
                         <tbody>
                         {% for session in sessions %}
                             <tr>
@@ -93,23 +93,23 @@
                                 <td>{{ session.service.libelle }}</td>
                                 <td>
                                     {% if session.service.type == 'INDIVIDUEL' %}
-                                        <span class="badge badge-info">RDV individuel</span>
+                                        <span class="badge badge-info">{{ 'presta.legend_individual'|trans }}</span>
                                     {% else %}
-                                        <span class="badge badge-success">Séance groupe ({{ session.nbInscrits }}/{{ session.service.capaciteMax }})</span>
+                                        <span class="badge badge-success">{{ 'presta.group_session_count'|trans({'%a%': session.nbInscrits, '%b%': session.service.capaciteMax}) }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <ul class="list-disc pl-4">
                                     {% for inscription in session.inscriptions %}
-                                        <li>{{ inscription.client.firstname|default('Client') }} {{ inscription.client.lastname|default('') }} <span class="text-xs opacity-60">({{ inscription.statut }})</span></li>
+                                        <li>{{ inscription.client.firstname|default('presta.client_default'|trans) }} {{ inscription.client.lastname|default('') }} <span class="text-xs opacity-60">({{ inscription.statut }})</span></li>
                                     {% else %}
-                                        <li class="text-xs opacity-60">Aucun inscrit</li>
+                                        <li class="text-xs opacity-60">{{ 'presta.no_registered'|trans }}</li>
                                     {% endfor %}
                                     </ul>
                                 </td>
                             </tr>
                         {% else %}
-                            <tr><td colspan="4" class="text-center py-8 text-base-content/60">Aucun rendez-vous ou inscription à venir.</td></tr>
+                            <tr><td colspan="4" class="text-center py-8 text-base-content/60">{{ 'presta.no_agenda'|trans }}</td></tr>
                         {% endfor %}
                         </tbody>
                     </table>

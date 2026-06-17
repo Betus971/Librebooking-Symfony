@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -13,9 +12,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 
 #[ORM\Table(
-    name: "users",
+    name: 'users',
     uniqueConstraints: [
-        new ORM\UniqueConstraint(name: "UNIQ_IDENTIFIER_EMAIL", columns: ["email"])
+        new ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', columns: ['email']),
         // ne rends pas "username" unique si ta base existante ne l'est pas
     ]
 )]
@@ -26,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
 
-    #[ORM\Column( type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\Column(length: 85, nullable: true)]
@@ -71,19 +70,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 85)]
     private string $timezone = 'Europe/Paris';
 
-    #[ORM\Column(type: "string", length: 10)]
+    #[ORM\Column(type: 'string', length: 10)]
     private string $language = 'fr';
 
-    #[ORM\Column(type: "smallint", options: ["unsigned" => true, "default" => 1])]
+    #[ORM\Column(type: 'smallint', options: ['unsigned' => true, 'default' => 1])]
     private int $homepageid = 1;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $date_created;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $last_modified = null;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $lastlogin = null;
 
     #[ORM\PrePersist]
@@ -97,7 +96,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     // FK vers user_statuses.status_id (tinyint unsigned)
-    #[ORM\Column(type: "smallint", options: ["unsigned" => true])]
+    #[ORM\Column(type: 'smallint', options: ['unsigned' => true])]
     private int $status_id = 1;
 
     #[ORM\Column(length: 16, nullable: true)]

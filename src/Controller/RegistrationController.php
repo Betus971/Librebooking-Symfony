@@ -39,10 +39,10 @@ class RegistrationController extends AbstractController
             // Simple validation
             $emailConstraint = new Assert\Email();
             $emailConstraint->message = 'L\'adresse email est invalide.';
-            
+
             $inputErrors = $validator->validate($email, [
                 new Assert\NotBlank(['message' => 'L\'adresse email est obligatoire.']),
-                $emailConstraint
+                $emailConstraint,
             ]);
 
             if (count($inputErrors) > 0) {

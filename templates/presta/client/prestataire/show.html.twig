@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profil de {{ prestataire.prenom }} {{ prestataire.nom }}{% endblock %}
+{% block title %}{{ prestataire.prenom }} {{ prestataire.nom }}{% endblock %}
 
 {% block body %}
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">Annuaire</a></li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
             <li>{{ prestataire.prenom }} {{ prestataire.nom }}</li>
         </ul>
     </div>
@@ -28,32 +28,32 @@
         </div>
     </div>
 
-    <h2 class="text-xl font-bold mb-4">Prestations proposées</h2>
+    <h2 class="text-xl font-bold mb-4">{{ 'presta.services_offered'|trans }}</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% for service in services %}
             <div class="card bg-base-200 border border-base-300 shadow-sm">
                 <div class="card-body">
                     <h3 class="card-title">{{ service.libelle }}</h3>
-                    <p class="text-sm text-base-content/70">{{ service.description|default('Aucune description.') }}</p>
+                    <p class="text-sm text-base-content/70">{{ service.description|default('presta.no_desc_short'|trans) }}</p>
                     <div class="flex gap-2 flex-wrap mt-2">
                         <span class="badge badge-outline">{{ service.dureeMinutes }} min</span>
                         {% if service.type == 'INDIVIDUEL' %}
-                            <span class="badge badge-success">Rendez-vous individuel</span>
+                            <span class="badge badge-success">{{ 'presta.type_individual'|trans }}</span>
                         {% else %}
-                            <span class="badge badge-secondary">Séance de groupe · max {{ service.capaciteMax }}</span>
+                            <span class="badge badge-secondary">{{ 'presta.type_group_max'|trans({'%count%': service.capaciteMax}) }}</span>
                         {% endif %}
                     </div>
                     <div class="card-actions justify-end mt-3">
                         {% if service.type == 'GROUPE' %}
-                            <a href="{{ path('app_presta_client_booking_group', {'id': service.id}) }}" class="btn btn-primary btn-sm">Voir les prochaines séances</a>
+                            <a href="{{ path('app_presta_client_booking_group', {'id': service.id}) }}" class="btn btn-primary btn-sm">{{ 'presta.see_next_sessions'|trans }}</a>
                         {% else %}
-                            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id}) }}" class="btn btn-primary btn-sm">Prendre rendez-vous</a>
+                            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id}) }}" class="btn btn-primary btn-sm">{{ 'presta.book_appointment'|trans }}</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
         {% else %}
-            <div class="md:col-span-2"><p class="text-base-content/60">Ce professionnel n'a pas encore configuré ses prestations.</p></div>
+            <div class="md:col-span-2"><p class="text-base-content/60">{{ 'presta.no_services_yet'|trans }}</p></div>
         {% endfor %}
     </div>
 </div>

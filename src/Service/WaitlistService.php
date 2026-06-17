@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
-use App\Entity\Resource;
 use App\Entity\ReservationSeries;
+use App\Entity\Resource;
 use App\Entity\User;
 use App\Entity\WaitlistRequest;
 use App\Notification\ReservationNotifier;

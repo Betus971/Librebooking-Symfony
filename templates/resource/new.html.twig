@@ -1,21 +1,14 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Nouvelle Ressource - Librebooking{% endblock %}
-
+{% block title %}{{ 'resource.new_title'|trans }} - Librebooking{% endblock %}
 {% block body %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <h1 class="text-3xl font-extrabold text-base-content mb-6">Nouvelle ressource</h1>
-
-        {# On inclut ton formulaire existant #}
+        <h1 class="text-3xl font-extrabold text-base-content mb-6">{{ 'resource.new_title'|trans }}</h1>
         {{ include('resource/_form.html.twig') }}
-
         <div class="mt-4">
             <a href="{{ path('app_resource_index') }}" class="btn btn-ghost">
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Retour à la liste
+                {{ 'resource.back_to_list'|trans }}
             </a>
         </div>
-
     </div>
 {% endblock %}

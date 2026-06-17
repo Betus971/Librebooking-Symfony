@@ -1,10 +1,9 @@
 <?php
+
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 #[ORM\Entity]
 #[ORM\Table(name: 'reservation_resources')]
 #[ORM\UniqueConstraint(name: 'uniq_series_resource', columns: ['series_id','resource_id'])]

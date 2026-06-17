@@ -81,8 +81,8 @@ class ReservationInstanceRepository extends ServiceEntityRepository
             ->andWhere('rr.resource = :rid')
             ->andWhere('IDENTITY(rs.status) IN (:activeStatuses)')
             ->setParameter('start', $start)
-            ->setParameter('end',   $end)
-            ->setParameter('rid',   $resourceId)
+            ->setParameter('end', $end)
+            ->setParameter('rid', $resourceId)
             ->setParameter('activeStatuses', ReservationStatus::ACTIVE_STATUSES)
             ->getQuery()->getResult();
     }
@@ -98,7 +98,7 @@ class ReservationInstanceRepository extends ServiceEntityRepository
             ->andWhere('ri.endDate   > :start')
             ->andWhere('IDENTITY(rs.status) IN (:activeStatuses)')
             ->setParameter('start', $start)
-            ->setParameter('end',   $end)
+            ->setParameter('end', $end)
             ->setParameter('activeStatuses', ReservationStatus::ACTIVE_STATUSES)
             ->getQuery()->getResult();
     }

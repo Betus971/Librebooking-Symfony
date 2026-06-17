@@ -16,26 +16,26 @@ class PrestataireType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom de famille',
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description de votre profil (ex: Coach sportif certifié...)',
                 'required' => false,
-                'attr' => ['class' => 'fr-input', 'rows' => 4]
+                'attr' => ['class' => 'fr-input', 'rows' => 4],
             ])
             ->add('photo', TextType::class, [
                 'label' => 'URL de votre photo de profil',
                 'required' => false,
-                'attr' => ['class' => 'fr-input', 'placeholder' => 'https://...']
+                'attr' => ['class' => 'fr-input', 'placeholder' => 'https://...'],
             ])
             ->add('isActive', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
                 'label' => 'Profil public (décocher pour se mettre en vacances / invisible)',
                 'required' => false,
-                'attr' => ['class' => 'fr-toggle__input']
+                'attr' => ['class' => 'fr-toggle__input'],
             ])
         ;
     }

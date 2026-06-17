@@ -1,19 +1,22 @@
 <?php
+
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-    #[ORM\Entity]
-    #[ORM\Table(name: 'reservation_instances',
-     indexes: [
-        new ORM\Index(name: 'idx_start_date', columns: ['start_date']),
-        new ORM\Index(name: 'idx_end_date', columns: ['end_date']),
-        ]
-    )]
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 
-     #[ORM\Index(name: 'idx_reference_number', columns: ['reference_number'])]
+#[ORM\Entity]
+#[ORM\Table(
+    name: 'reservation_instances',
+    indexes: [
+    new ORM\Index(name: 'idx_start_date', columns: ['start_date']),
+    new ORM\Index(name: 'idx_end_date', columns: ['end_date']),
+    ]
+)]
+
+#[ORM\Index(name: 'idx_reference_number', columns: ['reference_number'])]
 class ReservationInstance
 {
     #[ORM\Id]

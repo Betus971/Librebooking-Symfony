@@ -5,27 +5,15 @@
 {% block body %}
 <div class="max-w-7xl mx-auto py-8">
 
-    {# --- FIL D'ARIANE --- #}
     <div class="text-sm breadcrumbs mb-8 text-base-content/70">
         <ul>
-            <li>
-                <a href="{{ path('app_home') }}">
-                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    Accueil
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('app_resource_index') }}">
-                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    Catalogue
-                </a>
-            </li>
+            <li><a href="{{ path('app_home') }}">{{ 'menu.home'|trans }}</a></li>
+            <li><a href="{{ path('app_resource_index') }}">{{ 'resource.breadcrumb_catalog'|trans }}</a></li>
             <li>{{ resource.name }}</li>
         </ul>
     </div>
 
     <div class="card lg:card-side bg-base-100 shadow-xl border border-base-200">
-        {# --- IMAGE COL --- #}
         <figure class="lg:w-2/5 xl:w-1/2 bg-base-200 relative min-h-[300px]">
             {% set img = resource.imageName ? asset('uploads/resources/' ~ resource.imageName) : null %}
             {% if img %}
@@ -37,83 +25,64 @@
             {% endif %}
         </figure>
 
-        {# --- CONTENT COL --- #}
         <div class="card-body lg:w-3/5 xl:w-1/2 p-8 sm:p-12">
             <div class="flex flex-wrap items-center gap-3 mb-4">
-                {% if resource.category %}
-                    <div class="badge badge-primary badge-outline">
-                        {{ resource.category.name }}
-                    </div>
-                {% endif %}
-                
+                {% if resource.category %}<div class="badge badge-primary badge-outline">{{ resource.category.name }}</div>{% endif %}
                 {% if resource.isActive %}
-                    <div class="badge badge-success">
-                        Active
-                    </div>
+                    <div class="badge badge-success">{{ 'resource.active'|trans }}</div>
                 {% else %}
-                    <div class="badge badge-ghost">
-                        Inactive
-                    </div>
+                    <div class="badge badge-ghost">{{ 'resource.inactive'|trans }}</div>
                 {% endif %}
-                
-                {% if resource.requiresApproval %}
-                    <div class="badge badge-info">
-                        Approbation requise
-                    </div>
-                {% endif %}
+                {% if resource.requiresApproval %}<div class="badge badge-info">{{ 'resource.requires_approval'|trans }}</div>{% endif %}
             </div>
 
             <h1 class="card-title text-3xl sm:text-4xl font-extrabold mb-6">{{ resource.name }}</h1>
 
             {% if resource.description %}
-                <div class="prose max-w-none text-base-content/80 mb-8">
-                    <p>{{ resource.description }}</p>
-                </div>
+                <div class="prose max-w-none text-base-content/80 mb-8"><p>{{ resource.description }}</p></div>
             {% endif %}
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 border-t border-base-200 pt-8">
                 <div>
-                    <dt class="text-sm font-medium text-base-content/60 mb-1">Localisation</dt>
+                    <dt class="text-sm font-medium text-base-content/60 mb-1">{{ 'resource.location'|trans }}</dt>
                     <dd class="text-base font-bold flex items-center">
                         <svg class="mr-2 h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        {{ resource.location|default('Non renseignée') }}
+                        {{ resource.location|default('resource.location_unset'|trans) }}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-base-content/60 mb-1">Capacité maximale</dt>
+                    <dt class="text-sm font-medium text-base-content/60 mb-1">{{ 'resource.max_capacity'|trans }}</dt>
                     <dd class="text-base font-bold flex items-center">
                         <svg class="mr-2 h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        {{ resource.maxParticipants ? resource.maxParticipants ~ ' personnes' : 'Illimitée' }}
+                        {{ resource.maxParticipants ? resource.maxParticipants ~ ' ' ~ ('resource.people'|trans) : 'resource.unlimited'|trans }}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-base-content/60 mb-1">Contact responsable</dt>
+                    <dt class="text-sm font-medium text-base-content/60 mb-1">{{ 'resource.contact'|trans }}</dt>
                     <dd class="text-base font-bold flex items-center">
                         <svg class="mr-2 h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        {{ resource.contactInfo|default('Non défini') }}
+                        {{ resource.contactInfo|default('resource.contact_unset'|trans) }}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-base-content/60 mb-1">Durée autorisée</dt>
+                    <dt class="text-sm font-medium text-base-content/60 mb-1">{{ 'resource.duration_allowed'|trans }}</dt>
                     <dd class="text-base font-bold flex items-center">
                         <svg class="mr-2 h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ resource.minDuration }} à {{ resource.maxDuration }} min
+                        {{ resource.minDuration }} - {{ resource.maxDuration }} min
                     </dd>
                 </div>
             </div>
 
             <div class="card-actions justify-between items-center mt-auto pt-8 border-t border-base-200">
                 {% if resource.publicId %}
-                    <a href="{{ url('app_calendar_feed_resource', {'publicId': resource.publicId}) }}"
-                       class="btn btn-ghost btn-sm gap-2 text-base-content/70"
-                       title="Ajouter cet agenda à Outlook, Google Agenda ou Thunderbird">
+                    <a href="{{ url('app_calendar_feed_resource', {'publicId': resource.publicId}) }}" class="btn btn-ghost btn-sm gap-2 text-base-content/70" title="Outlook, Google Agenda, Thunderbird">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        S'abonner à l'agenda (iCal)
+                        {{ 'resource.subscribe_ical'|trans }}
                     </a>
                 {% endif %}
                 <a href="{{ path('reservation_new', {'resource': resource.id}) }}" class="btn btn-primary btn-lg w-full sm:w-auto">
                     <svg class="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Réserver cette ressource
+                    {{ 'resource.book_this'|trans }}
                 </a>
             </div>
         </div>

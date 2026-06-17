@@ -1,14 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Rendez-vous : {{ service.libelle }}{% endblock %}
-
-{% set joursFr = {'Monday':'lundi','Tuesday':'mardi','Wednesday':'mercredi','Thursday':'jeudi','Friday':'vendredi','Saturday':'samedi','Sunday':'dimanche'} %}
-{% set joursCourt = {'Mon':'Lun','Tue':'Mar','Wed':'Mer','Thu':'Jeu','Fri':'Ven','Sat':'Sam','Sun':'Dim'} %}
-{% set moisFr = {'January':'janvier','February':'février','March':'mars','April':'avril','May':'mai','June':'juin','July':'juillet','August':'août','September':'septembre','October':'octobre','November':'novembre','December':'décembre'} %}
+{% block title %}{{ 'presta.book_appointment'|trans }} : {{ service.libelle }}{% endblock %}
 
 {% macro slot(c, service, jourLabel) %}
     <form method="post" action="{{ path('app_presta_client_booking_individual_book', {'id': service.id}) }}" class="slot"
-          onsubmit="return confirm('Confirmer ce rendez-vous{{ jourLabel ? ' ' ~ jourLabel : '' }} à {{ c.start|date('H:i') }} ?');">
+          onsubmit="return confirm('{{ 'presta.confirm_appointment'|trans({'%time%': c.start|date('H:i')})|e('js') }}');">
         <input type="hidden" name="_token" value="{{ csrf_token('book_individual' ~ service.id) }}">
         <input type="hidden" name="time" value="{{ c.startStr }}">
         <button type="submit" class="slot__btn">{{ c.start|date('H:i') }}</button>
@@ -39,42 +35,42 @@
 <div class="max-w-5xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">Annuaire</a></li>
+            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
             <li><a href="{{ path('app_presta_client_prestataire_show', {'id': service.prestataire.id}) }}">{{ service.prestataire.prenom }} {{ service.prestataire.nom }}</a></li>
             <li>{{ service.libelle }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-1">Prendre rendez-vous : {{ service.libelle }}</h1>
-    <p class="text-base-content/60 mb-4">Durée : {{ service.dureeMinutes }} minutes — sélectionnez un créneau pour réserver.</p>
+    <h1 class="text-2xl font-bold mb-1">{{ 'presta.book_title'|trans({'%service%': service.libelle}) }}</h1>
+    <p class="text-base-content/60 mb-4">{{ 'presta.duration_select'|trans({'%min%': service.dureeMinutes}) }}</p>
 
     <div role="tablist" class="tabs tabs-boxed w-fit mb-4">
-        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'day'}) }}" class="tab {{ view == 'day' ? 'tab-active' : '' }}">Vue par jour</a>
-        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'week'}) }}" class="tab {{ view == 'week' ? 'tab-active' : '' }}">Vue par semaine</a>
+        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'day'}) }}" class="tab {{ view == 'day' ? 'tab-active' : '' }}">{{ 'presta.view_by_day'|trans }}</a>
+        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'week'}) }}" class="tab {{ view == 'week' ? 'tab-active' : '' }}">{{ 'presta.view_by_week'|trans }}</a>
     </div>
 
     {% if view == 'day' %}
     <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
         <div class="flex items-center justify-between mb-3 gap-2">
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">‹ Jour préc.</a>
-            <h2 class="font-semibold text-center">{{ (joursFr[currentDate|date('l')] ?? currentDate|date('l'))|capitalize }} {{ currentDate|date('j') }} {{ moisFr[currentDate|date('F')] ?? currentDate|date('F') }} {{ currentDate|date('Y') }}</h2>
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">Jour suiv. ›</a>
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_day'|trans }}</a>
+            <h2 class="font-semibold text-center">{{ currentDate|format_datetime(pattern='EEEE d MMMM y', locale=app.request.locale)|capitalize }}</h2>
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_day'|trans }}</a>
         </div>
 
         {% if creneaux|length == 0 %}
             <div class="alert alert-info">
-                <span>Aucun créneau disponible ce jour. Essayez un autre jour ou la vue semaine.</span>
+                <span>{{ 'presta.no_slot_day'|trans }}</span>
             </div>
         {% else %}
             {% set matin = creneaux|filter(c => (c.start|date('G')) < 12) %}
             {% set aprem = creneaux|filter(c => (c.start|date('G')) >= 12) %}
-            <p class="text-sm opacity-60 mb-1">{{ creneaux|length }} créneau(x) disponible(s)</p>
+            <p class="text-sm opacity-60 mb-1">{{ 'presta.slots_available'|trans({'%count%': creneaux|length}) }}</p>
             {% if matin|length > 0 %}
-                <h3 class="slot-group-title">Matin</h3>
+                <h3 class="slot-group-title">{{ 'presta.morning'|trans }}</h3>
                 <div class="slot-picker">{% for c in matin %}{{ ui.slot(c, service) }}{% endfor %}</div>
             {% endif %}
             {% if aprem|length > 0 %}
-                <h3 class="slot-group-title">Après-midi</h3>
+                <h3 class="slot-group-title">{{ 'presta.afternoon'|trans }}</h3>
                 <div class="slot-picker">{% for c in aprem %}{{ ui.slot(c, service) }}{% endfor %}</div>
             {% endif %}
         {% endif %}
@@ -82,26 +78,25 @@
     {% else %}
     <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
         <div class="flex items-center justify-between mb-3 gap-2">
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">‹ Semaine préc.</a>
-            <h2 class="font-semibold text-center">Semaine du {{ daysOfWeek[0]|date('j') }} {{ moisFr[daysOfWeek[0]|date('F')] ?? daysOfWeek[0]|date('F') }} au {{ daysOfWeek[6]|date('j') }} {{ moisFr[daysOfWeek[6]|date('F')] ?? daysOfWeek[6]|date('F') }} {{ daysOfWeek[6]|date('Y') }}</h2>
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">Semaine suiv. ›</a>
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_week'|trans }}</a>
+            <h2 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': daysOfWeek[0]|date('d/m'), '%end%': daysOfWeek[6]|date('d/m/Y')}) }}</h2>
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_week'|trans }}</a>
         </div>
 
         {% set totalCreneaux = 0 %}
         {% for dayCreneaux in creneauxByDay %}{% set totalCreneaux = totalCreneaux + dayCreneaux|length %}{% endfor %}
 
         {% if totalCreneaux == 0 %}
-            <div class="alert alert-info"><span>Aucun créneau cette semaine. Essayez une autre semaine.</span></div>
+            <div class="alert alert-info"><span>{{ 'presta.no_slot_week'|trans }}</span></div>
         {% else %}
             <div class="week-scroll">
                 <div class="week-days">
                     {% for day in daysOfWeek %}
                         {% set dayCreneaux = creneauxByDay[day|date('Y-m-d')] %}
-                        {% set jourLabel = (joursFr[day|date('l')] ?? day|date('l')) ~ ' ' ~ day|date('d/m') %}
                         <div class="week-day">
-                            <div class="week-day__head">{{ joursCourt[day|date('D')] ?? day|date('D') }}<small>{{ day|date('d/m') }}{% if dayCreneaux|length > 0 %} · {{ dayCreneaux|length }}{% endif %}</small></div>
+                            <div class="week-day__head">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}<small>{{ day|date('d/m') }}{% if dayCreneaux|length > 0 %} · {{ dayCreneaux|length }}{% endif %}</small></div>
                             {% if dayCreneaux|length > 0 %}
-                                <div class="week-day__slots">{% for c in dayCreneaux %}{{ ui.slot(c, service, jourLabel) }}{% endfor %}</div>
+                                <div class="week-day__slots">{% for c in dayCreneaux %}{{ ui.slot(c, service) }}{% endfor %}</div>
                             {% else %}
                                 <div class="week-day__empty">—</div>
                             {% endif %}

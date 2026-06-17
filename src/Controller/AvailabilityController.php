@@ -21,7 +21,7 @@ final class AvailabilityController extends AbstractController
     {
 
         $weekStart = new \DateTimeImmutable($request->query->get('start') ?: 'monday this week');
-        $days = array_map(fn($i) => $weekStart->modify("+$i day"), range(0, 6)); // 7 jours
+        $days = array_map(fn ($i) => $weekStart->modify("+$i day"), range(0, 6)); // 7 jours
 
         // CORRECTION ICI : On convertit 'type' en entier s'il existe
         $typeParam = $request->query->get('type');
@@ -40,8 +40,8 @@ final class AvailabilityController extends AbstractController
 
         // Matrice [resourceId][Y-m-d] => [ [start, end], ... ]
         $matrix = [];
-        $periodStart = $days[0]->setTime(0,0);
-        $periodEnd   = $days[6]->setTime(23,59,59);
+        $periodStart = $days[0]->setTime(0, 0);
+        $periodEnd   = $days[6]->setTime(23, 59, 59);
 
         // Récup bulk des réservations / blackouts pour limiter les requêtes
         $indexedBusy = $availability->busyIndex($list, $periodStart, $periodEnd);
@@ -71,9 +71,9 @@ final class AvailabilityController extends AbstractController
         $resource = $repo->find($r->query->getInt('resource'));
         $date = new \DateTimeImmutable($r->query->get('date'));
         // TOUS les créneaux ouverts du jour, avec leur disponibilité (libre/pris).
-        $list = $a->allWindowsForDay($resource, $date, $a->busyIndex([$resource], $date->setTime(0,0), $date->setTime(23,59,59)));
+        $list = $a->allWindowsForDay($resource, $date, $a->busyIndex([$resource], $date->setTime(0, 0), $date->setTime(23, 59, 59)));
 
-        $payload = array_map(fn($w) => [
+        $payload = array_map(fn ($w) => [
             'label'     => $w->start->format('H:i') . '–' . $w->end->format('H:i'),
             'start'     => $w->start->format('H:i'),
             'end'       => $w->end->format('H:i'),

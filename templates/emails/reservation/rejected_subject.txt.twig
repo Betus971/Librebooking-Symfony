@@ -1,1 +1,1 @@
-[Librebooking] Réservation refusée — {{ series.title|default('Réservation') }}
+{{ 'email.subject_rejected'|trans({'%title%': series.title|default('email.default_title'|trans)}) }}

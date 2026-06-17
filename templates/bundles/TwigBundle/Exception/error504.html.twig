@@ -1,30 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Erreur 504 - Temps d'attente dépassé{% endblock %}
+{% block title %}{{ 'errors.error_word'|trans }} 504 - {{ 'errors.e504_title'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="fr-container fr-my-8w">
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
-                <h1 class="fr-h1">Erreur 504</h1>
-                <p class="fr-text--lead">Le serveur a mis trop de temps à répondre.</p>
-                <p class="fr-text--sm fr-mb-5w">
-                    Ce problème est généralement temporaire et dû à une surcharge de l'application ou à un traitement très long.
-                    Nous vous invitons à patienter quelques instants puis à rafraîchir la page.
-                </p>
-                <ul class="fr-btns-group fr-btns-group--inline-md">
-                    <li>
-                        <button class="fr-btn" onclick="window.location.reload();">
-                            Rafraîchir la page
-                        </button>
-                    </li>
-                    <li>
-                        <a class="fr-btn fr-btn--secondary" href="{{ path('app_home') }}">
-                            Retour à l'accueil
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <div class="max-w-xl mx-auto text-center py-16">
+        <h1 class="text-5xl font-extrabold text-base-content">504</h1>
+        <p class="text-lg mt-2">{{ 'errors.e504_lead'|trans }}</p>
+        <p class="text-sm text-base-content/60 mt-3 mb-6">
+            {{ 'errors.e504_desc'|trans }}
+        </p>
+        <div class="flex justify-center gap-3">
+            <button class="btn btn-primary" onclick="window.location.reload();">{{ 'errors.refresh'|trans }}</button>
+            <a class="btn btn-ghost" href="{{ path('app_home') }}">{{ 'errors.back_home'|trans }}</a>
         </div>
     </div>
 {% endblock %}

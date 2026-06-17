@@ -1,21 +1,21 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Profil Prestataire{% endblock %}
+{% block title %}{{ 'presta.my_profile'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li>Mon profil</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li>{{ 'presta.my_profile_short'|trans }}</li>
         </ul>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'profile' }) }}</aside>
         <div class="md:col-span-3">
-            <h1 class="text-2xl font-bold mb-1">Mon profil prestataire</h1>
-            <p class="text-sm text-base-content/60 mb-4">Ces informations seront visibles par les utilisateurs qui souhaitent prendre rendez-vous avec vous.</p>
+            <h1 class="text-2xl font-bold mb-1">{{ 'presta.my_profile'|trans }}</h1>
+            <p class="text-sm text-base-content/60 mb-4">{{ 'presta.profile_subtitle'|trans }}</p>
 
             <div class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="card-body">
@@ -28,7 +28,7 @@
                         <div class="md:col-span-2">{{ form_row(form.isActive, {attr:{class:'toggle toggle-primary'}}) }}</div>
                     </div>
                     <div class="mt-6">
-                        <button type="submit" class="btn btn-primary">Enregistrer mon profil</button>
+                        <button type="submit" class="btn btn-primary">{{ 'presta.save_profile'|trans }}</button>
                     </div>
                     {{ form_end(form) }}
                 </div>

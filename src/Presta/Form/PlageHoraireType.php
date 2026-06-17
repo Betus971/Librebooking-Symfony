@@ -25,17 +25,17 @@ class PlageHoraireType extends AbstractType
                     'Samedi' => 6,
                     'Dimanche' => 7,
                 ],
-                'attr' => ['class' => 'fr-select']
+                'attr' => ['class' => 'fr-select'],
             ])
             ->add('heureDebut', TimeType::class, [
                 'label' => 'Heure de début',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
             ->add('heureFin', TimeType::class, [
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input']
+                'attr' => ['class' => 'fr-input'],
             ])
         ;
     }

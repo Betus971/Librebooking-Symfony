@@ -54,11 +54,11 @@ class AgendaController extends AbstractController
             $dayKey = $day->format('Y-m-d');
             $sessionsByDayAndTime[$dayKey] = [];
         }
-        
+
         foreach ($allSessions as $session) {
             $sessionDate = $session->getDateDebut()->format('Y-m-d');
             $sessionTime = $session->getDateDebut()->format('H:i');
-            
+
             if (isset($sessionsByDayAndTime[$sessionDate])) {
                 if (!isset($sessionsByDayAndTime[$sessionDate][$sessionTime])) {
                     $sessionsByDayAndTime[$sessionDate][$sessionTime] = [];

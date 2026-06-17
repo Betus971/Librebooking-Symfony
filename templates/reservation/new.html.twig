@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
-{% block title %}Nouvelle réservation - Librebooking{% endblock %}
+{% block title %}{{ 'reservation.new'|trans }} - Librebooking{% endblock %}
 {% block body %}
     {# 1. STRUCTURE DU MODAL (DaisyUI) #}
     <dialog id="modal-dispo" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box relative bg-base-100">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-base-content">
                 <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                Disponibilités : <span id="modal-resource-name" class="font-bold text-primary"></span>
+                {{ 'reservation_form.availability_label'|trans }} <span id="modal-resource-name" class="font-bold text-primary"></span>
             </h3>
             
             <div id="modal-slots-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 my-4">
@@ -15,7 +15,7 @@
             
             <div class="modal-action">
                 <form method="dialog">
-                    <button class="btn btn-ghost" id="btn-close-modal">Fermer</button>
+                    <button class="btn btn-ghost" id="btn-close-modal">{{ 'common.close'|trans }}</button>
                 </form>
             </div>
         </div>
@@ -27,8 +27,8 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-base-content">Nouvelle réservation</h1>
-            <p class="mt-2 text-sm text-base-content/70">Remplissez les informations ci-dessous pour réserver une ressource.</p>
+            <h1 class="text-3xl font-extrabold text-base-content">{{ 'reservation.new'|trans }}</h1>
+            <p class="mt-2 text-sm text-base-content/70">{{ 'reservation_form.subtitle'|trans }}</p>
         </div>
 
         <div class="card bg-base-100 shadow-xl border border-base-200">
@@ -39,16 +39,16 @@
                 <div id="form-client-alert" class="hidden alert alert-error shadow-sm" role="alert">
                     <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <div>
-                        <h3 class="font-bold">Votre demande ne peut pas être envoyée</h3>
-                        <div class="text-sm" id="form-client-alert-msg">Merci de corriger les champs indiqués en rouge ci-dessous.</div>
+                        <h3 class="font-bold">{{ 'reservation_form.error_title'|trans }}</h3>
+                        <div class="text-sm" id="form-client-alert-msg">{{ 'reservation_form.error_intro'|trans }}</div>
                     </div>
                 </div>
 
                 <div class="space-y-6">
                     {# 1. TITRE #}
                     <div class="form-control w-full">
-                        {{ form_label(form.title, 'Titre de la réservation *', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
-                        {{ form_widget(form.title, {'attr': {'class': 'input input-bordered w-full', 'placeholder': 'Ex : Réunion d’équipe...'}}) }}
+                        {{ form_label(form.title, 'reservation_form.title_label'|trans, {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_widget(form.title, {'attr': {'class': 'input input-bordered w-full', 'placeholder': 'reservation_form.title_placeholder'|trans}}) }}
                         {% if form.title.vars.errors|length > 0 %}
                             <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.title) }}</span></label>
                         {% endif %}
@@ -56,7 +56,7 @@
 
                     {# 2. RESSOURCE #}
                     <div class="form-control w-full">
-                        {{ form_label(form.resource, 'Ressource à réserver *', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_label(form.resource, 'reservation_form.resource_label'|trans, {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
                         {{ form_widget(form.resource, {'attr': {'class': 'select select-bordered w-full', 'id': 'reservation_quick_resource'}}) }}
                         <div id="timeblocks-info" class="mt-2 text-sm text-base-content/60"></div>
                         {% if form.resource.vars.errors|length > 0 %}
@@ -66,7 +66,7 @@
                         <div class="mt-3">
                             <button type="button" id="btn-open-dispo" class="btn btn-sm btn-outline btn-primary">
                                 <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                Voir les disponibilités
+                                {{ 'reservation_form.see_availability'|trans }}
                             </button>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                     {# 3. DATES ET HEURES #}
                     <div class="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-2" data-field="start">
                         <div class="form-control">
-                            <label class="label font-medium text-base-content">Date et heure de début *</label>
+                            <label class="label font-medium text-base-content">{{ 'reservation_form.start_label'|trans }}</label>
                             <div class="grid grid-cols-2 gap-2">
                                 {{ form_widget(form.startDate, { attr: {
                                     class: 'input input-bordered w-full',
@@ -92,7 +92,7 @@
                         </div>
 
                         <div class="form-control" data-field="end">
-                            <label class="label font-medium text-base-content">Date et heure de fin *</label>
+                            <label class="label font-medium text-base-content">{{ 'reservation_form.end_label'|trans }}</label>
                             <div class="grid grid-cols-2 gap-2">
                                 {{ form_widget(form.endDate, { attr: {
                                     class: 'input input-bordered w-full',
@@ -111,10 +111,10 @@
                     </div>
                     
                     {# 4. PARTICIPANTS #}
-                    <div class="divider">Participants</div>
+                    <div class="divider">{{ 'reservation_form.participants'|trans }}</div>
                     <div class="form-control">
-                        <label class="label font-medium text-base-content mb-1">Liste des participants (Emails)</label>
-                        <p class="text-sm text-base-content/60 mb-4">Format attendu : nom@domaine.fr</p>
+                        <label class="label font-medium text-base-content mb-1">{{ 'reservation_form.participants_list'|trans }}</label>
+                        <p class="text-sm text-base-content/60 mb-4">{{ 'reservation_form.participants_hint'|trans }}</p>
                         
                         <div id="participants-list" data-prototype="{{ form_widget(form.participants.vars.prototype)|e('html_attr') }}" class="space-y-3">
                             {% for participant in form.participants %}
@@ -122,7 +122,7 @@
                                     <div class="flex-grow">
                                         {{ form_widget(participant, {'attr': {'class': 'input input-bordered w-full'}}) }}
                                     </div>
-                                    <button type="button" class="btn btn-square btn-error btn-outline remove-participant" title="Supprimer">
+                                    <button type="button" class="btn btn-square btn-error btn-outline remove-participant" title="{{ 'common.delete'|trans }}">
                                         <svg class="h-5 w-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
@@ -131,14 +131,14 @@
                         
                         <button type="button" id="add-participant-btn" class="btn btn-sm btn-ghost mt-4 w-fit border border-base-300">
                             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Ajouter un participant
+                            {{ 'reservation_form.add_participant'|trans }}
                         </button>
                     </div>
 
                     {# 5. DESCRIPTION #}
-                    <div class="divider">Motif</div>
+                    <div class="divider">{{ 'reservation_form.reason'|trans }}</div>
                     <div class="form-control">
-                        {{ form_label(form.description, 'Description / Motif', {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
+                        {{ form_label(form.description, 'reservation_form.description_label'|trans, {'label_attr': {'class': 'label font-medium text-base-content'}}) }}
                         {{ form_widget(form.description, {'attr': {'class': 'textarea textarea-bordered w-full', 'rows': 4}}) }}
                         {% if form.description.vars.errors|length > 0 %}
                             <label class="label"><span class="label-text-alt text-error">{{ form_errors(form.description) }}</span></label>
@@ -176,17 +176,17 @@
                         <input type="hidden" name="end" value="{{ waitlist.end }}">
                         <button type="submit" class="btn btn-outline btn-sm gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            M'inscrire en liste d'attente pour ce créneau
+                            {{ 'reservation_form.waitlist_join'|trans }}
                         </button>
                     </form>
                 {% endif %}
 
                 <div class="card-actions justify-end mt-8 border-t border-base-200 pt-6">
                     <a href="{{ path('app_resource_index') }}" class="btn btn-ghost">
-                        Annuler
+                        {{ 'common.cancel'|trans }}
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        Confirmer la réservation
+                        {{ 'reservation_form.confirm'|trans }}
                     </button>
                 </div>
 
@@ -227,20 +227,20 @@
                     const dateVal = (inputDate && inputDate.value) ? inputDate.value : new Date().toISOString().split('T')[0];
 
                     if (!resourceId) {
-                        alert("Veuillez d'abord sélectionner une ressource.");
+                        alert("{{ 'reservation_form.select_resource_first'|trans|e('js') }}");
                         return;
                     }
 
                     document.getElementById('modal-resource-name').textContent = selectResource.options[selectResource.selectedIndex].text;
                     modal.showModal();
 
-                    modalContainer.innerHTML = '<div class="col-span-full text-center py-8"><span class="loading loading-spinner text-primary loading-lg"></span><p class="mt-2 text-sm text-base-content/70">Chargement des créneaux...</p></div>';
+                    modalContainer.innerHTML = '<div class="col-span-full text-center py-8"><span class="loading loading-spinner text-primary loading-lg"></span><p class="mt-2 text-sm text-base-content/70">{{ 'reservation_form.loading_slots'|trans|e('js') }}</p></div>';
 
                     fetch('{{ path('app_availability_slots') }}?resource=' + resourceId + '&date=' + dateVal)
                         .then(r => r.json())
                         .then(list => {
                             if (list.length === 0) {
-                                modalContainer.innerHTML = `<p class="col-span-full text-sm text-base-content/60 text-center py-4">Aucun créneau d'ouverture à cette date.</p>`;
+                                modalContainer.innerHTML = `<p class="col-span-full text-sm text-base-content/60 text-center py-4">{{ 'reservation_form.no_open_slots'|trans|e('js') }}</p>`;
                                 return;
                             }
 
@@ -255,13 +255,13 @@
                                 // Créneau déjà réservé → grisé, non cliquable
                                 return `
                                     <span class="btn btn-sm btn-disabled opacity-40 line-through cursor-not-allowed pointer-events-none"
-                                          title="Déjà réservé">
+                                          title="{{ 'reservation_form.already_booked'|trans|e('js') }}">
                                         ${s.label}
                                     </span>`;
                             }).join('');
                         })
                         .catch(err => {
-                            modalContainer.innerHTML = `<div class="col-span-full p-4 alert alert-error shadow-sm text-sm">Erreur lors du chargement des disponibilités.</div>`;
+                            modalContainer.innerHTML = `<div class="col-span-full p-4 alert alert-error shadow-sm text-sm">{{ 'reservation_form.slots_error'|trans|e('js') }}</div>`;
                         });
                 });
             }
@@ -298,7 +298,7 @@
                     div.classList.add('flex', 'items-center', 'gap-2', 'participant-item');
                     div.innerHTML = `
                         <div class="flex-grow">${prototype}</div>
-                        <button type="button" class="btn btn-square btn-error btn-outline remove-participant" title="Supprimer">
+                        <button type="button" class="btn btn-square btn-error btn-outline remove-participant" title="{{ 'common.delete'|trans|e('js') }}">
                             <svg class="h-5 w-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     `;
@@ -367,13 +367,13 @@
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (start < today) {
-                        showFieldError(groupStart, errStart, 'Date dans le passé : choisissez aujourd\'hui ou plus tard.');
+                        showFieldError(groupStart, errStart, '{{ 'reservation_form.err_past'|trans|e('js') }}');
                         errors.push('date de début');
                     }
                 }
 
                 if (start && end && end <= start) {
-                    showFieldError(groupEnd, errEnd, 'La fin doit être postérieure au début.');
+                    showFieldError(groupEnd, errEnd, '{{ 'reservation_form.err_end_before_start'|trans|e('js') }}');
                     errors.push('date de fin');
                 }
 

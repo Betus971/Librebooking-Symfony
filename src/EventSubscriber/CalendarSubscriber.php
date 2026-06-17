@@ -1,4 +1,5 @@
 <?php
+
 // src/EventSubscriber/CalendarSubscriber.php
 
 namespace App\EventSubscriber;
@@ -18,7 +19,8 @@ final class CalendarSubscriber implements EventSubscriberInterface
         private readonly ResourceRepository $resources,
         private readonly TimeBlockRepository $timeBlocks,
         private readonly WeekHelper $weeks
-    ) {}
+    ) {
+    }
 
     public static function getSubscribedEvents(): array
     {
@@ -26,7 +28,8 @@ final class CalendarSubscriber implements EventSubscriberInterface
     }
 
     public function onCalendarSetData(SetDataEvent $event): void
-    {$start = $event->getStart();
+    {
+        $start = $event->getStart();
         $end   = $event->getEnd();
         $filters = $event->getFilters();
 
@@ -83,8 +86,12 @@ final class CalendarSubscriber implements EventSubscriberInterface
 
             $rStart = $r->getStartDate();
             $rEnd = $r->getEndDate();
-            if ($rStart instanceof \DateTimeImmutable) { $rStart = \DateTime::createFromImmutable($rStart); }
-            if ($rEnd instanceof \DateTimeImmutable) { $rEnd = \DateTime::createFromImmutable($rEnd); }
+            if ($rStart instanceof \DateTimeImmutable) {
+                $rStart = \DateTime::createFromImmutable($rStart);
+            }
+            if ($rEnd instanceof \DateTimeImmutable) {
+                $rEnd = \DateTime::createFromImmutable($rEnd);
+            }
             $fc = new FcEvent($title, $rStart, $rEnd);
 
             // Options JS FullCalendar pass-through

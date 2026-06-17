@@ -1,9 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Séances : {{ service.libelle }}{% endblock %}
-
-{% set moisFr = {'January':'janvier','February':'février','March':'mars','April':'avril','May':'mai','June':'juin','July':'juillet','August':'août','September':'septembre','October':'octobre','November':'novembre','December':'décembre'} %}
-{% set joursCourt = {'Mon':'Lun','Tue':'Mar','Wed':'Mer','Thu':'Jeu','Fri':'Ven','Sat':'Sam','Sun':'Dim'} %}
+{% block title %}{{ 'presta.sessions_title'|trans({'%service%': service.libelle}) }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -26,18 +23,18 @@
 <div class="max-w-5xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">Annuaire</a></li>
+            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
             <li><a href="{{ path('app_presta_client_prestataire_show', {'id': service.prestataire.id}) }}">{{ service.prestataire.prenom }} {{ service.prestataire.nom }}</a></li>
             <li>{{ service.libelle }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-1">Prochaines séances : {{ service.libelle }}</h1>
-    <p class="text-base-content/60 mb-4">{{ service.dureeMinutes }} min · séance de groupe (max {{ service.capaciteMax }} personnes)</p>
+    <h1 class="text-2xl font-bold mb-1">{{ 'presta.sessions_title'|trans({'%service%': service.libelle}) }}</h1>
+    <p class="text-base-content/60 mb-4">{{ 'presta.group_subtitle'|trans({'%min%': service.dureeMinutes, '%count%': service.capaciteMax}) }}</p>
 
     <div role="tablist" class="tabs tabs-boxed w-fit mb-4">
-        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'list'}) }}" class="tab {{ view == 'list' ? 'tab-active' : '' }}">Vue liste</a>
-        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': currentWeekStart|date('Y-m-d')}) }}" class="tab {{ view == 'calendar' ? 'tab-active' : '' }}">Vue calendrier</a>
+        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'list'}) }}" class="tab {{ view == 'list' ? 'tab-active' : '' }}">{{ 'presta.view_list'|trans }}</a>
+        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': currentWeekStart|date('Y-m-d')}) }}" class="tab {{ view == 'calendar' ? 'tab-active' : '' }}">{{ 'presta.view_calendar'|trans }}</a>
     </div>
 
     {% if view == 'list' %}
@@ -47,46 +44,46 @@
             {% set restantes = service.capaciteMax - session.nbInscrits %}
             <div class="card bg-base-200 border border-base-300 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">{{ (joursCourt[session.dateDebut|date('D')] ?? session.dateDebut|date('D'))|capitalize }} {{ session.dateDebut|date('j') }} {{ moisFr[session.dateDebut|date('F')] ?? session.dateDebut|date('F') }}</h2>
+                    <h2 class="card-title text-base">{{ session.dateDebut|format_datetime(pattern='EEE d MMMM', locale=app.request.locale)|capitalize }}</h2>
                     <p class="font-semibold">{{ session.dateDebut|date('H:i') }} – {{ session.dateFin|date('H:i') }}</p>
-                    {% if complet %}<span class="badge badge-error badge-sm">Complet</span>{% else %}<span class="badge badge-success badge-sm">{{ restantes }} place{{ restantes > 1 ? 's' : '' }} dispo</span>{% endif %}
+                    {% if complet %}<span class="badge badge-error badge-sm">{{ 'presta.full'|trans }}</span>{% else %}<span class="badge badge-success badge-sm">{{ 'presta.spots_left'|trans({'%count%': restantes}) }}</span>{% endif %}
                     <div class="card-actions justify-end mt-2">
                         {% if complet %}
-                            <button class="btn btn-disabled btn-sm">Séance complète</button>
+                            <button class="btn btn-disabled btn-sm">{{ 'presta.session_full_btn'|trans }}</button>
                         {% else %}
-                            <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('Confirmer votre inscription à la séance du {{ session.dateDebut|date('d/m/Y') }} à {{ session.dateDebut|date('H:i') }} ?');">
+                            <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_register_session'|trans({'%date%': session.dateDebut|date('d/m/Y'), '%time%': session.dateDebut|date('H:i')})|e('js') }}');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
-                                <button type="submit" class="btn btn-primary btn-sm">S'inscrire</button>
+                                <button type="submit" class="btn btn-primary btn-sm">{{ 'presta.register'|trans }}</button>
                             </form>
                         {% endif %}
                     </div>
                 </div>
             </div>
         {% else %}
-            <div class="md:col-span-3"><div class="alert alert-info"><span>Aucune séance n'est programmée pour le moment.</span></div></div>
+            <div class="md:col-span-3"><div class="alert alert-info"><span>{{ 'presta.no_session'|trans }}</span></div></div>
         {% endfor %}
     </div>
     {% else %}
     <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
         <div class="flex items-center justify-between mb-3">
-            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">‹ Semaine préc.</a>
-            <h2 class="font-semibold text-center">Semaine du {{ currentWeekStart|date('j') }} {{ moisFr[currentWeekStart|date('F')] ?? currentWeekStart|date('F') }} {{ currentWeekStart|date('Y') }}</h2>
-            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">Semaine suiv. ›</a>
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_week'|trans }}</a>
+            <h2 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': currentWeekStart|date('d/m'), '%end%': (currentWeekStart|date_modify('+6 days'))|date('d/m/Y')}) }}</h2>
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_week'|trans }}</a>
         </div>
         <div class="gcal-week">
             {% for day in daysOfWeek %}
                 <div class="gcal-day">
-                    <div class="gcal-day__head">{{ joursCourt[day|date('D')] ?? day|date('D') }}<small>{{ day|date('d/m') }}</small></div>
+                    <div class="gcal-day__head">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}<small>{{ day|date('d/m') }}</small></div>
                     {% set daySessions = sessionsByDay[day|date('Y-m-d')] %}
                     {% if daySessions|length > 0 %}{% for session in daySessions %}
                         {% set complet = session.nbInscrits >= service.capaciteMax %}
                         <div class="gsession {{ complet ? 'gsession--full' : 'gsession--free' }}">
                             <div class="gsession__time">{{ session.dateDebut|date('H:i') }}–{{ session.dateFin|date('H:i') }}</div>
-                            <div class="text-xs">{% if complet %}Complet{% else %}{{ service.capaciteMax - session.nbInscrits }} place(s){% endif %}</div>
+                            <div class="text-xs">{% if complet %}{{ 'presta.full'|trans }}{% else %}{{ 'presta.spots'|trans({'%count%': service.capaciteMax - session.nbInscrits}) }}{% endif %}</div>
                             {% if not complet %}
-                                <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('Confirmer votre inscription ?');" class="mt-1">
+                                <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_register'|trans|e('js') }}');" class="mt-1">
                                     <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
-                                    <button type="submit" class="btn btn-primary btn-xs w-full">S'inscrire</button>
+                                    <button type="submit" class="btn btn-primary btn-xs w-full">{{ 'presta.register'|trans }}</button>
                                 </form>
                             {% endif %}
                         </div>

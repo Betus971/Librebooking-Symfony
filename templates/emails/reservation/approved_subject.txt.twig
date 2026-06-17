@@ -1,1 +1,1 @@
-[Librebooking] Réservation approuvée — {{ series.title|default('Réservation') }}
+{{ 'email.subject_approved'|trans({'%title%': series.title|default('email.default_title'|trans)}) }}

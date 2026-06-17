@@ -1,25 +1,17 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Inscription - Librebooking{% endblock %}
-
+{% block title %}{{ 'register.title'|trans }} - Librebooking{% endblock %}
 {% block body %}
 <div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div class="flex justify-center mb-6">
             <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                </svg>
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
             </div>
         </div>
-        <h2 class="text-3xl font-extrabold text-base-content tracking-tight font-outfit">
-            Créer un compte
-        </h2>
+        <h2 class="text-3xl font-extrabold text-base-content tracking-tight font-outfit">{{ 'register.title'|trans }}</h2>
         <p class="mt-2 text-sm text-base-content/70">
-            Ou
-            <a href="{{ path('app_login') }}" class="link link-primary font-medium transition-colors">
-                connectez-vous à votre compte existant
-            </a>
+            {{ 'register.have_account'|trans }}
+            <a href="{{ path('app_login') }}" class="link link-primary font-medium">{{ 'register.login_link'|trans }}</a>
         </p>
     </div>
 
@@ -27,8 +19,6 @@
         <div class="card bg-base-100 shadow-xl border border-base-300">
             <div class="card-body sm:p-10">
                 <form class="space-y-5" method="post" action="{{ path('app_register') }}">
-                    
-                    {# Erreurs de validation #}
                     {% if errors is defined and errors|length > 0 %}
                         <div class="alert alert-error border border-error/20 bg-error/5 text-error-content shadow-sm p-4 rounded-xl">
                             <div class="flex flex-col gap-1.5">
@@ -43,60 +33,28 @@
                     {% endif %}
 
                     <div class="grid grid-cols-2 gap-4">
-                        {# Prénom #}
                         <div class="form-control w-full">
-                            <label for="fname" class="label">
-                                <span class="label-text font-semibold text-base-content/80">Prénom</span>
-                            </label>
+                            <label for="fname" class="label"><span class="label-text font-semibold text-base-content/80">{{ 'register.fname'|trans }}</span></label>
                             <input type="text" name="fname" id="fname" value="{{ fname }}" class="input input-bordered input-sm rounded-xl w-full" placeholder="John" required autofocus>
                         </div>
-
-                        {# Nom #}
                         <div class="form-control w-full">
-                            <label for="lname" class="label">
-                                <span class="label-text font-semibold text-base-content/80">Nom</span>
-                            </label>
+                            <label for="lname" class="label"><span class="label-text font-semibold text-base-content/80">{{ 'register.lname'|trans }}</span></label>
                             <input type="text" name="lname" id="lname" value="{{ lname }}" class="input input-bordered input-sm rounded-xl w-full" placeholder="Doe" required>
                         </div>
                     </div>
 
-                    {# Email #}
                     <div class="form-control w-full">
-                        <label for="email" class="label">
-                            <span class="label-text font-semibold text-base-content/80">Adresse email</span>
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                </svg>
-                            </div>
-                            <input type="email" name="email" id="email" value="{{ email }}" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="vous@exemple.com" required>
-                        </div>
+                        <label for="email" class="label"><span class="label-text font-semibold text-base-content/80">{{ 'register.email'|trans }}</span></label>
+                        <input type="email" name="email" id="email" value="{{ email }}" class="input input-bordered input-sm rounded-xl w-full" placeholder="vous@exemple.com" required>
                     </div>
 
-                    {# Mot de passe #}
                     <div class="form-control w-full">
-                        <label for="password" class="label">
-                            <span class="label-text font-semibold text-base-content/80">Mot de passe</span>
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <input type="password" name="password" id="password" class="input input-bordered input-sm rounded-xl w-full pl-10" placeholder="••••••••" minlength="6" required>
-                        </div>
-                        <label class="label mt-1">
-                            <span class="label-text-alt text-base-content/40">Le mot de passe doit faire au moins 6 caractères.</span>
-                        </label>
+                        <label for="password" class="label"><span class="label-text font-semibold text-base-content/80">{{ 'register.password'|trans }}</span></label>
+                        <input type="password" name="password" id="password" class="input input-bordered input-sm rounded-xl w-full" placeholder="••••••••" minlength="6" required>
+                        <label class="label mt-1"><span class="label-text-alt text-base-content/40">{{ 'register.password_hint'|trans }}</span></label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-sm rounded-xl w-full mt-4 font-bold shadow-sm hover:shadow-md transition-all">
-                        S'inscrire
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-xl w-full mt-4 font-bold">{{ 'register.submit'|trans }}</button>
                 </form>
             </div>
         </div>

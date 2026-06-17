@@ -19,26 +19,27 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-
 final class ReservationController extends AbstractController
 {
     #[Route('/reservation', name: 'reservation_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $em,
-                        ReservationManager $reservationManager,
-                        ReservationRequestValidator $validator,
-                        SluggerInterface $slugger,
-                        ReservationNotifier $notifier,
-                        #[Autowire('%attachments_directory%')] string $attachmentsDir): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        ReservationManager $reservationManager,
+        ReservationRequestValidator $validator,
+        SluggerInterface $slugger,
+        ReservationNotifier $notifier,
+        #[Autowire('%attachments_directory%')] string $attachmentsDir
+    ): Response {
         $dto = new ReservationQuickDto();
 
         $form = $this->createForm(ReservationQuickType::class, $dto);
@@ -99,7 +100,7 @@ final class ReservationController extends AbstractController
             $timeStart = $form->get('startTime')->getData();
             $timeEnd   = $form->get('endTime')->getData();
 
-            if ($dStart && $timeStart && $dEnd && $timeEnd ) {
+            if ($dStart && $timeStart && $dEnd && $timeEnd) {
                 // On reconstruit les DateTime complets pour ton DTO
                 $start = (clone $dStart)->setTime((int)$timeStart->format('H'), (int)$timeStart->format('i'));
                 $end   = (clone $dEnd)->setTime((int)$timeEnd->format('H'), (int)$timeEnd->format('i'));
@@ -212,8 +213,11 @@ final class ReservationController extends AbstractController
             ? Response::HTTP_UNPROCESSABLE_ENTITY
             : Response::HTTP_OK;
 
-        return $this->render('reservation/new.html.twig',
-            ['form' => $form], new Response(null, $status));
+        return $this->render(
+            'reservation/new.html.twig',
+            ['form' => $form],
+            new Response(null, $status)
+        );
 
 
     }
@@ -240,7 +244,7 @@ final class ReservationController extends AbstractController
     // Page très simple pour voir la série créée (à adapter)
     #[Route('/reservation/{uuid}', name: 'reservation_show', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
-    public function show (#[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series): Response
+    public function show(#[MapEntity(mapping: ['uuid' => 'uuid'])] ReservationSeries $series): Response
     {
         return $this->render('reservation/show.html.twig', [
             'series' => $series,

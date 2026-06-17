@@ -1,17 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ is_edit ? 'Modifier' : 'Ajouter' }} une plage horaire{% endblock %}
+{% block title %}{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }} {{ 'presta.a_slot'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_provider_schedule_index') }}">Mes disponibilités</a></li>
-            <li>{{ is_edit ? 'Modifier' : 'Ajouter' }}</li>
+            <li><a href="{{ path('app_presta_provider_schedule_index') }}">{{ 'presta.my_availability'|trans }}</a></li>
+            <li>{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'Modifier' : 'Ajouter' }} une plage horaire</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }} {{ 'presta.a_slot'|trans }}</h1>
 
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body">
@@ -22,8 +22,8 @@
                 <div>{{ form_row(form.heureFin, {attr:{class:'input input-bordered w-full'}}) }}</div>
             </div>
             <div class="flex gap-3 mt-4">
-                <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer' }}</button>
-                <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-ghost">Annuler</a>
+                <button type="submit" class="btn btn-primary">{{ is_edit ? 'common.save'|trans : 'common.create'|trans }}</button>
+                <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-ghost">{{ 'common.cancel'|trans }}</a>
             </div>
             {{ form_end(form) }}
         </div>

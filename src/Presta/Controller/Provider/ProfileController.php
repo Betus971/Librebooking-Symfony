@@ -2,7 +2,6 @@
 
 namespace App\Presta\Controller\Provider;
 
-use App\Presta\Entity\Prestataire;
 use App\Presta\Form\PrestataireType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

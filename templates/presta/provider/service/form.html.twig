@@ -1,18 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}{% endblock %}
+{% block title %}{{ is_edit ? 'presta.edit_service'|trans : 'presta.add_service'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-2xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li><a href="{{ path('app_presta_provider_service_index') }}">Mes prestations</a></li>
-            <li>{{ is_edit ? 'Modifier' : 'Ajouter' }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li><a href="{{ path('app_presta_provider_service_index') }}">{{ 'presta.my_services'|trans }}</a></li>
+            <li>{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'presta.edit_service'|trans : 'presta.add_service'|trans }}</h1>
 
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body">
@@ -26,8 +26,8 @@
             </div>
             <div class="my-4">{{ form_row(form.isActive, {attr:{class:'toggle toggle-primary'}}) }}</div>
             <div class="flex gap-3 mt-2">
-                <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer la prestation' }}</button>
-                <a href="{{ path('app_presta_provider_service_index') }}" class="btn btn-ghost">Annuler</a>
+                <button type="submit" class="btn btn-primary">{{ is_edit ? 'common.save'|trans : 'presta.create_service'|trans }}</button>
+                <a href="{{ path('app_presta_provider_service_index') }}" class="btn btn-ghost">{{ 'common.cancel'|trans }}</a>
             </div>
             {{ form_end(form) }}
         </div>

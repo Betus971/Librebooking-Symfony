@@ -13,15 +13,17 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
-    public function index(ResourceRepository $repo, ResourceCategoryRepository $catRepo,
-                          AnnouncementRepository $announcementRepository,
-                          ReservationSeriesRepository $reservationRepo): Response
-    {
+    public function index(
+        ResourceRepository $repo,
+        ResourceCategoryRepository $catRepo,
+        AnnouncementRepository $announcementRepository,
+        ReservationSeriesRepository $reservationRepo
+    ): Response {
         $announcements = $announcementRepository->findActiveAnnouncements();
 
         // 2. Tes Catégories (Inchangé)
         $rows = $catRepo->findForHome();
-        $categories = array_map(fn($r) => [
+        $categories = array_map(fn ($r) => [
             'category' => $r[0],
             'count'    => (int)$r['resourceCount'],
         ], $rows);

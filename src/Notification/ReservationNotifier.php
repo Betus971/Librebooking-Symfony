@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Notification;
 
 use App\Entity\ReservationInstance;
@@ -25,12 +26,25 @@ final class ReservationNotifier
         #[Autowire(param: 'app.mail.from')]
         private string $from = 'no-reply@librebooking.local',
         private ?LoggerInterface $logger = null,
-    ) {}
+    ) {
+    }
 
-    public function created(ReservationSeries $s): void   { $this->send($s, 'created'); }
-    public function approved(ReservationSeries $s): void  { $this->send($s, 'approved'); }
-    public function cancelled(ReservationSeries $s): void { $this->send($s, 'cancelled'); }
-    public function rejected(ReservationSeries $s, string $reason): void { $this->send($s, 'rejected', ['reason' => $reason]); }
+    public function created(ReservationSeries $s): void
+    {
+        $this->send($s, 'created');
+    }
+    public function approved(ReservationSeries $s): void
+    {
+        $this->send($s, 'approved');
+    }
+    public function cancelled(ReservationSeries $s): void
+    {
+        $this->send($s, 'cancelled');
+    }
+    public function rejected(ReservationSeries $s, string $reason): void
+    {
+        $this->send($s, 'rejected', ['reason' => $reason]);
+    }
 
     /**
      * Rappel avant le début d'une réservation. $instance est l'occurrence concernée.

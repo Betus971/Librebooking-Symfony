@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Repository;
+
 use App\Entity\ReservationSeries;
 use App\Entity\ReservationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -173,8 +174,12 @@ class ReservationSeriesRepository extends ServiceEntityRepository
         if (!empty($f['to'])) {
             $countQb->andWhere('i2.startDate <= :to')->setParameter('to', $f['to']);
         }
-        if (($f['approval'] ?? 'all') === 'req')   { $countQb->andWhere('EXISTS (SELECT 1 FROM App\Entity\ReservationResource rr3 JOIN rr3.resource r3 WITH r3.requiresApproval = true WHERE rr3.series = s2)'); }
-        if (($f['approval'] ?? 'all') === 'noreq') { $countQb->andWhere('NOT EXISTS (SELECT 1 FROM App\Entity\ReservationResource rr3 JOIN rr3.resource r3 WITH r3.requiresApproval = true WHERE rr3.series = s2)'); }
+        if (($f['approval'] ?? 'all') === 'req') {
+            $countQb->andWhere('EXISTS (SELECT 1 FROM App\Entity\ReservationResource rr3 JOIN rr3.resource r3 WITH r3.requiresApproval = true WHERE rr3.series = s2)');
+        }
+        if (($f['approval'] ?? 'all') === 'noreq') {
+            $countQb->andWhere('NOT EXISTS (SELECT 1 FROM App\Entity\ReservationResource rr3 JOIN rr3.resource r3 WITH r3.requiresApproval = true WHERE rr3.series = s2)');
+        }
 
         // Même scope hybride sur le count, pour que la pagination reflète la réalité.
         // (les ressources r2 sont déjà jointes ci-dessus)
@@ -292,4 +297,3 @@ class ReservationSeriesRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 }
-

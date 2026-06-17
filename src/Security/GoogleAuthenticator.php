@@ -42,7 +42,7 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
         $accessToken = $this->fetchAccessToken($client);
 
         return new SelfValidatingPassport(
-            new UserBadge($accessToken->getToken(), function() use ($accessToken, $client) {
+            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
                 /** @var GoogleUser $googleUser */
                 $googleUser = $client->fetchUserFromToken($accessToken);
 
@@ -63,7 +63,7 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 // $user->setPassword('...');
                 $user->setFname($googleUser->getFirstName() ?? 'Google');
                 $user->setLname($googleUser->getLastName() ?? 'User');
-                
+
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 

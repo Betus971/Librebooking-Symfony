@@ -38,7 +38,7 @@ class SessionController extends AbstractController
         $session->setPrestataire($prestataire);
 
         $form = $this->createForm(SessionType::class, $session, [
-            'prestataire' => $prestataire
+            'prestataire' => $prestataire,
         ]);
         $form->handleRequest($request);
 
@@ -52,7 +52,7 @@ class SessionController extends AbstractController
         return $this->render('presta/provider/session/form.html.twig', [
             'session' => $session,
             'form' => $form->createView(),
-            'is_edit' => false
+            'is_edit' => false,
         ]);
     }
 
@@ -69,7 +69,7 @@ class SessionController extends AbstractController
         }
 
         $form = $this->createForm(SessionType::class, $session, [
-            'prestataire' => $prestataire
+            'prestataire' => $prestataire,
         ]);
         $form->handleRequest($request);
 
@@ -82,7 +82,7 @@ class SessionController extends AbstractController
         return $this->render('presta/provider/session/form.html.twig', [
             'session' => $session,
             'form' => $form->createView(),
-            'is_edit' => true
+            'is_edit' => true,
         ]);
     }
 

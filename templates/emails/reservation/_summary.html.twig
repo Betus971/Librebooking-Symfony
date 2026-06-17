@@ -1,21 +1,21 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse;">
     <tr>
-        <td style="padding:8px 0;color:#6b7280;width:140px;">Demande</td>
-        <td style="padding:8px 0;font-weight:bold;">{{ series.title|default('Réservation') }}</td>
+        <td style="padding:8px 0;color:#6b7280;width:140px;">{{ 'email.request'|trans }}</td>
+        <td style="padding:8px 0;font-weight:bold;">{{ series.title|default('email.default_title'|trans) }}</td>
     </tr>
     {% for rr in series.reservationResources %}
         {% if rr.resource %}
             <tr>
-                <td style="padding:8px 0;color:#6b7280;">Ressource</td>
+                <td style="padding:8px 0;color:#6b7280;">{{ 'email.resource'|trans }}</td>
                 <td style="padding:8px 0;">{{ rr.resource.name }}</td>
             </tr>
         {% endif %}
     {% endfor %}
     {% for instance in series.instances %}
         <tr>
-            <td style="padding:8px 0;color:#6b7280;">Créneau</td>
+            <td style="padding:8px 0;color:#6b7280;">{{ 'email.slot'|trans }}</td>
             <td style="padding:8px 0;">
-                du {{ instance.startDate|date('d/m/Y H:i') }} au {{ instance.endDate|date('d/m/Y H:i') }}
+                {{ 'email.range'|trans({'%start%': instance.startDate|date('d/m/Y H:i'), '%end%': instance.endDate|date('d/m/Y H:i')}) }}
             </td>
         </tr>
     {% endfor %}

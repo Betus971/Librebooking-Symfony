@@ -8,27 +8,25 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class BlackoutInstanceRepository extends ServiceEntityRepository
 {
-
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, BlackoutInstance::class);
     }
 
-//    public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
-//    {
-//        $dql = 'SELECT r.id AS rid, bi.startDate AS s, bi.endDate AS e
-//            FROM App\Entity\BlackoutInstance bi
-//            JOIN bi.series bs
-//            JOIN bs.resource r
-//            WHERE r.id IN (:ids) AND bi.startDate < :end AND bi.endDate > :start';
-//        return $this->getEntityManager()
-//            ->createQuery($dql)
-//            ->setParameter('ids', $resourceIds)
-//            ->setParameter('start', $start)
-//            ->setParameter('end', $end)
-//            ->getArrayResult();
-//    }
+    //    public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
+    //    {
+    //        $dql = 'SELECT r.id AS rid, bi.startDate AS s, bi.endDate AS e
+    //            FROM App\Entity\BlackoutInstance bi
+    //            JOIN bi.series bs
+    //            JOIN bs.resource r
+    //            WHERE r.id IN (:ids) AND bi.startDate < :end AND bi.endDate > :start';
+    //        return $this->getEntityManager()
+    //            ->createQuery($dql)
+    //            ->setParameter('ids', $resourceIds)
+    //            ->setParameter('start', $start)
+    //            ->setParameter('end', $end)
+    //            ->getArrayResult();
+    //    }
 
     public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
     {

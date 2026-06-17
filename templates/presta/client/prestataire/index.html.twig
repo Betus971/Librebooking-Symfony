@@ -1,18 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Annuaire des professionnels{% endblock %}
+{% block title %}{{ 'presta.directory_title'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li>Prendre rendez-vous</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li>{{ 'presta.book_appointment'|trans }}</li>
         </ul>
     </div>
 
-    <h1 class="text-3xl font-extrabold mb-2">Annuaire des professionnels</h1>
-    <p class="text-base-content/60 mb-6">Sélectionnez le professionnel ou le service de votre choix pour prendre rendez-vous.</p>
+    <h1 class="text-3xl font-extrabold mb-2">{{ 'presta.directory_title'|trans }}</h1>
+    <p class="text-base-content/60 mb-6">{{ 'presta.directory_subtitle'|trans }}</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         {% for presta in prestataires %}
@@ -22,12 +22,12 @@
                 {% endif %}
                 <div class="card-body">
                     <h3 class="card-title text-primary">{{ presta.prenom }} {{ presta.nom }}</h3>
-                    <p class="text-sm text-base-content/70 line-clamp-3">{{ presta.description|default('Aucune description disponible.') }}</p>
-                    <div class="card-actions justify-end mt-2"><span class="text-sm text-primary font-medium">Voir les prestations →</span></div>
+                    <p class="text-sm text-base-content/70 line-clamp-3">{{ presta.description|default('presta.no_description'|trans) }}</p>
+                    <div class="card-actions justify-end mt-2"><span class="text-sm text-primary font-medium">{{ 'presta.see_services'|trans }}</span></div>
                 </div>
             </a>
         {% else %}
-            <div class="md:col-span-3"><div class="alert alert-info"><span>Aucun prestataire n'est enregistré pour le moment.</span></div></div>
+            <div class="md:col-span-3"><div class="alert alert-info"><span>{{ 'presta.no_provider'|trans }}</span></div></div>
         {% endfor %}
     </div>
 </div>

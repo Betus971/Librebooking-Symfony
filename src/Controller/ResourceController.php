@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Resource;
-use App\Entity\Schedule;
 use App\Form\ResourceType;
 use App\Repository\ResourceRepository;
 use App\Repository\ScheduleRepository;
@@ -22,7 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class ResourceController extends AbstractController
 {
     #[Route(name: 'app_resource_index', methods: ['GET'])]
-    public function index(ResourceRepository $resourceRepository ,ScheduleRepository $sRepo,  Request $request ): Response
+    public function index(ResourceRepository $resourceRepository, ScheduleRepository $sRepo, Request $request): Response
     {
         $view     = $request->query->get('view', 'cards');       // table | cards (défaut sur cards pour plus de clarté)
         $q        = trim((string)$request->query->get('q', ''));  // recherche par nom
@@ -38,7 +37,7 @@ final class ResourceController extends AbstractController
         ];
 
         $user = $this->getUser();
-        $resources = $resourceRepository->findForIndex($filters ,$user);
+        $resources = $resourceRepository->findForIndex($filters, $user);
         $schedules = $sRepo->findBy([], ['name' => 'ASC']);
 
         return $this->render('resource/index.html.twig', [
@@ -123,9 +122,9 @@ final class ResourceController extends AbstractController
                 }
             }
 
-                $entityManager->flush();
-                $this->addFlash('success', 'Ressource mise à jour avec succès !');
-                return $this->redirectToRoute('app_resource_index', [], Response::HTTP_SEE_OTHER);
+            $entityManager->flush();
+            $this->addFlash('success', 'Ressource mise à jour avec succès !');
+            return $this->redirectToRoute('app_resource_index', [], Response::HTTP_SEE_OTHER);
 
         }
         return $this->render('resource/edit.html.twig', [
@@ -147,55 +146,55 @@ final class ResourceController extends AbstractController
 
         return $this->redirectToRoute('app_resource_index', [], Response::HTTP_SEE_OTHER);
     }
-//    #[Route('/resource/quick-new', name: 'app_resource_quick_new',methods: ['GET', 'POST'])]
-//    public function quickNew(
-//        Request $request,
-//        EntityManagerInterface $em,
-//        SluggerInterface $slugger
-//    ): Response {
-//        $resource = new Resource();
-//        $form = $this->createForm(ResourceQuickType::class, $resource, [
-//            'attr' => ['novalidate' => 'novalidate'] // optionnel
-//        ]);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            if ($file = $form->get('photo')->getData()) {
-//                // Récupère le chemin du dossier d'upload
-//                $uploadDirectory = $this->getParameter('upload_directory');
-//
-//                // Crée le dossier s'il n'existe pas
-//                if (!file_exists($uploadDirectory)) {
-//                    mkdir($uploadDirectory, 0775, true);
-//                }
-//
-//                // Génère un nom de fichier sécurisé
-//                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-//                $safeFilename = $slugger->slug($originalFilename);
-//                $extension = strtolower($file->guessExtension());
-//                $filename = substr($safeFilename, 0, 20) . '-' . uniqid() . '.' . $extension;
-//
-//                // Déplace le fichier
-//                $file->move($uploadDirectory, $filename);
-//                $resource->setImageName($filename);
-//            }
-//
-//            // valeurs par défaut utiles
-//            $resource->setIsActive(true)->setAutoassign(true)->setStatusId(1);
-//            $resource->setDateCreated(new \DateTime());
-//            $resource->setLastModified(new \DateTime());
-//
-//            $em->persist($resource);
-//            $em->flush();
-//
-//            $this->addFlash('success', 'Ressource créée.');
-//            return $this->redirectToRoute('app_resource_edit', ['id' => $resource->getId()]);
-//        }
-//
-//        // Affiché dans la modale (ou page fallback)
-//        return $this->render('resource/_quick_modal_content.html.twig', [
-//            'form' => $form->createView(),
-//        ]);
+    //    #[Route('/resource/quick-new', name: 'app_resource_quick_new',methods: ['GET', 'POST'])]
+    //    public function quickNew(
+    //        Request $request,
+    //        EntityManagerInterface $em,
+    //        SluggerInterface $slugger
+    //    ): Response {
+    //        $resource = new Resource();
+    //        $form = $this->createForm(ResourceQuickType::class, $resource, [
+    //            'attr' => ['novalidate' => 'novalidate'] // optionnel
+    //        ]);
+    //        $form->handleRequest($request);
+    //
+    //        if ($form->isSubmitted() && $form->isValid()) {
+    //            if ($file = $form->get('photo')->getData()) {
+    //                // Récupère le chemin du dossier d'upload
+    //                $uploadDirectory = $this->getParameter('upload_directory');
+    //
+    //                // Crée le dossier s'il n'existe pas
+    //                if (!file_exists($uploadDirectory)) {
+    //                    mkdir($uploadDirectory, 0775, true);
+    //                }
+    //
+    //                // Génère un nom de fichier sécurisé
+    //                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+    //                $safeFilename = $slugger->slug($originalFilename);
+    //                $extension = strtolower($file->guessExtension());
+    //                $filename = substr($safeFilename, 0, 20) . '-' . uniqid() . '.' . $extension;
+    //
+    //                // Déplace le fichier
+    //                $file->move($uploadDirectory, $filename);
+    //                $resource->setImageName($filename);
+    //            }
+    //
+    //            // valeurs par défaut utiles
+    //            $resource->setIsActive(true)->setAutoassign(true)->setStatusId(1);
+    //            $resource->setDateCreated(new \DateTime());
+    //            $resource->setLastModified(new \DateTime());
+    //
+    //            $em->persist($resource);
+    //            $em->flush();
+    //
+    //            $this->addFlash('success', 'Ressource créée.');
+    //            return $this->redirectToRoute('app_resource_edit', ['id' => $resource->getId()]);
+    //        }
+    //
+    //        // Affiché dans la modale (ou page fallback)
+    //        return $this->render('resource/_quick_modal_content.html.twig', [
+    //            'form' => $form->createView(),
+    //        ]);
     //}
 
 }

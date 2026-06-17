@@ -3,7 +3,6 @@
 namespace App\Presta\Controller\Provider;
 
 use App\Presta\Entity\PlageHoraire;
-use App\Presta\Entity\Prestataire;
 use App\Presta\Form\PlageHoraireType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,7 +49,7 @@ class PlageHoraireController extends AbstractController
         return $this->render('presta/provider/plage_horaire/form.html.twig', [
             'plage' => $plage,
             'form' => $form->createView(),
-            'is_edit' => false
+            'is_edit' => false,
         ]);
     }
 
@@ -73,7 +72,7 @@ class PlageHoraireController extends AbstractController
         return $this->render('presta/provider/plage_horaire/form.html.twig', [
             'plage' => $plageHoraire,
             'form' => $form->createView(),
-            'is_edit' => true
+            'is_edit' => true,
         ]);
     }
 

@@ -1,9 +1,8 @@
 <?php
+
 namespace App\Presta\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'presta_service')]
@@ -96,7 +95,7 @@ class Service
     public function setType(string $type): static
     {
         if (!in_array($type, [self::TYPE_INDIVIDUEL, self::TYPE_GROUPE])) {
-            throw new \InvalidArgumentException("Invalid type");
+            throw new \InvalidArgumentException('Invalid type');
         }
         $this->type = $type;
         return $this;

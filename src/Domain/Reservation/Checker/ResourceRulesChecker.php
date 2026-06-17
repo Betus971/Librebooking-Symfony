@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domain\Reservation\Checker;
 
 use App\Entity\Resource;
@@ -20,27 +21,27 @@ final class ResourceRulesChecker
 
         // 1) Ressource active ?
         if (method_exists($resource, 'isActive') && !$resource->isActive()) {
-            $errors[] = "Cette ressource est inactive et ne peut pas être réservée.";
+            $errors[] = 'Cette ressource est inactive et ne peut pas être réservée.';
             return $errors;
         }
 
         // 2) Durée en minutes
         $minutes = (int) round(($end->getTimestamp() - $start->getTimestamp()) / 60);
         if ($minutes <= 0) {
-            return ["La fin doit être postérieure au début."];
+            return ['La fin doit être postérieure au début.'];
         }
 
         // 3) Min / Max (entier minutes, nullable) – messages lisibles
         if (method_exists($resource, 'getMinDuration')) {
             $min = $resource->getMinDuration();
             if (null !== $min && $minutes < $min) {
-                $errors[] = "La durée est inférieure à la durée minimale autorisée (min. ".$this->humanDelay($min).").";
+                $errors[] = 'La durée est inférieure à la durée minimale autorisée (min. '.$this->humanDelay($min).').';
             }
         }
         if (method_exists($resource, 'getMaxDuration')) {
             $max = $resource->getMaxDuration();
             if (null !== $max && $minutes > $max) {
-                $errors[] = "La durée dépasse la durée maximale autorisée (max. ".$this->humanDelay($max).").";
+                $errors[] = 'La durée dépasse la durée maximale autorisée (max. '.$this->humanDelay($max).').';
             }
         }
 
@@ -60,10 +61,10 @@ final class ResourceRulesChecker
                 $startMinutesOfDay = ((int) $start->format('H')) * 60 + (int) $start->format('i');
 
                 if ($startMinutesOfDay % $inc !== 0) {
-                    $errors[] = "L’heure de début doit être alignée sur un pas de ".$this->humanDelay($inc)." (ex. tranches de ".$this->humanDelay($inc).").";
+                    $errors[] = 'L’heure de début doit être alignée sur un pas de '.$this->humanDelay($inc).' (ex. tranches de '.$this->humanDelay($inc).').';
                 }
                 if ($minutes % $inc !== 0) {
-                    $errors[] = "La durée doit respecter le pas de ".$this->humanDelay($inc)." (pas de créneau).";
+                    $errors[] = 'La durée doit respecter le pas de '.$this->humanDelay($inc).' (pas de créneau).';
                 }
             }
         }
@@ -75,7 +76,7 @@ final class ResourceRulesChecker
             if (null !== $preAdd) {
                 $limit = $now->modify("+{$preAdd} minutes");
                 if ($limit > $start) {
-                    $errors[] = "Les réservations doivent être créées au moins ".$this->humanDelay($preAdd)." avant l’heure de début.";
+                    $errors[] = 'Les réservations doivent être créées au moins '.$this->humanDelay($preAdd).' avant l’heure de début.';
                 }
             }
         }
@@ -84,7 +85,7 @@ final class ResourceRulesChecker
             if (null !== $maxAhead) {
                 $tooEarlyAfter = $now->modify("+{$maxAhead} minutes");
                 if ($start > $tooEarlyAfter) {
-                    $errors[] = "On ne peut pas réserver plus de ".$this->humanDelay($maxAhead)." à l’avance.";
+                    $errors[] = 'On ne peut pas réserver plus de '.$this->humanDelay($maxAhead).' à l’avance.';
                 }
             }
         }
@@ -106,13 +107,23 @@ final class ResourceRulesChecker
         $m = $r % 60;
 
         $parts = [];
-        if ($d > 0) { $parts[] = $d.' '.($d > 1 ? 'jours' : 'jour'); }
-        if ($h > 0) { $parts[] = $h.' '.($h > 1 ? 'heures' : 'heure'); }
-        if ($m > 0 || empty($parts)) { $parts[] = $m.' min'; }
+        if ($d > 0) {
+            $parts[] = $d.' '.($d > 1 ? 'jours' : 'jour');
+        }
+        if ($h > 0) {
+            $parts[] = $h.' '.($h > 1 ? 'heures' : 'heure');
+        }
+        if ($m > 0 || empty($parts)) {
+            $parts[] = $m.' min';
+        }
 
         // préférer une forme compacte quand c’est “pile”
-        if ($d > 0 && $h === 0 && $m === 0) return $d.' '.($d>1?'jours':'jour');
-        if ($h > 0 && $m === 0 && $d === 0) return $h.' '.($h>1?'heures':'heure');
+        if ($d > 0 && $h === 0 && $m === 0) {
+            return $d.' '.($d > 1 ? 'jours' : 'jour');
+        }
+        if ($h > 0 && $m === 0 && $d === 0) {
+            return $h.' '.($h > 1 ? 'heures' : 'heure');
+        }
 
         return implode(' ', $parts);
     }

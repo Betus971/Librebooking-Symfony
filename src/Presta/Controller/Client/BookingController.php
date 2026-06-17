@@ -2,7 +2,6 @@
 
 namespace App\Presta\Controller\Client;
 
-use App\Entity\User;
 use App\Presta\Entity\Inscription;
 use App\Presta\Entity\Service;
 use App\Presta\Entity\Session;
@@ -66,7 +65,7 @@ class BookingController extends AbstractController
             $dayKey = $day->format('Y-m-d');
             $sessionsByDay[$dayKey] = [];
         }
-        
+
         foreach ($allSessions as $session) {
             $sessionDate = $session->getDateDebut()->format('Y-m-d');
             if (isset($sessionsByDay[$sessionDate])) {
@@ -93,7 +92,7 @@ class BookingController extends AbstractController
     public function bookGroup(Session $session, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('book_session'.$session->getId(), $request->request->get('_token'))) {
-            
+
             // Vérifier la capacité
             if ($session->getNbInscrits() >= $session->getService()->getCapaciteMax()) {
                 $this->addFlash('error', 'Désolé, cette séance est déjà complète.');
@@ -105,7 +104,7 @@ class BookingController extends AbstractController
             // Vérifier si le client est déjà inscrit
             $existing = $em->getRepository(Inscription::class)->findOneBy([
                 'session' => $session,
-                'client' => $client
+                'client' => $client,
             ]);
 
             if ($existing) {
@@ -137,13 +136,15 @@ class BookingController extends AbstractController
         }
 
         $prestataire = $service->getPrestataire();
-        
+
         // Date demandée ou aujourd'hui
         $dateParam = $request->query->get('date');
         $view = $request->query->get('view', 'day'); // 'day' ou 'week'
         $date = $dateParam ? \DateTime::createFromFormat('Y-m-d', $dateParam) : new \DateTime();
-        if (!$date) $date = new \DateTime();
-        
+        if (!$date) {
+            $date = new \DateTime();
+        }
+
         // Pour la vue semaine : calculer les 7 jours
         $daysOfWeek = [];
         $creneauxByDay = [];
@@ -162,7 +163,7 @@ class BookingController extends AbstractController
         // Préparer les jours précédent/suivant pour la navigation
         $prevDate = (clone $date)->modify('-1 day');
         $nextDate = (clone $date)->modify('+1 day');
-        
+
         // Pour la vue semaine
         $prevWeek = (clone $date)->modify('-7 days');
         $nextWeek = (clone $date)->modify('+7 days');
@@ -193,7 +194,7 @@ class BookingController extends AbstractController
         // Récupérer les plages horaires du prestataire pour ce jour
         $plages = $em->getRepository(\App\Presta\Entity\PlageHoraire::class)->findBy([
             'prestataire' => $prestataire,
-            'jourSemaine' => $jourSemaine
+            'jourSemaine' => $jourSemaine,
         ]);
 
         // Récupérer les sessions déjà réservées pour ce prestataire ce jour-là
@@ -217,7 +218,7 @@ class BookingController extends AbstractController
         foreach ($plages as $plage) {
             $currentStart = clone $date;
             $currentStart->setTime((int)$plage->getHeureDebut()->format('H'), (int)$plage->getHeureDebut()->format('i'));
-            
+
             $endPlage = clone $date;
             $endPlage->setTime((int)$plage->getHeureFin()->format('H'), (int)$plage->getHeureFin()->format('i'));
 
@@ -262,9 +263,9 @@ class BookingController extends AbstractController
     public function bookIndividual(Service $service, Request $request, EntityManagerInterface $em): Response
     {
         $timeStr = $request->request->get('time'); // ex: 2026-06-10 14:00
-        
+
         if ($this->isCsrfTokenValid('book_individual'.$service->getId(), $request->request->get('_token')) && $timeStr) {
-            
+
             $dateDebut = \DateTime::createFromFormat('Y-m-d H:i', $timeStr);
             if ($dateDebut) {
                 $dateFin = clone $dateDebut;

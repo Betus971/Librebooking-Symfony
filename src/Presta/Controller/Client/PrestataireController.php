@@ -33,7 +33,7 @@ class PrestataireController extends AbstractController
         // On récupère les services ACTIFS du prestataire
         $services = $em->getRepository(Service::class)->findBy([
             'prestataire' => $prestataire,
-            'isActive' => true
+            'isActive' => true,
         ]);
 
         return $this->render('presta/client/prestataire/show.html.twig', [

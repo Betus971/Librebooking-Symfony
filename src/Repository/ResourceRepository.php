@@ -120,7 +120,7 @@ class ResourceRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('r')
             ->leftJoin('r.category', 'cat')->addSelect('cat')
-            ->orderBy('r.name','ASC');
+            ->orderBy('r.name', 'ASC');
 
         if ($c->onlyActive !== null) {
             $qb->andWhere('r.isActive = :act')->setParameter('act', $c->onlyActive);

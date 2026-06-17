@@ -2,7 +2,6 @@
 
 namespace App\Presta\Controller\Provider;
 
-use App\Presta\Entity\Prestataire;
 use App\Presta\Entity\Service;
 use App\Presta\Form\ServiceType;
 use Doctrine\ORM\EntityManagerInterface;

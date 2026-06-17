@@ -1,12 +1,12 @@
 <?php
+
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use App\Repository\ResourceRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-#[ORM\Entity (repositoryClass: ResourceRepository::class)]
+
+#[ORM\Entity(repositoryClass: ResourceRepository::class)]
 #[ORM\Table(name: 'resources')]
 class Resource
 {

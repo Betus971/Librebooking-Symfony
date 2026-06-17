@@ -1,8 +1,8 @@
 <ul class="menu bg-base-100 border border-base-300 rounded-box w-full">
-    <li class="menu-title">Espace prestataire</li>
-    <li><a href="{{ path('app_presta_provider_profile_edit') }}" class="{{ current_menu == 'profile' ? 'active' : '' }}">Mon profil public</a></li>
-    <li><a href="{{ path('app_presta_provider_service_index') }}" class="{{ current_menu == 'service' ? 'active' : '' }}">Mes prestations (catalogue)</a></li>
-    <li><a href="{{ path('app_presta_provider_agenda_index') }}" class="{{ current_menu == 'agenda' ? 'active' : '' }}">Mon agenda (réservations)</a></li>
-    <li><a href="{{ path('app_presta_provider_schedule_index') }}" class="{{ current_menu == 'schedule' ? 'active' : '' }}">Mes disponibilités</a></li>
-    <li><a href="{{ path('app_presta_provider_session_index') }}" class="{{ current_menu == 'session' ? 'active' : '' }}">Mes séances de groupe</a></li>
+    <li class="menu-title">{{ 'presta.provider_space'|trans }}</li>
+    <li><a href="{{ path('app_presta_provider_profile_edit') }}" class="{{ current_menu == 'profile' ? 'active' : '' }}">{{ 'presta.menu_profile'|trans }}</a></li>
+    <li><a href="{{ path('app_presta_provider_service_index') }}" class="{{ current_menu == 'service' ? 'active' : '' }}">{{ 'presta.menu_service'|trans }}</a></li>
+    <li><a href="{{ path('app_presta_provider_agenda_index') }}" class="{{ current_menu == 'agenda' ? 'active' : '' }}">{{ 'presta.menu_agenda'|trans }}</a></li>
+    <li><a href="{{ path('app_presta_provider_schedule_index') }}" class="{{ current_menu == 'schedule' ? 'active' : '' }}">{{ 'presta.menu_schedule'|trans }}</a></li>
+    <li><a href="{{ path('app_presta_provider_session_index') }}" class="{{ current_menu == 'session' ? 'active' : '' }}">{{ 'presta.menu_session'|trans }}</a></li>
 </ul>

@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes prestations{% endblock %}
+{% block title %}{{ 'presta.my_services'|trans }}{% endblock %}
 
 {% block body %}
 <div class="max-w-6xl mx-auto">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
-            <li>Mes prestations</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
+            <li>{{ 'presta.my_services'|trans }}</li>
         </ul>
     </div>
 
@@ -15,15 +15,15 @@
         <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'service' }) }}</aside>
         <div class="md:col-span-3">
             <div class="flex items-center justify-between mb-4">
-                <h1 class="text-2xl font-bold">Mon catalogue de prestations</h1>
-                <a href="{{ path('app_presta_provider_service_new') }}" class="btn btn-primary btn-sm">+ Ajouter</a>
+                <h1 class="text-2xl font-bold">{{ 'presta.my_catalog'|trans }}</h1>
+                <a href="{{ path('app_presta_provider_service_new') }}" class="btn btn-primary btn-sm">{{ 'presta.add'|trans }}</a>
             </div>
 
             <div class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="table">
                         <thead>
-                            <tr><th>Prestation</th><th>Type</th><th>Durée</th><th>Capacité</th><th class="text-right">Actions</th></tr>
+                            <tr><th>{{ 'presta.th_service'|trans }}</th><th>{{ 'presta.th_type'|trans }}</th><th>{{ 'presta.th_duration'|trans }}</th><th>{{ 'presta.th_capacity'|trans }}</th><th class="text-right">{{ 'common.actions'|trans }}</th></tr>
                         </thead>
                         <tbody>
                         {% for service in services %}
@@ -37,21 +37,21 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ service.dureeMinutes }} min</td>
-                                <td>{{ service.capaciteMax }} pers.</td>
+                                <td>{{ service.capaciteMax }} {{ 'resource.people_short'|trans }}</td>
                                 <td class="text-right">
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ path('app_presta_provider_service_edit', {'id': service.id}) }}" class="btn btn-ghost btn-xs" title="Modifier">✎</a>
-                                        <form method="post" action="{{ path('app_presta_provider_service_delete', {'id': service.id}) }}" onsubmit="return confirm('Supprimer cette prestation ?');">
+                                        <a href="{{ path('app_presta_provider_service_edit', {'id': service.id}) }}" class="btn btn-ghost btn-xs" title="{{ 'common.edit'|trans }}">✎</a>
+                                        <form method="post" action="{{ path('app_presta_provider_service_delete', {'id': service.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_delete_service'|trans|e('js') }}');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ service.id) }}">
-                                            <button class="btn btn-ghost btn-xs text-error" title="Supprimer">🗑</button>
+                                            <button class="btn btn-ghost btn-xs text-error" title="{{ 'common.delete'|trans }}">🗑</button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr><td colspan="5" class="text-center py-8 text-base-content/60">
-                                Vous ne proposez encore aucune prestation.<br>
-                                <a href="{{ path('app_presta_provider_service_new') }}" class="btn btn-sm btn-primary mt-3">Créer ma première prestation</a>
+                                {{ 'presta.no_services'|trans }}<br>
+                                <a href="{{ path('app_presta_provider_service_new') }}" class="btn btn-sm btn-primary mt-3">{{ 'presta.create_first_service'|trans }}</a>
                             </td></tr>
                         {% endfor %}
                         </tbody>
