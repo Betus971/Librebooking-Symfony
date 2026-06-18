@@ -14,7 +14,7 @@
  #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Planning — Aperçu V2{% endblock %}
+{% block title %}{{ 'calendar.preview_title'|trans }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -27,10 +27,10 @@
         {# ---- En-tête ---- #}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
             <div>
-                <h1 class="text-2xl font-bold">{{ pageTitle }}</h1>
-                <span class="badge badge-info badge-sm mt-1">Aperçu — ne remplace pas le planning principal</span>
+                <h1 class="text-2xl font-bold">{{ 'calendar.preview_title'|trans }}</h1>
+                <span class="badge badge-info badge-sm mt-1">{{ 'calendar.preview_badge'|trans }}</span>
             </div>
-            <a href="{{ path('app_calendar') }}" class="btn btn-ghost btn-sm">‹ Revenir au planning classique</a>
+            <a href="{{ path('app_calendar') }}" class="btn btn-ghost btn-sm">{{ 'calendar.back_classic'|trans }}</a>
         </div>
 
         {# ---- Carte calendrier ---- #}
@@ -40,29 +40,29 @@
             <div class="cal2-topbar">
                 <div class="cal2-topbar-left">
                     <h2 id="cal2-title" class="cal2-title"></h2>
-                    <button class="cal2-btn-icon" id="cal2-prev" aria-label="Précédent">‹</button>
-                    <button class="cal2-btn-icon" id="cal2-next" aria-label="Suivant">›</button>
-                    <button class="cal2-btn-today" id="cal2-today">Aujourd'hui</button>
+                    <button class="cal2-btn-icon" id="cal2-prev" aria-label="{{ 'calendar.prev'|trans }}">‹</button>
+                    <button class="cal2-btn-icon" id="cal2-next" aria-label="{{ 'calendar.next'|trans }}">›</button>
+                    <button class="cal2-btn-today" id="cal2-today">{{ 'calendar.btn_today'|trans }}</button>
                 </div>
                 <div class="cal2-topbar-right">
-                    <div class="cal2-legend" aria-label="Légende des catégories">
-                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-reunion);"></span>Réunion</span>
-                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-seminaire);"></span>Séminaire</span>
-                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-atelier);"></span>Atelier</span>
+                    <div class="cal2-legend" aria-label="{{ 'calendar.legend'|trans }}">
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-reunion);"></span>{{ 'calendar.cat_meeting'|trans }}</span>
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-seminaire);"></span>{{ 'calendar.cat_seminar'|trans }}</span>
+                        <span><span class="cal2-legend__dot" style="background: var(--cal2-cat-atelier);"></span>{{ 'calendar.cat_workshop'|trans }}</span>
                     </div>
                     <div class="cal2-view-group">
-                        <button class="cal2-btn-view" data-view="timeGridDay">Jour</button>
-                        <button class="cal2-btn-view is-active" data-view="timeGridWeek">Semaine</button>
-                        <button class="cal2-btn-view" data-view="dayGridMonth">Mois</button>
+                        <button class="cal2-btn-view" data-view="timeGridDay">{{ 'calendar.btn_day'|trans }}</button>
+                        <button class="cal2-btn-view is-active" data-view="timeGridWeek">{{ 'calendar.btn_week'|trans }}</button>
+                        <button class="cal2-btn-view" data-view="dayGridMonth">{{ 'calendar.btn_month'|trans }}</button>
                     </div>
                 </div>
             </div>
 
             {# Sélecteur de ressource #}
             <div class="mb-3 max-w-sm">
-                <label class="label" for="resource-select-v2"><span class="label-text">Filtrer par ressource</span></label>
+                <label class="label" for="resource-select-v2"><span class="label-text">{{ 'calendar.filter_by_resource'|trans }}</span></label>
                 <select class="select select-bordered w-full" id="resource-select-v2">
-                    <option value="" selected>Toutes les ressources</option>
+                    <option value="" selected>{{ 'calendar.all_resources'|trans }}</option>
                     {% for res in resources %}
                         <option value="{{ res.id }}">{{ res.name }}</option>
                     {% endfor %}
@@ -76,7 +76,7 @@
                  data-new-url="{{ path('reservation_new') }}"
                  data-events-url="/fc-load-events"></div>
 
-            <p class="cal2-hint">ℹ Cliquez sur un créneau pour ajouter un événement.</p>
+            <p class="cal2-hint">{{ 'calendar.hint_click'|trans }}</p>
         </div>
     </div>
 
@@ -151,7 +151,7 @@
                 fc = new FullCalendar.Calendar(el, {
                     initialView: 'timeGridWeek',
                     initialDate: weekStart,
-                    locale: 'fr',
+                    locale: '{{ app.request.locale }}',
                     timeZone: 'Europe/Paris',
                     firstDay: 1,
                     nowIndicator: true,
@@ -164,14 +164,14 @@
                     slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
                     headerToolbar: false, // Désactive la toolbar native
                     dayHeaderContent: function(arg) {
-                        const dayName = arg.date.toLocaleDateString('fr-FR', { weekday: 'long' });
+                        const dayName = arg.date.toLocaleDateString('{{ app.request.locale }}', { weekday: 'long' });
                         const capDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
                         
                         if (arg.view.type === 'dayGridMonth') {
                             return { html: '<div class="cal2-day-head" style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;"><span class="cal2-day-name">' + capDay + '</span></div>' };
                         }
                         
-                        const dateNum = arg.date.toLocaleDateString('fr-FR', { day: 'numeric' });
+                        const dateNum = arg.date.toLocaleDateString('{{ app.request.locale }}', { day: 'numeric' });
                         return { html: '<div class="cal2-day-head" style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;"><span class="cal2-day-name">' + capDay + '</span> <span class="cal2-day-num">' + dateNum + '</span></div>' };
                     },
                     datesSet: function(info) {

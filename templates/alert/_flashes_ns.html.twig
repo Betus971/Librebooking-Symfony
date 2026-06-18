@@ -8,7 +8,7 @@
 
         <div class="alert alert-{{ variant }} shadow-sm mb-3" role="status">
             <span class="text-sm">{{ message }}</span>
-            <button type="button" class="btn btn-ghost btn-xs" title="Masquer"
+            <button type="button" class="btn btn-ghost btn-xs" title="{{ 'common.dismiss'|trans }}"
                     onclick="this.closest('.alert').remove()">✕</button>
         </div>
     {% endfor %}

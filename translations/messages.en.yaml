@@ -59,6 +59,7 @@ common:
     places: "seats"
     close: "Close"
     home: "Home"
+    dismiss: "Dismiss"
 
 # ============================================================
 # Authentication
@@ -611,6 +612,16 @@ calendar:
     btn_month: "Month"
     btn_week: "Week"
     btn_day: "Day"
+    preview_title: "Calendar — V2 preview"
+    preview_badge: "Preview — does not replace the main calendar"
+    back_classic: "‹ Back to classic calendar"
+    prev: "Previous"
+    next: "Next"
+    legend: "Category legend"
+    cat_meeting: "Meeting"
+    cat_seminar: "Seminar"
+    cat_workshop: "Workshop"
+    hint_click: "ℹ Click a slot to add an event."
 
 availability:
     week: "Week"

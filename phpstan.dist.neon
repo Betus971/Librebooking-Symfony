@@ -1,0 +1,9 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    # Le code généré / d'infrastructure n'apporte rien à analyser.
+    excludePaths:
+        - src/Kernel.php
+    # Doctrine collections & co. : on tolère quelques imprécisions au démarrage.
+    treatPhpDocTypesAsCertain: false

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: Lint, analyse & tests
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, intl, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Lint YAML
+        run: php bin/console lint:yaml config translations
+
+      - name: Lint Twig
+        run: php bin/console lint:twig templates
+
+      - name: Lint container
+        run: php bin/console lint:container
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: PHP-CS-Fixer (dry-run)
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: PHPUnit
+        run: php bin/phpunit

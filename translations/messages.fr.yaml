@@ -59,6 +59,7 @@ common:
     places: "places"
     close: "Fermer"
     home: "Accueil"
+    dismiss: "Masquer"
 
 # ============================================================
 # Authentification
@@ -611,6 +612,16 @@ calendar:
     btn_month: "Mois"
     btn_week: "Semaine"
     btn_day: "Jour"
+    preview_title: "Planning — Aperçu V2"
+    preview_badge: "Aperçu — ne remplace pas le planning principal"
+    back_classic: "‹ Revenir au planning classique"
+    prev: "Précédent"
+    next: "Suivant"
+    legend: "Légende des catégories"
+    cat_meeting: "Réunion"
+    cat_seminar: "Séminaire"
+    cat_workshop: "Atelier"
+    hint_click: "ℹ Cliquez sur un créneau pour ajouter un événement."
 
 availability:
     week: "Semaine"
