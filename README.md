@@ -46,6 +46,17 @@
 
 ---
 
+## 💡 The Core Concept: Resources vs. Services
+
+Librebooking combines two fundamentally different paradigms into a single, unified platform:
+
+1. **Resource Booking (Physical assets):** A logic based on **stock and occupation**. You book a room, a vehicle, or equipment for a fixed time slot (e.g., 1 hour). The duration is static, regardless of why you need the resource.
+2. **Service Booking (Prestations):** A logic based on **human availability and dynamic workflow**. You book a professional's time. The duration is dynamic and intrinsically linked to the service requested (e.g., a simple consultation vs. a comprehensive review). The provider's overall daily availability is progressively consumed by appointments of varying lengths.
+
+By supporting both, Librebooking adapts to almost any organizational need—whether you are lending company cars or managing a team of internal IT consultants.
+
+---
+
 ## 🧱 Tech stack
 
 | Layer | Technology |
