@@ -1,37 +1,111 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.my_profile'|trans }}{% endblock %}
+{% block title %}Mon Profil Prestataire{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li>{{ 'presta.my_profile_short'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><span aria-current="page">Mon Profil</span></li>
         </ul>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'profile' }) }}</aside>
-        <div class="md:col-span-3">
-            <h1 class="text-2xl font-bold mb-1">{{ 'presta.my_profile'|trans }}</h1>
-            <p class="text-sm text-base-content/60 mb-4">{{ 'presta.profile_subtitle'|trans }}</p>
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-1/4">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'profile' }) }}
+        </div>
+        <div class="w-full md:w-3/4">
+            <h1 class="text-3xl font-bold mb-2">Mon Profil Prestataire</h1>
+            <p class="text-lg text-base-content/80 mb-6">Ces informations seront visibles par les utilisateurs qui souhaitent prendre rendez-vous avec vous.</p>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm">
-                <div class="card-body">
-                    {{ form_start(form) }}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>{{ form_row(form.nom, {attr:{class:'input input-bordered w-full'}}) }}</div>
-                        <div>{{ form_row(form.prenom, {attr:{class:'input input-bordered w-full'}}) }}</div>
-                        <div class="md:col-span-2">{{ form_row(form.description, {attr:{class:'textarea textarea-bordered w-full', rows:4}}) }}</div>
-                        <div class="md:col-span-2">{{ form_row(form.photo, {attr:{class:'input input-bordered w-full'}}) }}</div>
-                        <div class="md:col-span-2">{{ form_row(form.isActive, {attr:{class:'toggle toggle-primary'}}) }}</div>
+            <div class="p-6 mb-8 bg-base-100 rounded-xl shadow border border-base-200">
+                {{ form_start(form) }}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        {{ form_row(form.nom) }}
                     </div>
-                    <div class="mt-6">
-                        <button type="submit" class="btn btn-primary">{{ 'presta.save_profile'|trans }}</button>
+                    <div>
+                        {{ form_row(form.prenom) }}
                     </div>
-                    {{ form_end(form) }}
+                    <div class="md:col-span-2">
+                        {{ form_row(form.description) }}
+                    </div>
+                    <div class="md:col-span-2">
+                        {{ form_row(form.photo) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.horizonJours) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.delaiAnnulationHeures) }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                {{ form_widget(form.unRdvActifParClient, {'attr': {'class': 'toggle toggle-primary'}}) }}
+                                <span class="label-text font-medium">Un seul rendez-vous actif par client</span>
+                            </label>
+                            <p class="text-sm text-base-content/70 mt-1">{{ form.unRdvActifParClient.vars.help }}</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                {{ form_widget(form.isActive, {'attr': {'class': 'toggle toggle-primary'}}) }}
+                                <span class="label-text font-medium">Actif (s'affiche dans la liste des prestataires)</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="mt-8">
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Enregistrer mon profil
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+
+            <div class="p-6 mb-8 bg-info/10 rounded-xl shadow border border-info/20 text-base-content">
+                <h2 class="text-xl font-bold mb-2">Synchronisation Agenda (iCal)</h2>
+                <p class="mb-4">Ce lien vous permet d'afficher votre agenda sur Outlook, Apple Calendar, Google Calendar, etc.</p>
+                {% if prestataire.icalToken %}
+                    <div class="form-control mb-4">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <input type="text" class="input input-bordered w-full pl-10" readonly value="{{ url('app_presta_ical_feed', {'token': prestataire.icalToken}) }}" onclick="this.select();">
+                        </div>
+                    </div>
+                    <form method="post" action="{{ path('app_presta_provider_profile_ical_token') }}" onsubmit="return confirm('Regénérer ce lien invalidera l\'ancien. Continuer ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('generate_ical_token') }}">
+                        <button type="submit" class="btn btn-sm btn-outline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Regénérer le lien
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{{ path('app_presta_provider_profile_ical_token') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('generate_ical_token') }}">
+                        <button type="submit" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Générer un lien iCal
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

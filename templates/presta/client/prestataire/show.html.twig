@@ -1,59 +1,51 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ prestataire.prenom }} {{ prestataire.nom }}{% endblock %}
+{% block title %}Profil de {{ prestataire.prenom }} {{ prestataire.nom }}{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_client_categorie_index') }}">Prendre rendez-vous</a></li>
             <li>{{ prestataire.prenom }} {{ prestataire.nom }}</li>
         </ul>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-start">
-        <div class="md:col-span-1">
-            {% if prestataire.photo %}
-                <img src="{{ prestataire.photo }}" alt="{{ prestataire.prenom }}" class="w-full rounded-xl">
-            {% else %}
-                <div class="aspect-square rounded-xl bg-base-300 flex items-center justify-center text-base-content/40">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                </div>
-            {% endif %}
-        </div>
-        <div class="md:col-span-3">
-            <h1 class="text-2xl font-bold">{{ prestataire.prenom }} {{ prestataire.nom }}</h1>
-            <p class="text-base-content/70 mt-2">{{ prestataire.description }}</p>
-        </div>
-    </div>
-
-    <h2 class="text-xl font-bold mb-4">{{ 'presta.services_offered'|trans }}</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {% for service in services %}
-            <div class="card bg-base-200 border border-base-300 shadow-sm">
-                <div class="card-body">
-                    <h3 class="card-title">{{ service.libelle }}</h3>
-                    <p class="text-sm text-base-content/70">{{ service.description|default('presta.no_desc_short'|trans) }}</p>
-                    <div class="flex gap-2 flex-wrap mt-2">
-                        <span class="badge badge-outline">{{ service.dureeMinutes }} min</span>
-                        {% if service.type == 'INDIVIDUEL' %}
-                            <span class="badge badge-success">{{ 'presta.type_individual'|trans }}</span>
-                        {% else %}
-                            <span class="badge badge-secondary">{{ 'presta.type_group_max'|trans({'%count%': service.capaciteMax}) }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="card-actions justify-end mt-3">
-                        {% if service.type == 'GROUPE' %}
-                            <a href="{{ path('app_presta_client_booking_group', {'id': service.id}) }}" class="btn btn-primary btn-sm">{{ 'presta.see_next_sessions'|trans }}</a>
-                        {% else %}
-                            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id}) }}" class="btn btn-primary btn-sm">{{ 'presta.book_appointment'|trans }}</a>
-                        {% endif %}
-                    </div>
+    <div class="bg-gradient-to-r from-base-200 to-base-300 rounded-3xl p-8 mb-10 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-sm">
+        {% if prestataire.photo %}
+            <div class="avatar">
+                <div class="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 shadow-lg">
+                    <img src="{{ prestataire.photo }}" alt="Photo de {{ prestataire.prenom }}" />
                 </div>
             </div>
         {% else %}
-            <div class="md:col-span-2"><p class="text-base-content/60">{{ 'presta.no_services_yet'|trans }}</p></div>
+            <div class="avatar placeholder">
+                <div class="bg-neutral text-neutral-content w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+            </div>
+        {% endif %}
+        <div class="text-center md:text-left">
+            <h1 class="text-4xl font-bold mb-3">{{ prestataire.prenom }} {{ prestataire.nom }}</h1>
+            <p class="text-lg text-base-content/70 max-w-2xl">{{ prestataire.description|default('Ce professionnel n\'a pas encore rédigé de présentation.') }}</p>
+        </div>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-6">Prestations proposées</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for service in services %}
+            {{ include('presta/client/_service_card.html.twig', { service: service }) }}
+        {% else %}
+            <div class="col-span-full">
+                <div class="alert alert-info shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Ce professionnel n'a pas encore configuré ses prestations.</span>
+                </div>
+            </div>
         {% endfor %}
     </div>
 </div>

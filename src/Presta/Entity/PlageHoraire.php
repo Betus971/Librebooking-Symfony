@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Presta\Entity;
 
+use App\Presta\Repository\PlageHoraireRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PlageHoraireRepository::class)]
 #[ORM\Table(name: 'presta_plage_horaire')]
 class PlageHoraire
 {
@@ -26,6 +26,53 @@ class PlageHoraire
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heureFin = null;
+
+    // Période de validité OPTIONNELLE de la plage. Si renseignées, la plage ne
+    // s'applique QUE sur ces dates (ex. remplacement, vacances, planning limité).
+    // Vides = plage récurrente sans limite (comportement par défaut).
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateDebut = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateFin = null;
+
+    public function getDateDebut(): ?\DateTimeInterface
+    {
+        return $this->dateDebut;
+    }
+
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static
+    {
+        $this->dateDebut = $dateDebut;
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeInterface
+    {
+        return $this->dateFin;
+    }
+
+    public function setDateFin(?\DateTimeInterface $dateFin): static
+    {
+        $this->dateFin = $dateFin;
+        return $this;
+    }
+
+    /**
+     * La plage est-elle active le jour donné ? Vrai si aucune période n'est
+     * définie, sinon vrai seulement si le jour tombe dans [dateDebut, dateFin].
+     */
+    public function isActiveOn(\DateTimeInterface $day): bool
+    {
+        $d = $day->format('Y-m-d');
+        if ($this->dateDebut !== null && $d < $this->dateDebut->format('Y-m-d')) {
+            return false;
+        }
+        if ($this->dateFin !== null && $d > $this->dateFin->format('Y-m-d')) {
+            return false;
+        }
+        return true;
+    }
 
     public function getId(): ?int
     {

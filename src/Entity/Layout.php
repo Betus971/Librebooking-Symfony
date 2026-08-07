@@ -1,12 +1,10 @@
 <?php
-
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
-
 #[ORM\Entity]
 #[ORM\Table(name: 'layouts')]
 class Layout
@@ -41,11 +39,6 @@ class Layout
     {
         $this->schedules  = new ArrayCollection();
         $this->timeBlocks = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        return $this->name ?? '';
     }
 
     public function getId(): ?int
@@ -141,5 +134,113 @@ class Layout
         }
 
         return $this;
+    }
+
+    /**
+     * Retourne un résumé des plages d'ouverture du layout, prêt à être affiché
+     * dans un widget « Horaires d'ouverture » (cf. demande MOA juin 2026 :
+     * afficher cette info sur la fiche ressource ET dans le formulaire de
+     * réservation).
+     *
+     * Format de retour :
+     * [
+     *   'minTime'   => '08:00',         // heure d'ouverture la plus précoce
+     *   'maxTime'   => '17:00',         // heure de fermeture la plus tardive
+     *   'daysOpen'  => [1,2,3,4,5],     // jours de la semaine ouverts (1=Lun .. 0=Dim)
+     *   'daysLabel' => 'Lundi à vendredi',
+     * ]
+     *
+     * Retourne `null` si aucun créneau d'ouverture n'est défini.
+     */
+    public function getOpeningSummary(): ?array
+    {
+        $openBlocks = [];
+        foreach ($this->timeBlocks as $tb) {
+            if ($tb->isOpen()) {
+                $openBlocks[] = $tb;
+            }
+        }
+        if ([] === $openBlocks) {
+            return null;
+        }
+
+        // Min / max sur l'union des plages
+        $minTime = null;
+        $maxTime = null;
+        // Set des jours couverts. dayOfWeek=null signifie "tous les jours".
+        $daysOpen = [];
+
+        foreach ($openBlocks as $tb) {
+            $s = $tb->getStartTime()->format('H:i');
+            $e = $tb->getEndTime()->format('H:i');
+
+            if (null === $minTime || $s < $minTime) {
+                $minTime = $s;
+            }
+            if (null === $maxTime || $e > $maxTime) {
+                $maxTime = $e;
+            }
+
+            $dow = $tb->getDayOfWeek();
+            if (null === $dow) {
+                $daysOpen = [0, 1, 2, 3, 4, 5, 6];
+                break; // pas la peine de continuer, "tous les jours" l'emporte
+            }
+            $daysOpen[] = (int) $dow;
+        }
+        $daysOpen = array_values(array_unique($daysOpen));
+        sort($daysOpen);
+
+        return [
+            'minTime'   => $minTime,
+            'maxTime'   => $maxTime,
+            'daysOpen'  => $daysOpen,
+            'daysLabel' => self::formatDaysLabel($daysOpen),
+        ];
+    }
+
+    /**
+     * Convertit un tableau de jours (0=Dim..6=Sam) en label français lisible.
+     * Détecte les patterns courants pour un rendu naturel :
+     *   - [0..6]      → "Tous les jours"
+     *   - [1..5]      → "Lundi à vendredi"
+     *   - [1..6,0]    → "Tous les jours"
+     *   - [0,6]       → "Samedi et dimanche"
+     *   - autre       → liste explicite "Lundi, mardi, jeudi"
+     *
+     * @param list<int> $daysOpen
+     */
+    private static function formatDaysLabel(array $daysOpen): string
+    {
+        $names = [
+            0 => 'dimanche',
+            1 => 'lundi',
+            2 => 'mardi',
+            3 => 'mercredi',
+            4 => 'jeudi',
+            5 => 'vendredi',
+            6 => 'samedi',
+        ];
+
+        $set = array_flip($daysOpen);
+
+        if (count($daysOpen) === 7) {
+            return 'Tous les jours';
+        }
+        if ([1, 2, 3, 4, 5] === $daysOpen) {
+            return 'Lundi à vendredi';
+        }
+        if ([0, 6] === $daysOpen) {
+            return 'Samedi et dimanche';
+        }
+        if (count($daysOpen) === 6 && !isset($set[0])) {
+            return 'Du lundi au samedi';
+        }
+        if (count($daysOpen) === 6 && !isset($set[6])) {
+            return 'Du dimanche au vendredi';
+        }
+
+        $labels = array_map(fn(int $d) => $names[$d] ?? '?', $daysOpen);
+        return ucfirst(implode(', ', $labels));
     }
 }

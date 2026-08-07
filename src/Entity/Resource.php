@@ -5,6 +5,9 @@ namespace App\Entity;
 use App\Repository\ResourceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: ResourceRepository::class)]
 #[ORM\Table(name: 'resources')]
@@ -60,6 +63,9 @@ class Resource
 
     #[ORM\Column(name: 'max_participants', type: Types::INTEGER, nullable: true, options: ['unsigned' => true])]
     private ?int $maxParticipants = null; // équivalent mediumint UNSIGNED (on reste en int Doctrine)
+
+    #[ORM\Column(name: 'requires_participants', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $requiresParticipants = false;
 
     #[ORM\Column(name: 'min_notice_time_add', type: Types::INTEGER, nullable: true)]
     private ?int $minNoticeTimeAdd = null;
@@ -130,14 +136,25 @@ class Resource
     private ?int $resourceStatusReasonId = null;
 
     #[ORM\ManyToOne(inversedBy: 'resources')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Assert\NotBlank(message: "La catégorie est obligatoire.")]
     private ?ResourceCategory $category = null;
 
     #[ORM\ManyToOne(targetEntity: ResourceGroup::class, inversedBy: 'resources')]
     #[ORM\JoinColumn(name: 'admin_group_id', referencedColumnName: 'id')]
     private ?ResourceGroup $resourceGroup = null;
 
+    /**
+     * @var Collection<int, Equipement>
+     */
+    #[ORM\ManyToMany(targetEntity: Equipement::class, inversedBy: 'resources')]
+    #[ORM\JoinTable(name: 'resource_equipement')]
+    private Collection $equipements;
 
-
+    public function __construct()
+    {
+        $this->equipements = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -321,6 +338,17 @@ class Resource
     {
         $this->maxParticipants = $maxParticipants;
 
+        return $this;
+    }
+
+    public function isRequiresParticipants(): bool
+    {
+        return $this->requiresParticipants;
+    }
+
+    public function setRequiresParticipants(bool $requiresParticipants): static
+    {
+        $this->requiresParticipants = $requiresParticipants;
         return $this;
     }
 
@@ -616,6 +644,27 @@ class Resource
         return $this;
     }
 
+    /**
+     * @return Collection<int, Equipement>
+     */
+    public function getEquipements(): Collection
+    {
+        return $this->equipements;
+    }
 
+    public function addEquipement(Equipement $equipement): static
+    {
+        if (!$this->equipements->contains($equipement)) {
+            $this->equipements->add($equipement);
+        }
 
+        return $this;
+    }
+
+    public function removeEquipement(Equipement $equipement): static
+    {
+        $this->equipements->removeElement($equipement);
+
+        return $this;
+    }
 }

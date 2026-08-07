@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -15,23 +16,26 @@ class UserRoleType extends AbstractType
     {
         $builder
             ->add('roles', ChoiceType::class, [
-                'label' => 'Attribution des rôles',
-                // P0.1 — ROLE_SUPER_ADMIN volontairement ABSENT de cette liste.
-                // Un super-admin ne se crée jamais via le formulaire web (sinon
-                // n'importe quel gestionnaire pourrait s'auto-promouvoir). Il se
-                // provisionne en base à la main / via console / via mapping SSO.
+                'label' => 'Désignation « Prestataire »',
+                // P0.1 — ROLE_SUPER_ADMIN volontairement ABSENT (un super-admin ne
+                // se crée jamais via le web).
+                //
+                // Les rôles « métier » (Admin Ressources, Admin Accueil, Agent
+                // d'Accueil, Super-Admin) sont désormais attribués AUTOMATIQUEMENT
+                // par le SSO d'après les groupes LDAP (profil A/B/C/D/E) et
+                // RECALCULÉS à chaque requête : les afficher ici serait trompeur
+                // (le SSO les réécrit systématiquement). Seul ROLE_PRESTATAIRE est
+                // posé à la main, hors périmètre SSO → on ne garde que cette case.
                 'choices' => [
-                    'Admin Ressources (Salles, Véhicules)' => 'ROLE_ADMIN_RESSOURCE',
-                    'Admin Badges (Création & Suppression)' => 'ROLE_ADMIN_BADGE',
-                    'Agent d\'Accueil (Attribution badge uniquement)' => 'ROLE_AGENT_ACCUEIL',
+                    'Prestataire (gère ses prestations et son agenda)' => 'ROLE_PRESTATAIRE',
                 ],
-                'multiple' => true, // On peut avoir plusieurs casquettes
-                'expanded' => true, // Affiche des Checkboxes (pas une liste déroulante)
-                'help' => 'Cochez les responsabilités de cet utilisateur.',
+                'multiple' => true, // reste un tableau de rôles (mappé sur User::roles)
+                'expanded' => true, // Affiche une case à cocher
+                'help' => "Les rôles d'administration et d'accueil sont attribués automatiquement par le SSO (groupes LDAP) et ne se règlent pas ici. Seule la désignation « Prestataire » est manuelle.",
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer les droits',
-                'attr' => ['class' => 'fr-btn'],
+                'attr' => ['class' => 'fr-btn']
             ])
         ;
     }
@@ -43,3 +47,4 @@ class UserRoleType extends AbstractType
         ]);
     }
 }
+   

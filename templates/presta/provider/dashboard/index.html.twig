@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Tableau de bord Prestataire{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li>Tableau de bord</li>
+        </ul>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-1/4">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'dashboard' }) }}
+        </div>
+        <div class="w-full md:w-3/4">
+            <h1 class="text-3xl font-bold mb-2">Tableau de bord</h1>
+            <p class="text-base-content/70 mb-8 text-lg">Vue d'ensemble de votre activité.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="card bg-primary text-primary-content shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-5xl">{{ stats.reservations_ce_mois }}</h2>
+                        <p>Réservations ce mois-ci</p>
+                    </div>
+                </div>
+                <div class="card bg-warning text-warning-content shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-5xl">{{ stats.en_attente }}</h2>
+                        <p>Demandes en attente</p>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{ path('app_presta_provider_agenda_index') }}" class="btn btn-secondary">
+                <span class="icon-[lucide--calendar] mr-2"></span> Voir mon agenda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

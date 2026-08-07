@@ -2,7 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Resource;
 use App\Entity\ResourceCategory;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,7 +23,7 @@ class ResourceCategoryType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'fr-textarea', 'rows' => 4],
             ]) ;
-    }
+          }
 
 
 

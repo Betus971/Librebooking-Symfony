@@ -25,16 +25,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  *   - Owner de la série.
  *   - Super-admin ou gestionnaire du groupe (via MANAGE).
  *   - TODO futur : participants (quand la notion sera matérialisée côté entité).
- *
- * CANCEL (annulation d'une série) :
- *   - Owner de la série (annulation de sa propre demande).
- *   - Super-admin ou gestionnaire du groupe (via MANAGE).
  */
 final class ReservationSeriesVoter extends Voter
 {
     public const MANAGE       = 'MANAGE';
     public const VIEW_DETAILS = 'VIEW_DETAILS';
-    public const CANCEL       = 'CANCEL';
+    public const CANCEL_OWN   = 'CANCEL_OWN';
 
     public function __construct(private readonly Security $security)
     {
@@ -42,7 +38,7 @@ final class ReservationSeriesVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::MANAGE, self::VIEW_DETAILS, self::CANCEL], true)
+        return in_array($attribute, [self::MANAGE, self::VIEW_DETAILS, self::CANCEL_OWN], true)
             && $subject instanceof ReservationSeries;
     }
 
@@ -60,20 +56,22 @@ final class ReservationSeriesVoter extends Voter
         return match ($attribute) {
             self::MANAGE       => $this->canManage($series, $user),
             self::VIEW_DETAILS => $this->canViewDetails($series, $user),
-            self::CANCEL       => $this->canCancel($series, $user),
+            self::CANCEL_OWN   => $this->isOwner($series, $user),
             default            => false,
         };
     }
 
-    private function canCancel(ReservationSeries $series, User $user): bool
+    /**
+     * RF-14 — Annulation par le propriétaire lui-même.
+     *
+     * Reproduit fidèlement l'ancien contrôle inline de
+     * ReservationController::cancel() : SEUL le propriétaire de la série peut
+     * l'annuler via la route utilisateur. (La gestion admin passe par MANAGE.)
+     */
+    private function isOwner(ReservationSeries $series, User $user): bool
     {
-        // Owner : annulation de sa propre demande.
-        if ($series->getOwner() && $series->getOwner()->getId() === $user->getId()) {
-            return true;
-        }
-
-        // Gestionnaire ou super-admin : via MANAGE.
-        return $this->canManage($series, $user);
+        return $series->getOwner() !== null
+            && $series->getOwner()->getId() === $user->getId();
     }
 
     private function canManage(ReservationSeries $series, User $user): bool

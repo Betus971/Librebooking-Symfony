@@ -34,7 +34,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Recherche paginée d'utilisateurs par email, nom ou uid.
+     * Recherche paginée d'utilisateurs par email, nom, uid ou nigend.
      *
      * @return array{users: User[], total: int}
      */
@@ -45,7 +45,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         if ($q !== '') {
             $qb->andWhere(
-                'LOWER(u.email) LIKE :q OR LOWER(u.lname) LIKE :q OR LOWER(u.uid) LIKE :q'
+                'LOWER(u.email) LIKE :q OR LOWER(u.lname) LIKE :q OR LOWER(u.uid) LIKE :q OR LOWER(u.nigend) LIKE :q'
             )->setParameter('q', '%' . strtolower($q) . '%');
         }
 
@@ -58,5 +58,40 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
 
         return ['users' => $users, 'total' => (int) $total];
+    }
+
+    /**
+     * Recherche d'utilisateurs pour l'auto-complétion (champ participant).
+     * Cherche sur prénom, nom et email parmi les comptes locaux (provisionnés
+     * par le SSO à la première connexion).
+     *
+     * @return list<array{email: string, label: string}>
+     */
+    public function searchForAutocomplete(string $q, int $limit = 10): array
+    {
+        $q = trim($q);
+        if (mb_strlen($q) < 2) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.id AS id', 'u.email AS email', 'u.fname AS fname', 'u.lname AS lname')
+            ->where('u.email IS NOT NULL')
+            ->andWhere('LOWER(u.email) LIKE :q OR LOWER(u.fname) LIKE :q OR LOWER(u.lname) LIKE :q')
+            ->setParameter('q', '%' . mb_strtolower($q) . '%')
+            ->orderBy('u.lname', 'ASC')
+            ->addOrderBy('u.fname', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static function (array $r): array {
+            $name = trim(($r['fname'] ?? '') . ' ' . ($r['lname'] ?? ''));
+            return [
+                'id' => (int) $r['id'],
+                'email' => (string) $r['email'],
+                'label' => $name !== '' ? $name . ' — ' . $r['email'] : (string) $r['email'],
+            ];
+        }, $rows);
     }
 }

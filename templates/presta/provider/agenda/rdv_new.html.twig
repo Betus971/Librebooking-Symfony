@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% set edit = is_edit is defined and is_edit %}
+{% set rdv = session is defined ? session : null %}
+
+{% block title %}{{ edit ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous' }}{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 mt-8 mb-16">
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-1/4">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'agenda' }) }}
+        </div>
+        <div class="w-full md:w-3/4">
+
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-2xl font-bold mb-0">{{ edit ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous' }}</h1>
+                <a href="{{ path('app_presta_provider_agenda_index') }}" class="btn btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Retour à l'agenda
+                </a>
+            </div>
+            <p class="text-sm text-base-content/70 mb-8">
+                {% if edit %}
+                    Modifier la prestation, le client, la date ou l'heure de ce rendez-vous.
+                {% else %}
+                    Caler un RDV à la main (ex. une personne de passage), même en dehors de vos
+                    disponibilités habituelles. Le créneau sera réservé et bloqué à cette date.
+                {% endif %}
+            </p>
+
+            {% if services is empty %}
+                <div class="alert alert-warning shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <span>Vous n'avez aucune prestation individuelle active. Créez-en une d'abord dans « Mes prestations ».</span>
+                </div>
+            {% else %}
+            <form method="post"
+                  action="{{ edit ? path('app_presta_provider_agenda_rdv_edit', {'id': rdv.id}) : path('app_presta_provider_agenda_rdv_new') }}"
+                  class="bg-base-200 p-6 md:p-8 rounded-box">
+                <input type="hidden" name="_token" value="{{ edit ? csrf_token('rdv_edit' ~ rdv.id) : csrf_token('rdv_new') }}">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label" for="rdv-service"><span class="label-text font-medium">Prestation *</span></label>
+                        <select class="select select-bordered w-full" id="rdv-service" name="service" required>
+                            <option value="" disabled {{ edit ? '' : 'selected' }}>Choisir une prestation…</option>
+                            {% for s in services %}
+                                <option value="{{ s.id }}" {{ edit and rdv.service and rdv.service.id == s.id ? 'selected' : '' }}>{{ s.libelle }} ({{ s.dureeMinutes }} min)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="rdv-client"><span class="label-text font-medium">Nom du client *</span></label>
+                        <input class="input input-bordered w-full" type="text" id="rdv-client" name="clientNom" required placeholder="Ex. Colonel Martin" value="{{ edit ? rdv.clientNom : '' }}">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="form-control">
+                        <label class="label" for="rdv-date"><span class="label-text font-medium">Date *</span></label>
+                        <input class="input input-bordered w-full" type="date" id="rdv-date" name="date" required value="{{ edit ? rdv.dateDebut|date('Y-m-d') : '' }}">
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="rdv-heure"><span class="label-text font-medium">Heure de début *</span></label>
+                        <input class="input input-bordered w-full" type="time" id="rdv-heure" name="heure" required value="{{ edit ? rdv.dateDebut|date('H:i') : '' }}">
+                    </div>
+                </div>
+
+                <div class="form-control mt-4">
+                    <label class="label" for="rdv-note"><span class="label-text font-medium">Note (optionnel)</span></label>
+                    <input class="input input-bordered w-full" type="text" id="rdv-note" name="note" placeholder="Ex. urgent, à confirmer…" value="{{ edit ? rdv.note : '' }}">
+                </div>
+
+                <p class="text-xs text-base-content/70 mt-4 mb-6">
+                    L'heure de fin est calculée automatiquement selon la durée de la prestation.
+                </p>
+
+                <div class="flex flex-wrap gap-4">
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        {{ edit ? 'Enregistrer les modifications' : 'Ajouter le RDV' }}
+                    </button>
+                    <a href="{{ path('app_presta_provider_agenda_index') }}" class="btn btn-outline">Annuler</a>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

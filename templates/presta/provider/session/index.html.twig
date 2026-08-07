@@ -1,54 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.my_sessions'|trans }}{% endblock %}
+{% block title %}Mes séances de groupe{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
-    <div class="text-sm breadcrumbs mb-6">
+<div class="container mx-auto px-4 mt-8 mb-16">
+    <div class="breadcrumbs text-sm mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li>{{ 'presta.my_sessions'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li>Mes séances</li>
         </ul>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'session' }) }}</aside>
-        <div class="md:col-span-3">
-            <div class="flex items-center justify-between mb-2">
-                <h1 class="text-2xl font-bold">{{ 'presta.my_sessions'|trans }}</h1>
-                <a href="{{ path('app_presta_provider_session_new') }}" class="btn btn-primary btn-sm">{{ 'presta.plan'|trans }}</a>
+    <div class="flex flex-col md:flex-row gap-8">
+        <div class="w-full md:w-1/4">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'session' }) }}
+        </div>
+        <div class="w-full md:w-3/4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold">Mes séances de groupe</h1>
+                    <p class="text-sm text-base-content/70 mt-2">Gérez ici les dates précises pour les prestations de type "Groupe".</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="{{ path('app_presta_provider_session_new') }}" class="btn btn-primary">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Planifier une séance
+                    </a>
+                </div>
             </div>
-            <p class="text-sm text-base-content/60 mb-4">{{ 'presta.sessions_subtitle'|trans }}</p>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="bg-base-100 shadow rounded-xl border border-base-200 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="table">
-                        <thead><tr><th>{{ 'presta.th_date'|trans }}</th><th>{{ 'presta.th_time'|trans }}</th><th>{{ 'presta.th_service'|trans }}</th><th>{{ 'presta.th_registered'|trans }}</th><th class="text-right">{{ 'common.actions'|trans }}</th></tr></thead>
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr class="bg-base-200 text-base-content">
+                                <th>Date</th>
+                                <th>Horaire</th>
+                                <th>Prestation</th>
+                                <th>Inscrits</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         {% for session in sessions %}
                             <tr>
-                                <td class="font-semibold">{{ session.dateDebut|date('d/m/Y') }}</td>
-                                <td>{{ session.dateDebut|date('H:i') }} - {{ session.dateFin|date('H:i') }}</td>
-                                <td>{{ session.service.libelle }}</td>
                                 <td>
-                                    {% set restantes = session.service.capaciteMax - session.nbInscrits %}
-                                    <span class="badge badge-sm {{ restantes == 0 ? 'badge-error' : 'badge-info' }}">{{ session.nbInscrits }} / {{ session.service.capaciteMax }}</span>
+                                    <div class="flex items-center font-bold">
+                                        <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        {{ session.dateDebut|date('d/m/Y') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center text-base-content/70">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        {{ session.dateDebut|date('H:i') }} - {{ session.dateFin|date('H:i') }}
+                                    </div>
+                                </td>
+                                <td><span class="font-bold">{{ session.service.libelle }}</span></td>
+                                <td>
+                                    {% set places_restantes = session.service.capaciteMax - session.nbInscrits %}
+                                    <div class="badge {{ places_restantes == 0 ? 'badge-error' : 'badge-info' }} gap-2 p-3 font-semibold">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        {{ session.nbInscrits }} / {{ session.service.capaciteMax }}
+                                    </div>
                                 </td>
                                 <td class="text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ path('app_presta_provider_session_edit', {'id': session.id}) }}" class="btn btn-ghost btn-xs" title="{{ 'common.edit'|trans }}">✎</a>
-                                        <form method="post" action="{{ path('app_presta_provider_session_delete', {'id': session.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_delete_session'|trans|e('js') }}');">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ path('app_presta_provider_session_edit', {'id': session.id}) }}" class="btn btn-sm btn-ghost btn-square text-primary" title="Modifier">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        </a>
+                                        <form method="post" action="{{ path('app_presta_provider_session_delete', {'id': session.id}) }}" onsubmit="return confirm('Annuler cette séance ? Attention, des personnes sont peut-être inscrites.');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ session.id) }}">
-                                            <button class="btn btn-ghost btn-xs text-error" title="{{ 'common.delete'|trans }}">🗑</button>
+                                            <button class="btn btn-sm btn-ghost btn-square text-error" title="Supprimer">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         {% else %}
-                            <tr><td colspan="5" class="text-center py-8 text-base-content/60">
-                                {{ 'presta.no_sessions'|trans }}<br>
-                                <a href="{{ path('app_presta_provider_session_new') }}" class="btn btn-sm btn-primary mt-3">{{ 'presta.create_session'|trans }}</a>
-                            </td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center py-12">
+                                    <svg class="w-16 h-16 mx-auto text-base-content/20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <p class="text-lg font-medium text-base-content/60">Aucune séance planifiée.</p>
+                                    <a href="{{ path('app_presta_provider_session_new') }}" class="btn btn-primary mt-4">Créer une séance</a>
+                                </td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>

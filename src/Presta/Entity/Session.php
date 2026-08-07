@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Presta\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Presta\Repository\SessionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: SessionRepository::class)]
 #[ORM\Table(name: 'presta_session')]
 class Session
 {
@@ -39,6 +39,37 @@ class Session
 
     #[ORM\Column]
     private ?int $nbInscrits = 0;
+
+    // RDV « imprévu » créé à la main par le prestataire (gradé de passage, etc.) :
+    // le client n'est pas un compte de l'appli, juste un nom saisi librement.
+    // NULL pour les séances normales (le client est alors dans les inscriptions).
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $clientNom = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $note = null;
+
+    public function getClientNom(): ?string
+    {
+        return $this->clientNom;
+    }
+
+    public function setClientNom(?string $clientNom): static
+    {
+        $this->clientNom = $clientNom;
+        return $this;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): static
+    {
+        $this->note = $note;
+        return $this;
+    }
 
     public function getId(): ?int
     {

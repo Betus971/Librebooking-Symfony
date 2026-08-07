@@ -29,17 +29,17 @@ class SessionType extends AbstractType
                         ->setParameter('prestataire', $prestataire)
                         ->setParameter('typeGroupe', Service::TYPE_GROUPE);
                 },
-                'attr' => ['class' => 'fr-select'],
+                'attr' => ['class' => 'fr-select']
             ])
             ->add('dateDebut', DateTimeType::class, [
                 'label' => 'Début de la séance',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input'],
+                'attr' => ['class' => 'fr-input']
             ])
             ->add('dateFin', DateTimeType::class, [
                 'label' => 'Fin de la séance',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input'],
+                'attr' => ['class' => 'fr-input']
             ])
         ;
     }

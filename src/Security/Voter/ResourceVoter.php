@@ -10,13 +10,21 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Autorisation "scopée" sur une Ressource.
+ * Autorisation "scopée" sur une Ressource — visibilité HYBRIDE (P3).
  *
  * Principe pour MANAGE :
  *  - ROLE_SUPER_ADMIN : accès à toutes les ressources, sans condition.
- *  - ROLE_ADMIN_RESSOURCE : accès si la ressource appartient à un
- *    ResourceGroup auquel l'utilisateur est rattaché (périmètre administratif).
+ *  - ROLE_ADMIN_RESSOURCE : accès si AU MOINS UNE des conditions est vraie :
+ *      (a) couche SSO automatique — la ressource porte le MÊME code unité que
+ *          l'utilisateur (Resource.codeUnite == User.codeunite). C'est le
+ *          mécanisme PRINCIPAL : pas de gestion manuelle, suit les mutations.
+ *      (b) couche manuelle d'exception — la ressource appartient à un
+ *          ResourceGroup auquel l'utilisateur est rattaché. Porte de sortie
+ *          pour les cas particuliers (ressource partagée, gestion déléguée).
  *  - Tous les autres : pas de MANAGE, mais VIEW libre (lecture catalogue).
+ *
+ * La couche (a) est recalculée à la volée à chaque requête → toujours fraîche,
+ * jamais périmée. La couche (b) n'est utilisée que pour les exceptions.
  */
 final class ResourceVoter extends Voter
 {
@@ -33,9 +41,8 @@ final class ResourceVoter extends Voter
             && $subject instanceof Resource;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        $vote ??= new Vote();
         /** @var Resource $resource */
         $resource = $subject;
 
@@ -56,7 +63,17 @@ final class ResourceVoter extends Voter
 
         // Gestionnaire de ressource : visibilité hybride.
         if ($this->security->isGranted('ROLE_ADMIN_RESSOURCE')) {
-            // Couche manuelle d'exception : rattachement explicite via groupe.
+            // (a) Couche SSO automatique : même code unité. Mécanisme principal.
+            //     On exige des deux côtés une valeur non nulle pour éviter qu'un
+            //     user sans code unité (null) ne matche une ressource sans code
+            //     unité (null) — ce qui ouvrirait tout par défaut.
+            $userUnite     = $user->getCodeunite();
+            $resourceUnite = $resource->getCodeUnite();
+            if (null !== $userUnite && null !== $resourceUnite && $userUnite === $resourceUnite) {
+                return true;
+            }
+
+            // (b) Couche manuelle d'exception : rattachement explicite via groupe.
             $resGroup = $resource->getResourceGroup();
             if (null !== $resGroup && $user->getResourceGroups()->contains($resGroup)) {
                 return true;

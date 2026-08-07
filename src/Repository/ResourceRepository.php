@@ -99,17 +99,13 @@ class ResourceRepository extends ServiceEntityRepository
         if (($filters['status'] ?? 'all') !== 'all') {
             $qb->andWhere('r.isActive = :act')->setParameter('act', $filters['status'] === 'active');
         }
-        if (!empty($filters['category'])) {
-            $qb->andWhere('r.category = :catId')->setParameter('catId', $filters['category']);
-        }
 
-        // --- 🛡️ FILTRE RBAC (CLOISONNEMENT PAR GROUPE) ---
         // Si l'utilisateur est fourni et qu'il N'EST PAS Super Admin
         if ($user && !in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $qb->join('r.resourceGroup', 'rg')
-                ->join('rg.users', 'u')
-                ->andWhere('u = :user')
-                ->setParameter('user', $user);
+            $qb->leftJoin('r.resourceGroup', 'rg')
+               ->leftJoin('rg.users', 'u')
+               ->andWhere('u = :user')
+               ->setParameter('user', $user);
         }
 
         return $qb->getQuery()->getResult();
@@ -120,7 +116,7 @@ class ResourceRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('r')
             ->leftJoin('r.category', 'cat')->addSelect('cat')
-            ->orderBy('r.name', 'ASC');
+            ->orderBy('r.name','ASC');
 
         if ($c->onlyActive !== null) {
             $qb->andWhere('r.isActive = :act')->setParameter('act', $c->onlyActive);
@@ -131,30 +127,6 @@ class ResourceRepository extends ServiceEntityRepository
         if ($c->minCapacity) {
             $qb->andWhere('r.maxParticipants >= :cap')->setParameter('cap', $c->minCapacity);
         }
-        return $qb->getQuery()->getResult();
-    }
-
-    /**
-     * Ressources pour la vue planning (API), triées par nom.
-     *
-     * @param int|null $typeId  >0 : filtre sur la catégorie ; -1 : sans catégorie ;
-     *                          null/0 : toutes les ressources.
-     *
-     * @return Resource[]
-     */
-    public function findForPlanning(?int $typeId): array
-    {
-        $qb = $this->createQueryBuilder('r')
-            ->orderBy('r.name', 'ASC');
-
-        if ($typeId > 0) {
-            $qb->join('r.category', 'rc')
-                ->andWhere('rc.id = :tid')
-                ->setParameter('tid', $typeId);
-        } elseif ($typeId === -1) {
-            $qb->andWhere('r.category IS NULL');
-        }
-
         return $qb->getQuery()->getResult();
     }
 

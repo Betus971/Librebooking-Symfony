@@ -1,19 +1,20 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\TimeBlockRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-#[ORM\Entity(repositoryClass: TimeBlockRepository::class)]
+#[ORM\Entity (repositoryClass: TimeBlockRepository::class)]
 #[ORM\Table(name: 'time_blocks')]
 #[ORM\Index(name: 'idx_tb_layout', columns: ['layout_id'])]
 #[ORM\Index(name: 'idx_tb_layout_dow', columns: ['layout_id','day_of_week'])]
 class TimeBlock
 {
+
     public const OPEN   = 1;
     public const CLOSED = 0;
 
@@ -32,7 +33,7 @@ class TimeBlock
 
     // 0..6 (0=Dimanche) — nullable: si null => s’applique à tous les jours
     #[ORM\Column(name: 'day_of_week', type: 'smallint', nullable: true, options: ['unsigned' => true])]
-    #[Assert\Choice(choices: [null, 0, 1, 2, 3, 4, 5, 6], message: 'Le jour de la semaine doit être entre 0 (dimanche) et 6 (samedi), ou NULL pour tous les jours.')]
+    #[Assert\Choice(choices: [null, 0, 1, 2, 3, 4, 5, 6], message: "Le jour de la semaine doit être entre 0 (dimanche) et 6 (samedi), ou NULL pour tous les jours.")]
     private ?int $dayOfWeek = null;
 
     // Présents dans ta base

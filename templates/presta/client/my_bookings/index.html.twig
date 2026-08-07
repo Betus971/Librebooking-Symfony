@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Réservations{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 mt-8 mb-16">
+    
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+            <li>Mes Réservations</li>
+        </ul>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-8">Mes Réservations</h1>
+
+    <div role="tablist" class="tabs tabs-lifted tabs-lg mb-6">
+        <input type="radio" name="my_tabs_1" role="tab" class="tab font-semibold" aria-label="À venir ({{ upcoming|length }})" checked="checked" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6 mt-4">
+            {% if upcoming is empty %}
+                <p class="text-center text-base-content/60 py-8">Vous n'avez aucune réservation à venir.</p>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>Date &amp; Horaire</th>
+                                <th>Service</th>
+                                <th>Prestataire</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscription in upcoming %}
+                                {% set presta = inscription.session.prestataire %}
+                                <tr>
+                                    <td>
+                                        <div class="font-bold">{{ inscription.session.dateDebut|date('d/m/Y') }}</div>
+                                        <div class="text-sm text-base-content/60">{{ inscription.session.dateDebut|date('H:i') }} - {{ inscription.session.dateFin|date('H:i') }}</div>
+                                    </td>
+                                    <td>{{ inscription.session.service.libelle }}</td>
+                                    <td>{{ inscription.session.prestataire.prenom }} {{ inscription.session.prestataire.nom }}</td>
+                                    <td>
+                                        {% if inscription.isPending %}
+                                            <span class="badge badge-warning gap-1">En attente</span>
+                                        {% else %}
+                                            <span class="badge badge-success gap-1">Confirmé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if inscription.isPending or presta.annulationClientPossible(inscription.session.dateDebut) %}
+                                            <form method="post" action="{{ path('app_presta_client_my_bookings_cancel', {'id': inscription.id}) }}" class="m-0" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ inscription.id) }}">
+                                                <button type="submit" class="btn btn-error btn-sm btn-outline gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    {{ inscription.isPending ? 'Retirer la demande' : 'Annuler' }}
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <div class="text-xs text-base-content/60 max-w-xs flex gap-1 items-start">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                <span>Annulation close (&lt; {{ presta.delaiAnnulationHeures }} h). Contactez le prestataire.</span>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+
+        <input type="radio" name="my_tabs_1" role="tab" class="tab font-semibold" aria-label="Historique et Annulés ({{ past|length }})" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6 mt-4">
+            {% if past is empty %}
+                <p class="text-center text-base-content/60 py-8">Aucun historique.</p>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Prestataire</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscription in past %}
+                                <tr>
+                                    <td>{{ inscription.session.dateDebut|date('d/m/Y H:i') }}</td>
+                                    <td>{{ inscription.session.service.libelle }}</td>
+                                    <td>{{ inscription.session.prestataire.prenom }} {{ inscription.session.prestataire.nom }}</td>
+                                    <td>
+                                        {% if inscription.statut == 'CANCELLED' %}
+                                            <span class="badge badge-error gap-1">Annulé</span>
+                                        {% else %}
+                                            <span class="badge badge-success gap-1">Terminé</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

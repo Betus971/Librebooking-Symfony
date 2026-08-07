@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Indisponibilités - Prestataire{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 my-8">
+    <div class="breadcrumbs text-sm mb-8">
+        <ul>
+            <li>
+                <a href="{{ path('app_presta_provider_profile_edit') }}">Espace Prestataire</a>
+            </li>
+            <li>
+                <span class="text-base-content/70">Mes Indisponibilités</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <h1 class="text-3xl font-bold">Mes Indisponibilités (Congés / Absences)</h1>
+        <a href="{{ path('app_presta_provider_absence_new') }}" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            Déclarer une absence
+        </a>
+    </div>
+
+    <p class="text-lg opacity-80 mb-8">
+        Définissez ici vos périodes de congés ou d'indisponibilité. Aucun rendez-vous individuel ne sera proposé sur ces créneaux.
+    </p>
+
+    <div class="overflow-x-auto bg-base-100 rounded-box shadow">
+        <table class="table w-full">
+            <thead>
+                <tr>
+                    <th>Du</th>
+                    <th>Au</th>
+                    <th>Motif</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for absence in absences %}
+                    <tr class="hover">
+                        <td>{{ absence.dateDebut|date('d/m/Y à H:i') }}</td>
+                        <td>{{ absence.dateFin|date('d/m/Y à H:i') }}</td>
+                        <td>{{ absence.motif|default('-') }}</td>
+                        <td class="text-right">
+                            <form method="post" action="{{ path('app_presta_provider_absence_delete', {'id': absence.id}) }}" class="inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette absence ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ absence.id) }}">
+                                <button type="submit" class="btn btn-error btn-sm btn-square" title="Supprimer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-base-content/60">
+                            Aucune absence programmée.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

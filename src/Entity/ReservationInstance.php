@@ -1,22 +1,15 @@
 <?php
-
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Entity]
-#[ORM\Table(
-    name: 'reservation_instances',
-    indexes: [
-    new ORM\Index(name: 'idx_start_date', columns: ['start_date']),
-    new ORM\Index(name: 'idx_end_date', columns: ['end_date']),
-    ]
-)]
-
-#[ORM\Index(name: 'idx_reference_number', columns: ['reference_number'])]
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+    #[ORM\Entity]
+    #[ORM\Table(name: 'reservation_instances')]
+    #[ORM\Index(name: 'idx_start_date', columns: ['start_date'])]
+    #[ORM\Index(name: 'idx_end_date', columns: ['end_date'])]
+    #[ORM\Index(name: 'idx_reference_number', columns: ['reference_number'])]
 class ReservationInstance
 {
     #[ORM\Id]
@@ -46,23 +39,12 @@ class ReservationInstance
     #[ORM\Column(name: 'previous_end_date', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $previousEndDate = null;
 
-    #[ORM\Column(name: 'reminder_sent_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $reminderSentAt = null;
-
     #[ORM\OneToMany(mappedBy: 'reservationInstance', targetEntity: ReservationUser::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $reservationUsers;
 
     public function __construct()
     {
         $this->reservationUsers = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        if (isset($this->startDate)) {
-            return $this->startDate->format('d/m/Y H:i') . ' → ' . $this->endDate->format('H:i');
-        }
-        return '#' . ($this->id ?? '?');
     }
 
     public function getId(): ?int
@@ -135,17 +117,6 @@ class ReservationInstance
     public function setPreviousEndDate(?\DateTimeInterface $d): self
     {
         $this->previousEndDate = $d;
-        return $this;
-    }
-
-    public function getReminderSentAt(): ?\DateTimeImmutable
-    {
-        return $this->reminderSentAt;
-    }
-
-    public function setReminderSentAt(?\DateTimeImmutable $d): self
-    {
-        $this->reminderSentAt = $d;
         return $this;
     }
 

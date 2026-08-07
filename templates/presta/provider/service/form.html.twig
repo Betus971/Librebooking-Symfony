@@ -1,34 +1,138 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ is_edit ? 'presta.edit_service'|trans : 'presta.add_service'|trans }}{% endblock %}
+{% block title %}{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}{% endblock %}
 
 {% block body %}
-<div class="max-w-2xl mx-auto">
+<div class="container mx-auto px-4 py-8">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li><a href="{{ path('app_presta_provider_service_index') }}">{{ 'presta.my_services'|trans }}</a></li>
-            <li>{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_provider_service_index') }}">Mes Prestations</a></li>
+            <li>{{ is_edit ? 'Modifier' : 'Ajouter' }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'presta.edit_service'|trans : 'presta.add_service'|trans }}</h1>
+    <div class="flex justify-center">
+        <div class="w-full md:w-3/4 lg:w-2/3">
+            <h1 class="text-3xl font-bold mb-2">{{ is_edit ? 'Modifier la prestation' : 'Ajouter une prestation' }}</h1>
+            <p class="text-sm text-base-content/70 mb-8">
+                Les champs suivis d'un astérisque sont obligatoires.
+            </p>
 
-    <div class="card bg-base-100 border border-base-300 shadow-sm">
-        <div class="card-body">
-            {{ form_start(form) }}
-            {{ form_row(form.libelle, {attr:{class:'input input-bordered w-full'}}) }}
-            {{ form_row(form.description, {attr:{class:'textarea textarea-bordered w-full', rows:3}}) }}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>{{ form_row(form.type, {attr:{class:'select select-bordered w-full'}}) }}</div>
-                <div>{{ form_row(form.dureeMinutes, {attr:{class:'input input-bordered w-full'}}) }}</div>
-                <div>{{ form_row(form.capaciteMax, {attr:{class:'input input-bordered w-full'}}) }}</div>
+            {{ form_start(form, {'attr': {'class': 'space-y-8'}}) }}
+
+            {# ── Section 1 : Présentation ──────────────────────────── #}
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-4">Présentation</h2>
+                    <div class="form-control w-full mb-4">
+                        {{ form_label(form.libelle, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                        {{ form_widget(form.libelle, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        <div class="text-error mt-1 text-sm">{{ form_errors(form.libelle) }}</div>
+                    </div>
+                    <div class="form-control w-full">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'textarea textarea-bordered w-full h-32'}}) }}
+                        <div class="text-error mt-1 text-sm">{{ form_errors(form.description) }}</div>
+                    </div>
+                </div>
             </div>
-            <div class="my-4">{{ form_row(form.isActive, {attr:{class:'toggle toggle-primary'}}) }}</div>
-            <div class="flex gap-3 mt-2">
-                <button type="submit" class="btn btn-primary">{{ is_edit ? 'common.save'|trans : 'presta.create_service'|trans }}</button>
-                <a href="{{ path('app_presta_provider_service_index') }}" class="btn btn-ghost">{{ 'common.cancel'|trans }}</a>
+
+            {# ── Section 2 : Modalités ─────────────────────────────── #}
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-4">Modalités de réservation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                        <div class="form-control w-full">
+                            {{ form_label(form.type, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                            {{ form_widget(form.type, {'attr': {'class': 'select select-bordered w-full'}}) }}
+                            <div class="text-error mt-1 text-sm">{{ form_errors(form.type) }}</div>
+                        </div>
+                        <div class="form-control w-full">
+                            {{ form_label(form.dureeMinutes, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                            {{ form_widget(form.dureeMinutes, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                            <div class="text-error mt-1 text-sm">{{ form_errors(form.dureeMinutes) }}</div>
+                        </div>
+                        <div class="form-control w-full">
+                            {{ form_label(form.capaciteMax, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                            {{ form_widget(form.capaciteMax, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                            <div class="text-error mt-1 text-sm">{{ form_errors(form.capaciteMax) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info bg-info/10 text-info-content border-none shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="text-sm">
+                            <span class="block mb-1"><strong>Individuel</strong> : le client choisit librement un créneau dans vos horaires.</span>
+                            <span class="block"><strong>Groupe</strong> : vous créez des séances à horaires fixes auxquelles les clients s'inscrivent.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-control w-full">
+                        {{ form_label(form.categorie, null, {'label_attr': {'class': 'label font-medium'}}) }}
+                        {{ form_widget(form.categorie, {'attr': {'class': 'select select-bordered w-full'}}) }}
+                        <div class="text-error mt-1 text-sm">{{ form_errors(form.categorie) }}</div>
+                    </div>
+                </div>
             </div>
+
+            {# ── Section : Couleur d'affichage ─────────────────────── #}
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-2">Couleur dans l'agenda</h2>
+                    <p class="text-sm text-base-content/70 mb-4">{{ form.couleur.vars.help }}</p>
+                    <div class="flex flex-wrap gap-3">
+                        {% for choice in form.couleur %}
+                            {% set hex = choice.vars.attr['data-couleur']|default('#666666') %}
+                            <label class="cursor-pointer inline-flex items-center gap-2 border border-base-300 rounded-full py-1.5 px-3 hover:bg-base-200 transition-colors">
+                                <input type="radio" name="{{ choice.vars.full_name }}" value="{{ choice.vars.value }}"{% if choice.vars.checked %} checked{% endif %} class="radio radio-sm radio-primary" style="accent-color: {{ hex }};">
+                                <span class="w-4 h-4 rounded-full shadow-inner inline-block" style="background-color: {{ hex }}; border: 1px solid rgba(0,0,0,0.1);"></span>
+                                <span class="text-sm">{{ choice.vars.label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% do form.couleur.setRendered() %}
+                </div>
+            </div>
+
+            {# ── Section : Réservation & Visibilité ────────────────── #}
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-4">Réservation & Visibilité</h2>
+                    
+                    <div class="form-control w-full mb-2">
+                        <label class="cursor-pointer label justify-start gap-4 p-0">
+                            {{ form_widget(form.requiresApproval, {'attr': {'class': 'toggle toggle-primary'}}) }}
+                            <div>
+                                <span class="label-text font-medium text-base">Approbation requise</span>
+                                <div class="text-sm text-base-content/70 mt-1">{{ form.requiresApproval.vars.help }}</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="divider my-2"></div>
+
+                    <div class="form-control w-full">
+                        <label class="cursor-pointer label justify-start gap-4 p-0">
+                            {{ form_widget(form.isActive, {'attr': {'class': 'toggle toggle-success'}}) }}
+                            <div>
+                                <span class="label-text font-medium text-base">Prestation active</span>
+                                <div class="text-sm text-base-content/70 mt-1">Visible et réservable par les clients sur le catalogue.</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Actions ───────────────────────────────────────────── #}
+            <div class="flex flex-wrap gap-4 mt-8">
+                <button type="submit" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    {{ is_edit ? 'Enregistrer' : 'Créer la prestation' }}
+                </button>
+                <a href="{{ path('app_presta_provider_service_index') }}" class="btn btn-ghost border border-base-300">Annuler</a>
+            </div>
+
             {{ form_end(form) }}
         </div>
     </div>

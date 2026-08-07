@@ -44,7 +44,7 @@ final class MinutesToQuantityUnitTransformer implements DataTransformerInterface
 
         // Trie les unités autorisées par ordre décroissant de facteur
         $sortedUnits = $this->allowedUnits;
-        usort($sortedUnits, fn ($a, $b) => $this->factors[$b] <=> $this->factors[$a]);
+        usort($sortedUnits, fn($a, $b) => $this->factors[$b] <=> $this->factors[$a]);
 
         foreach ($sortedUnits as $u) {
             if ($minutes % $this->factors[$u] === 0) {
@@ -102,15 +102,9 @@ final class MinutesToQuantityUnitTransformer implements DataTransformerInterface
         $m = $minutes % 60;
 
         $parts = [];
-        if ($d > 0) {
-            $parts[] = "$d j";
-        }
-        if ($h > 0) {
-            $parts[] = "$h h";
-        }
-        if ($m > 0 || $minutes === 0) {
-            $parts[] = "$m min";
-        }
+        if ($d > 0) $parts[] = "$d j";
+        if ($h > 0) $parts[] = "$h h";
+        if ($m > 0 || $minutes === 0) $parts[] = "$m min";
 
         return implode(' ', $parts);
     }

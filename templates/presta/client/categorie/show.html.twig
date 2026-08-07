@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ categorie.nom }} — prestations{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 mt-8 mb-16">
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_client_categorie_index') }}">Prendre rendez-vous</a></li>
+            <li>{{ categorie.nom }}</li>
+        </ul>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-2">{{ categorie.nom }}</h1>
+    {% if categorie.description %}
+        <p class="text-lg text-base-content/70 mb-8">{{ categorie.description }}</p>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for service in services %}
+            {{ include('presta/client/_service_card.html.twig', { service: service, show_provider: true }) }}
+        {% else %}
+            <div class="col-span-full">
+                <div class="alert alert-info shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Aucune prestation dans cette catégorie pour le moment.</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

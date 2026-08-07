@@ -1,18 +1,20 @@
 <?php
 
 namespace App\Entity;
-
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'blackout_series')]
 class BlackoutSeries
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\Column( type: 'integer', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\Column(name: 'date_created', type: 'datetime')]

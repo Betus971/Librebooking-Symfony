@@ -3,8 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Entity\Resource;
-use App\Repository\ReservationInstanceRepository;
-use App\Repository\ResourceRepository;
+use App\Entity\ReservationInstance;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,19 +19,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class PlanningController extends AbstractController
 {
     #[Route('/planning', name: 'planning', methods: ['GET'])]
-    public function planning(Request $request, ResourceRepository $resourceRepo, ReservationInstanceRepository $instances): JsonResponse
+    public function planning(Request $request, EntityManagerInterface $em): JsonResponse
     {
         // --- Params ---
         $fromStr = $request->query->get('from');            // YYYY-MM-DD
         $days    = (int) $request->query->get('days', 7);   // 1..31
         $typeId  = $request->query->getInt('typeId', 0);    // id de catégorie Ressource (optionnel)
 
-        if ($days < 1) {
-            $days = 1;
-        }
-        if ($days > 31) {
-            $days = 31;
-        }
+        if ($days < 1)  { $days = 1; }
+        if ($days > 31) { $days = 31; }
 
         // from = lundi de la semaine si vide
         if (!$fromStr) {
@@ -45,7 +41,21 @@ final class PlanningController extends AbstractController
         $to   = $from->modify('+' . $days . ' days');
 
         // --- Ressources (filtre catégorie éventuel) ---
-        $resources = $resourceRepo->findForPlanning($typeId);
+        $qbRes = $em->createQueryBuilder()
+            ->select('r')
+            ->from(Resource::class, 'r')
+            ->orderBy('r.name', 'ASC');
+
+        if ($typeId > 0) {
+            $qbRes->join('r.category', 'rc')
+                ->andWhere('rc.id = :tid')
+                ->setParameter('tid', $typeId);
+        } elseif ($typeId === -1) {
+            // option "Sans catégorie"
+            $qbRes->andWhere('r.category IS NULL');
+        }
+
+        $resources = $qbRes->getQuery()->getResult();
 
         if (!$resources) {
             return $this->json([
@@ -55,10 +65,24 @@ final class PlanningController extends AbstractController
             ], 200, [], ['json_encode_options' => \JSON_UNESCAPED_UNICODE]);
         }
 
-        $resIds = array_map(fn (Resource $r) => $r->getId(), $resources);
+        $resIds = array_map(fn(Resource $r) => $r->getId(), $resources);
 
-        // --- Réservations chevauchant la plage (requête encapsulée côté repository) ---
-        $bookings = $instances->findForPlanningRange($resIds, $from, $to);
+        // --- Réservations : instance -> series -> reservationResources -> resource
+        $bookings = $em->createQueryBuilder()
+            ->select('ri', 's', 'rr', 'r2')
+            ->from(ReservationInstance::class, 'ri')
+            ->join('ri.series', 's')
+            ->join('s.reservationResources', 'rr') // <— la OneToMany que tu as
+            ->join('rr.resource', 'r2')            // <— ManyToOne vers Resource
+            ->andWhere('r2.id IN (:ids)')
+            ->andWhere('ri.endDate  > :from')      // champs exacts (end_date)
+            ->andWhere('ri.startDate < :to')       // champs exacts (start_date)
+            ->setParameter('ids', $resIds)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('ri.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
 
         // --- Sérialisation ressources ---
         $outResources = array_map(function (Resource $r) {
@@ -96,13 +120,9 @@ final class PlanningController extends AbstractController
             // pour chaque ressource rattachée via la série
             foreach ($ri->getSeries()->getReservationResources() as $link) {
                 $res = $link->getResource();
-                if (!$res) {
-                    continue;
-                }
+                if (!$res) continue;
                 $rid = $res->getId();
-                if (!isset($resourceIdSet[$rid])) {
-                    continue;
-                } // filtrage cohérent avec la liste
+                if (!isset($resourceIdSet[$rid])) continue; // filtrage cohérent avec la liste
 
                 $outBookings[] = [
                     'resourceId' => $rid,
@@ -121,3 +141,4 @@ final class PlanningController extends AbstractController
         ], 200, [], ['json_encode_options' => \JSON_UNESCAPED_UNICODE]);
     }
 }
+

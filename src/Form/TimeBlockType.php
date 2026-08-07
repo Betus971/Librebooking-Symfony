@@ -2,7 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Layout;
 use App\Entity\TimeBlock;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -34,7 +36,7 @@ class TimeBlockType extends AbstractType
               ]);
 
 
-        // Option unitaire (un seul bloc) — mappé sur l’entité
+              // Option unitaire (un seul bloc) — mappé sur l’entité
         $builder->add('dayOfWeek', ChoiceType::class, [
             'label'       => 'Jour (mode unitaire)',
             'required'    => false,
@@ -72,7 +74,7 @@ class TimeBlockType extends AbstractType
             ->add('slotDuration', IntegerType::class, [
                 'label'   => 'Durée des créneaux (minutes)',
                 'mapped'  => false,
-                'required' => false,
+                'required'=> false,
                 'attr'    => ['class' => 'fr-input', 'placeholder' => 'Ex: 30', 'min' => 1, 'step' => 1],
             ])
             ->add('availabilityCode', ChoiceType::class, [
@@ -80,7 +82,7 @@ class TimeBlockType extends AbstractType
                 'choices' => ['Disponible' => 1, 'Fermé' => 0],
                 'expanded' => true,
                 'label_attr' => ['class' => 'fr-label'],
-                'choice_attr' => fn () => ['class' => 'fr-radio-group'],
+                'choice_attr' => fn() => ['class' => 'fr-radio-group'],
             ])
 
             ->add('label', TextType::class, [
@@ -111,7 +113,7 @@ class TimeBlockType extends AbstractType
             ])
 
 
-        ;
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

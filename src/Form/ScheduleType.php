@@ -2,16 +2,19 @@
 
 namespace App\Form;
 
+use App\Entity\Layout;
 use App\Entity\Schedule;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class ScheduleType extends AbstractType
 {
@@ -19,22 +22,10 @@ class ScheduleType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, ['label' => 'Nom'])
-            ->add('weekdayStart', ChoiceType::class, [
-                'label' => 'Jour de début de semaine',
-                'choices' => [
-                    'Lundi' => 1,
-                    'Mardi' => 2,
-                    'Mercredi' => 3,
-                    'Jeudi' => 4,
-                    'Vendredi' => 5,
-                    'Samedi' => 6,
-                    'Dimanche' => 0,
-                ],
-                'placeholder' => 'Choisir un jour',
-            ])
-            ->add('daysVisible', IntegerType::class, ['label' => 'Nb jours visibles', 'empty_data' => '7'])
-
-
+            // Champs « weekdayStart » (jour de début de semaine) et « daysVisible »
+            // (nb de jours visibles) retirés du formulaire : ils ne servaient qu'au
+            // calendrier de disponibilités, supprimé de l'application. L'entité garde
+            // ses valeurs par défaut (weekdayStart=1 lundi, daysVisible=7).
             ->add('timezone', TimezoneType::class, [
                 'mapped' => false,
                 'label' => 'Fuseau horaire',
@@ -46,8 +37,20 @@ class ScheduleType extends AbstractType
             ])
             ->add('published', CheckboxType::class, ['required' => false, 'label' => 'Publié'])
             ->add('allowCalendarSubscription', CheckboxType::class, ['required' => false, 'label' => 'Abonnement iCal'])
-            ->add('startDate', DateType::class, ['widget' => 'single_text', 'required' => false, 'label' => 'Début'])
-            ->add('endDate', DateType::class, ['widget' => 'single_text', 'required' => false, 'label' => 'Fin'])
+            ->add('startDate', DateType::class, [
+                'widget' => 'single_text',
+                'required' => true,
+                'label' => 'Début *',
+                'help' => 'Obligatoire : date à partir de laquelle le planning est actif.',
+                'constraints' => [new NotNull(['message' => 'La date de début est obligatoire.'])],
+            ])
+            ->add('endDate', DateType::class, [
+                'widget' => 'single_text',
+                'required' => true,
+                'label' => 'Fin *',
+                'help' => 'Obligatoire : date jusqu\'à laquelle le planning est actif.',
+                'constraints' => [new NotNull(['message' => 'La date de fin est obligatoire.'])],
+            ])
             ->add('allowConcurrentBookings', CheckboxType::class, ['required' => false, 'label' => 'Réservations concurrentes'])
             ->add('totalConcurrentReservations', IntegerType::class, ['required' => false, 'label' => 'Max réservations simultanées'])
             ->add('maxResourcesPerReservation', IntegerType::class, ['required' => false, 'label' => 'Max ressources par résa'])

@@ -1,18 +1,19 @@
 <?php
-
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 #[ORM\Entity]
 #[ORM\Table(name: 'reservation_statuses')]
 class ReservationStatus
 {
     // IDs stables définis en base (voir migration de seed au déploiement)
-    public const PENDING   = 1; // En attente
-    public const APPROVED  = 2; // Confirmée
-    public const REJECTED  = 3; // Refusée
-    public const CANCELLED = 4; // Annulée
+    const PENDING   = 1; // En attente
+    const APPROVED  = 2; // Confirmée
+    const REJECTED  = 3; // Refusée
+    const CANCELLED = 4; // Annulée
 
     /**
      * Statuts considérés comme « actifs » :

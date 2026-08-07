@@ -1,8 +1,44 @@
-<ul class="menu bg-base-100 border border-base-300 rounded-box w-full">
-    <li class="menu-title">{{ 'presta.provider_space'|trans }}</li>
-    <li><a href="{{ path('app_presta_provider_profile_edit') }}" class="{{ current_menu == 'profile' ? 'active' : '' }}">{{ 'presta.menu_profile'|trans }}</a></li>
-    <li><a href="{{ path('app_presta_provider_service_index') }}" class="{{ current_menu == 'service' ? 'active' : '' }}">{{ 'presta.menu_service'|trans }}</a></li>
-    <li><a href="{{ path('app_presta_provider_agenda_index') }}" class="{{ current_menu == 'agenda' ? 'active' : '' }}">{{ 'presta.menu_agenda'|trans }}</a></li>
-    <li><a href="{{ path('app_presta_provider_schedule_index') }}" class="{{ current_menu == 'schedule' ? 'active' : '' }}">{{ 'presta.menu_schedule'|trans }}</a></li>
-    <li><a href="{{ path('app_presta_provider_session_index') }}" class="{{ current_menu == 'session' ? 'active' : '' }}">{{ 'presta.menu_session'|trans }}</a></li>
-</ul>
+<div class="card bg-base-200 shadow-sm border border-base-300">
+    <div class="card-body p-4">
+        <h2 class="card-title text-primary border-b border-base-300 pb-2 mb-2">
+            <span class="icon-[lucide--briefcase] mr-2"></span> Espace Pro
+        </h2>
+        <ul class="menu menu-md w-full p-0">
+            <li>
+                <a href="{{ path('app_presta_provider_dashboard_index') }}" class="{{ current_menu == 'dashboard' ? 'active' : '' }}">
+                    <span class="icon-[lucide--bar-chart] mr-2"></span> Tableau de bord
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_profile_edit') }}" class="{{ current_menu == 'profile' ? 'active' : '' }}">
+                    <span class="icon-[lucide--user] mr-2"></span> Mon profil public
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_service_index') }}" class="{{ current_menu == 'service' ? 'active' : '' }}">
+                    <span class="icon-[lucide--list] mr-2"></span> Mes prestations
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_agenda_index') }}" class="{{ current_menu == 'agenda' ? 'active' : '' }}">
+                    <span class="icon-[lucide--calendar] mr-2"></span> Mon Agenda
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_schedule_index') }}" class="{{ current_menu == 'schedule' ? 'active' : '' }}">
+                    <span class="icon-[lucide--clock] mr-2"></span> Mes disponibilités
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_session_index') }}" class="{{ current_menu == 'session' ? 'active' : '' }}">
+                    <span class="icon-[lucide--users] mr-2"></span> Séances de groupe
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_presta_provider_absence_index') }}" class="{{ current_menu == 'absence' ? 'active' : '' }}">
+                    <span class="icon-[lucide--x-circle] mr-2"></span> Indisponibilités
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

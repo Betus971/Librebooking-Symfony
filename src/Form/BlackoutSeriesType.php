@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\BlackoutSeries;
 use App\Entity\Resource;
+use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -17,7 +18,7 @@ class BlackoutSeriesType extends AbstractType
         $builder
             ->add('title', null, [
                 'label' => 'Titre de la fermeture',
-                'attr' => ['placeholder' => 'ex: Travaux Peinture'],
+                'attr' => ['placeholder' => 'ex: Travaux Peinture']
             ])
             ->add('resource', EntityType::class, [
                 'class' => Resource::class,
@@ -27,7 +28,7 @@ class BlackoutSeriesType extends AbstractType
             ])
             ->add('description', null, [
                 'label' => 'Note interne (Optionnel)',
-                'required' => false,
+                'required' => false
             ])
 
             // 👇 CHAMPS VIRTUELS (Servent à créer l'Instance) 👇

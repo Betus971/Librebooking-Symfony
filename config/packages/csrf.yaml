@@ -1,11 +1,7 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Protection CSRF basée sur la session (fonctionne sans JS, fiable derrière un reverse proxy).
+# Auparavant en "stateless" : nécessitait un JS qui remplace le placeholder du token côté navigateur,
+# ce qui ne fonctionnait pas en production derrière nginx.
 framework:
     form:
         csrf_protection:
             token_id: submit
-
-    csrf_protection:
-        stateless_token_ids:
-            - submit
-            - authenticate
-            - logout

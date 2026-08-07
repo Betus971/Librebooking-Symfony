@@ -1,122 +1,605 @@
+{# templates/presta/provider/agenda/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.my_agenda'|trans }}{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .week-view { display:grid; grid-template-columns:100px repeat(7,1fr); border:1px solid var(--fallback-b3,#e0e0e0); }
-    .week-view .time-header { grid-column:1; padding:8px; text-align:right; background:var(--fallback-b2,#f5f5f5); border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; font-weight:500; font-size:.85rem; }
-    .week-view .day-header { text-align:center; padding:12px 8px; background:var(--fallback-b2,#f5f5f5); border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; font-weight:600; }
-    .week-view .day-header .day-name { font-size:.9rem; display:block; }
-    .week-view .day-header .day-date { font-size:.75rem; opacity:.7; display:block; margin-top:2px; }
-    .week-view .slot { min-height:40px; padding:4px; border-bottom:1px solid #e0e0e0; border-right:1px solid #e0e0e0; position:relative; font-size:.75rem; }
-    .session-badge { background:#4CAF50; color:#fff; padding:3px 8px; border-radius:12px; font-size:.75rem; margin:2px; display:inline-block; cursor:pointer; line-height:1; font-weight:500; }
-    .session-badge.individual { background:#2196F3; }
-    .session-badge.full { background:#F44336; }
-    .session-badge:hover { opacity:.85; }
-    @media (max-width:768px){ .week-view{ grid-template-columns:60px repeat(7,1fr);} .week-view .slot{ min-height:36px; font-size:.7rem;} }
-</style>
-{% endblock %}
+{% block title %}Mon Agenda - Réservations{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li>{{ 'presta.my_agenda'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li>Mon Agenda</li>
         </ul>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'agenda' }) }}</aside>
-        <div class="md:col-span-3">
-            <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
-                <div>
-                    <h1 class="text-2xl font-bold">{{ 'presta.my_agenda'|trans }}</h1>
-                    <p class="text-sm text-base-content/60">{{ 'presta.agenda_subtitle'|trans }}</p>
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-1/4">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'agenda' }) }}
+        </div>
+        <div class="w-full md:w-3/4">
+            <div class="flex items-center justify-between mb-2">
+                <h1 class="text-3xl font-bold mb-0">Mon Agenda</h1>
+                <a href="{{ path('app_presta_provider_agenda_rdv_new') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Nouveau RDV
+                </a>
+            </div>
+            <p class="text-sm text-base-content/70 mb-6">
+                Vos prochains rendez-vous et les personnes inscrites.
+            </p>
+
+            {# ── Blocage ponctuel d'un créneau (un seul jour) ───────── #}
+            <div class="collapse collapse-arrow bg-base-200 mb-6 rounded-box">
+                <input type="checkbox" id="acc-bloquer" /> 
+                <div class="collapse-title text-lg font-medium flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    Bloquer un créneau (un jour précis)
                 </div>
-                <div class="join">
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'list'}) }}" class="btn btn-sm join-item {{ view != 'week' ? 'btn-primary' : 'btn-ghost' }}">{{ 'presta.list'|trans }}</a>
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': currentWeekStart|date('Y-m-d')}) }}" class="btn btn-sm join-item {{ view == 'week' ? 'btn-primary' : 'btn-ghost' }}">{{ 'presta.week'|trans }}</a>
+                <div class="collapse-content">
+                    <p class="text-sm text-base-content/70 mb-4">
+                        Rend un créneau indisponible à la réservation <strong>uniquement ce jour-là</strong> —
+                        votre semaine type n'est pas modifiée.
+                    </p>
+                    <form method="post" action="{{ path('app_presta_provider_agenda_block') }}" class="flex flex-wrap items-end gap-4">
+                        <input type="hidden" name="_token" value="{{ csrf_token('block_slot') }}">
+                        <div class="form-control w-full max-w-xs">
+                            <label class="label text-sm" for="blk-date"><span class="label-text">Date</span></label>
+                            <input class="input input-bordered" type="date" id="blk-date" name="date" required>
+                        </div>
+                        <div class="form-control w-24">
+                            <label class="label text-sm" for="blk-deb"><span class="label-text">De</span></label>
+                            <input class="input input-bordered" type="time" id="blk-deb" name="heureDebut" required>
+                        </div>
+                        <div class="form-control w-24">
+                            <label class="label text-sm" for="blk-fin"><span class="label-text">À</span></label>
+                            <input class="input input-bordered" type="time" id="blk-fin" name="heureFin" required>
+                        </div>
+                        <div class="form-control w-full max-w-xs">
+                            <label class="label text-sm" for="blk-motif"><span class="label-text">Motif (optionnel)</span></label>
+                            <input class="input input-bordered" type="text" id="blk-motif" name="motif" placeholder="Ex. rendez-vous perso">
+                        </div>
+                        <div class="form-control mt-4 md:mt-0">
+                            <button type="submit" class="btn btn-neutral">Bloquer</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            {% if view == 'week' %}
-            <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
-                <div class="flex items-center justify-between mb-4">
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="{{ 'presta.prev_week_title'|trans }}">‹</a>
-                    <h3 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': currentWeekStart|date('d/m/Y'), '%end%': (currentWeekStart|date_modify('+6 days'))|date('d/m/Y')}) }}</h3>
-                    <a href="{{ path('app_presta_provider_agenda_index', {'view': 'week', 'date': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm" title="{{ 'presta.next_week_title'|trans }}">›</a>
+            {# ── Bascule (à gauche) + Créneaux bloqués (à droite) ──────── #}
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+                <div class="join">
+                    <button type="button" id="view-list-btn" class="btn join-item">Liste</button>
+                    <button type="button" id="view-cal-btn" class="btn join-item btn-outline">Calendrier</button>
                 </div>
-                <div class="mb-3 text-sm flex gap-3 flex-wrap">
-                    <span><span class="badge badge-info badge-sm"></span> {{ 'presta.legend_individual'|trans }}</span>
-                    <span><span class="badge badge-success badge-sm"></span> {{ 'presta.legend_group'|trans }}</span>
-                    <span><span class="badge badge-error badge-sm"></span> {{ 'presta.legend_full'|trans }}</span>
-                </div>
-
-                <div class="week-view">
-                    <div class="time-header"></div>
-                    {% for day in daysOfWeek %}
-                        <div class="day-header"><span class="day-name">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}</span><span class="day-date">{{ day|date('d/m') }}</span></div>
-                    {% endfor %}
-                </div>
-                <div class="week-view">
-                    {% for hour in 8..19 %}{% for minute in [0, 30] %}
-                        {% set timeStr = hour ~ ':' ~ (minute == 0 ? '00' : '30') %}
-                        <div class="time-header">{{ timeStr }}</div>
-                        {% for day in daysOfWeek %}
-                            {% set dayKey = day|date('Y-m-d') %}
-                            {% set hasSession = sessionsByDayAndTime[dayKey][timeStr]|default(false) %}
-                            <div class="slot" data-day="{{ dayKey }}" data-time="{{ timeStr }}">
-                                {% if hasSession %}{% for session in sessionsByDayAndTime[dayKey][timeStr] %}
-                                    {% set badgeClass = session.service.type == 'INDIVIDUEL' ? 'individual' : 'group' %}
-                                    {% if session.nbInscrits >= session.service.capaciteMax %}{% set badgeClass = badgeClass ~ ' full' %}{% endif %}
-                                    <div class="session-badge {{ badgeClass }}" data-session-id="{{ session.id }}" title="{{ session.service.libelle }} - {{ session.dateDebut|date('d/m H:i') }} - {{ session.nbInscrits }}/{{ session.service.capaciteMax }}">
-                                        {{ session.dateDebut|date('H:i') }} - {{ session.service.type == 'INDIVIDUEL' ? 'presta.indiv_short'|trans : 'presta.group_short'|trans }}
-                                    </div>
-                                {% endfor %}{% endif %}
+                {% if absences|default([])|length > 0 %}
+                    <div class="flex flex-wrap items-center gap-2 justify-end">
+                        <span class="text-sm font-bold flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Créneaux bloqués :
+                        </span>
+                        {% for absence in absences %}
+                            <div class="badge badge-neutral gap-1 p-3">
+                                {{ absence.dateDebut|date('d/m') }} · {{ absence.dateDebut|date('H:i') }}-{{ absence.dateFin|date('H:i') }}{% if absence.motif %} — {{ absence.motif }}{% endif %}
+                                <form method="post" action="{{ path('app_presta_provider_agenda_block_delete', {'id': absence.id}) }}" class="inline m-0" onsubmit="return confirm('Débloquer ce créneau ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('unblock' ~ absence.id) }}">
+                                    <button type="submit" class="btn btn-ghost btn-xs btn-circle" title="Débloquer">✕</button>
+                                </form>
                             </div>
                         {% endfor %}
-                    {% endfor %}{% endfor %}
-                </div>
+                    </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="card bg-base-100 border border-base-300 shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="table">
-                        <thead><tr><th>{{ 'presta.th_datetime'|trans }}</th><th>{{ 'presta.th_service'|trans }}</th><th>{{ 'presta.th_type'|trans }}</th><th>{{ 'presta.th_clients'|trans }}</th></tr></thead>
-                        <tbody>
-                        {% for session in sessions %}
+
+            {# ═══════════════ VUE LISTE ═══════════════ #}
+            <div id="agenda-list">
+                {# ── Barre de filtres ─────────────────────────────────── #}
+                <div class="flex flex-col md:flex-row gap-4 items-end mb-6">
+                    <div class="form-control w-full md:w-2/3">
+                        <label class="label text-sm" for="agenda-search"><span class="label-text">Rechercher une prestation</span></label>
+                        <input class="input input-bordered w-full" type="search" id="agenda-search" placeholder="Nom de la prestation…">
+                    </div>
+                    <div class="form-control w-full md:w-1/3">
+                        <label class="label text-sm" for="agenda-type"><span class="label-text">Type</span></label>
+                        <select class="select select-bordered w-full" id="agenda-type">
+                            <option value="">Tous les types</option>
+                            <option value="INDIVIDUEL">RDV individuels</option>
+                            <option value="GROUPE">Séances de groupe</option>
+                        </select>
+                    </div>
+                </div>
+
+                <style>
+                    .agenda-scroll { max-height: 65vh; overflow: auto; }
+                    .agenda-scroll thead th {
+                        position: sticky; top: 0; z-index: 1;
+                        background: var(--fallback-b2,oklch(var(--b2)));
+                    }
+                </style>
+                <div class="overflow-x-auto bg-base-100 rounded-box border border-base-200 agenda-scroll shadow-sm">
+                    <table class="table table-zebra w-full">
+                        <thead class="bg-base-200">
                             <tr>
-                                <td><span class="font-semibold">{{ session.dateDebut|date('d/m/Y') }}</span><br>{{ session.dateDebut|date('H:i') }} - {{ session.dateFin|date('H:i') }}</td>
-                                <td>{{ session.service.libelle }}</td>
-                                <td>
-                                    {% if session.service.type == 'INDIVIDUEL' %}
-                                        <span class="badge badge-info">{{ 'presta.legend_individual'|trans }}</span>
-                                    {% else %}
-                                        <span class="badge badge-success">{{ 'presta.group_session_count'|trans({'%a%': session.nbInscrits, '%b%': session.service.capaciteMax}) }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <ul class="list-disc pl-4">
-                                    {% for inscription in session.inscriptions %}
-                                        <li>{{ inscription.client.firstname|default('presta.client_default'|trans) }} {{ inscription.client.lastname|default('') }} <span class="text-xs opacity-60">({{ inscription.statut }})</span></li>
-                                    {% else %}
-                                        <li class="text-xs opacity-60">{{ 'presta.no_registered'|trans }}</li>
-                                    {% endfor %}
-                                    </ul>
+                                <th>Date &amp; Heure</th>
+                                <th>Service</th>
+                                <th>Type</th>
+                                <th>Personnes inscrites</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agenda-tbody">
+                            {% for session in sessions %}
+                                <tr class="agenda-row"
+                                    data-type="{{ session.service.type }}"
+                                    data-libelle="{{ session.service.libelle|lower }}">
+                                    <td>
+                                        <div class="font-bold flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            {{ session.dateDebut|date('d/m/Y') }}
+                                        </div>
+                                        <div class="text-sm opacity-70 flex items-center mt-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            {{ session.dateDebut|date('H:i') }} - {{ session.dateFin|date('H:i') }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center">
+                                            <span class="w-3 h-3 rounded-full mr-2 shadow-inner" style="background-color:{{ session.service.couleurAffichage }};"></span>
+                                            <span class="font-bold">{{ session.service.libelle }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if session.service.type == 'INDIVIDUEL' %}
+                                            <span class="badge badge-primary">RDV Individuel</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Séance Groupe ({{ session.nbInscrits }}/{{ session.service.capaciteMax }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if session.service.type == 'GROUPE' and session.inscriptions|length > 0 %}
+                                            <button class="btn btn-sm btn-outline" onclick="document.getElementById('collapse-inscrits-{{ session.id }}').classList.toggle('hidden')">
+                                                Voir les inscrits ({{ session.inscriptions|length }})
+                                            </button>
+                                            <div class="hidden mt-4" id="collapse-inscrits-{{ session.id }}">
+                                        {% endif %}
+
+                                        <ul class="m-0 p-0 list-none">
+                                            {% for inscription in session.inscriptions %}
+                                                <li class="mb-2 pb-2 border-b border-base-200 border-dashed last:border-b-0">
+                                                    <strong>{{ inscription.client.lname ?: inscription.client.fname ?: inscription.client.email }}</strong>
+                                                    {% if inscription.statut == 'CANCELLED' %}
+                                                        <span class="badge badge-error badge-sm ml-2">Annulé</span>
+                                                    {% elseif inscription.isPending %}
+                                                        <span class="badge badge-warning badge-sm ml-2">À valider</span>
+                                                        <div class="ml-2 inline-flex gap-2 align-middle">
+                                                            <form method="post" action="{{ path('app_presta_provider_agenda_approve_inscription', {'id': inscription.id}) }}" class="m-0">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ inscription.id) }}">
+                                                                <button type="submit" class="btn btn-xs btn-success" title="Valider ce rendez-vous">Valider</button>
+                                                            </form>
+                                                            <form method="post" action="{{ path('app_presta_provider_agenda_cancel_inscription', {'id': inscription.id}) }}" class="m-0" onsubmit="return confirm('Refuser cette demande de rendez-vous ?');">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ inscription.id) }}">
+                                                                <button type="submit" class="btn btn-xs btn-error btn-outline" title="Refuser cette demande">Refuser</button>
+                                                            </form>
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="badge badge-success badge-sm ml-2 text-white">Confirmé</span>
+
+                                                        <form method="post" action="{{ path('app_presta_provider_agenda_cancel_inscription', {'id': inscription.id}) }}" class="inline-block ml-2 m-0">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ inscription.id) }}">
+                                                            <button type="submit" class="btn btn-xs btn-ghost text-error" title="Annuler cette réservation" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">Annuler</button>
+                                                        </form>
+                                                    {% endif %}
+                                                    <br>
+                                                    <a href="mailto:{{ inscription.client.email }}" class="link link-hover text-sm flex items-center mt-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                                        {{ inscription.client.email }}
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                {% if session.clientNom %}
+                                                    <li class="mb-2">
+                                                        <strong>{{ session.clientNom }}</strong>
+                                                        <span class="badge badge-info badge-sm ml-2">RDV ajouté à la main</span>
+                                                        {% if session.note %}<br><span class="text-xs opacity-70">{{ session.note }}</span>{% endif %}
+                                                        <div class="mt-2 flex gap-2 flex-wrap">
+                                                            <a href="{{ path('app_presta_provider_agenda_rdv_edit', {'id': session.id}) }}" class="btn btn-sm btn-outline">Modifier</a>
+                                                            <form method="post" action="{{ path('app_presta_provider_agenda_rdv_delete', {'id': session.id}) }}" class="m-0" onsubmit="return confirm('Supprimer définitivement ce rendez-vous ?');">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token('rdv_delete' ~ session.id) }}">
+                                                                <button type="submit" class="btn btn-sm btn-error btn-outline">Supprimer</button>
+                                                            </form>
+                                                        </div>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="text-sm opacity-50">Aucun inscrit</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+
+                                        {% if session.service.type == 'GROUPE' and session.inscriptions|length > 0 %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-12">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-base-content/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        <p class="text-base-content/70">Aucun rendez-vous ou inscription à venir.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr class="agenda-empty-filter hidden">
+                                <td colspan="4" class="text-center py-12 text-base-content/70">
+                                    Aucun résultat pour ces filtres.
                                 </td>
                             </tr>
-                        {% else %}
-                            <tr><td colspan="4" class="text-center py-8 text-base-content/60">{{ 'presta.no_agenda'|trans }}</td></tr>
-                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
+            </div>{# ═══ /VUE LISTE ═══ #}
+
+            {# ═══════════════ VUE CALENDRIER ═══════════════ #}
+            <div id="agenda-calendar" style="display:none;">
+                {{ include('components/_fullcalendar_lib.html.twig') }}
+                {% set fcEvents = [] %}
+                {% for session in sessions %}
+                    {% set firstInsc = session.inscriptions|first %}
+                    {% set clientLabel = firstInsc
+                        ? ((firstInsc.client.fname ~ ' ' ~ firstInsc.client.lname)|trim ?: firstInsc.client.email)
+                        : (session.clientNom ?: null) %}
+                    {% set fcTitle = session.service.type == 'GROUPE'
+                        ? session.service.libelle ~ ' (' ~ session.nbInscrits ~ '/' ~ session.service.capaciteMax ~ ')'
+                        : (clientLabel ? clientLabel ~ ' · ' ~ session.service.libelle : session.service.libelle) %}
+                    {% set isRdvManuel = session.clientNom is not null %}
+                    {% set activeInsc = (firstInsc and firstInsc.statut != 'CANCELLED') ? firstInsc : null %}
+                    {% set fcEvents = fcEvents|merge([{
+                        id:    session.id,
+                        title: fcTitle,
+                        start: session.dateDebut|date('Y-m-d\\TH:i:s'),
+                        end:   session.dateFin|date('Y-m-d\\TH:i:s'),
+                        color: session.service.couleurAffichage,
+                        editable: true,
+                        extendedProps: {
+                            service:   session.service.libelle,
+                            type:      session.service.type == 'GROUPE' ? 'Séance de groupe' : 'Rendez-vous individuel',
+                            client:    clientLabel,
+                            email:     firstInsc ? firstInsc.client.email : null,
+                            note:      session.note,
+                            debut:     session.dateDebut|date('d/m/Y \\à H:i'),
+                            fin:       session.dateFin|date('H:i'),
+                            inscrits:  session.service.type == 'GROUPE' ? (session.nbInscrits ~ ' / ' ~ session.service.capaciteMax) : null,
+                            editUrl:     isRdvManuel ? path('app_presta_provider_agenda_rdv_edit', {'id': session.id}) : null,
+                            deleteUrl:   isRdvManuel ? path('app_presta_provider_agenda_rdv_delete', {'id': session.id}) : null,
+                            deleteToken: isRdvManuel ? csrf_token('rdv_delete' ~ session.id) : null,
+                            cancelUrl:   activeInsc ? path('app_presta_provider_agenda_cancel_inscription', {'id': activeInsc.id}) : null,
+                            cancelToken: activeInsc ? csrf_token('cancel' ~ activeInsc.id) : null
+                        }
+                    }]) %}
+                {% endfor %}
+
+                {% for absence in absences|default([]) %}
+                    {% set fcEvents = fcEvents|merge([{
+                        id:    'abs-' ~ absence.id,
+                        title: 'Bloqué' ~ (absence.motif ? ' — ' ~ absence.motif : ''),
+                        start: absence.dateDebut|date('Y-m-d\\TH:i:s'),
+                        end:   absence.dateFin|date('Y-m-d\\TH:i:s'),
+                        color: '#8a8a8a',
+                        editable: false,
+                        extendedProps: {
+                            isAbsence:   true,
+                            motif:       absence.motif,
+                            debut:       absence.dateDebut|date('d/m/Y \\à H:i'),
+                            fin:         absence.dateFin|date('H:i'),
+                            unblockUrl:  path('app_presta_provider_agenda_block_delete', {'id': absence.id}),
+                            unblockToken: csrf_token('unblock' ~ absence.id)
+                        }
+                    }]) %}
+                {% endfor %}
+                <script type="application/json" id="presta-agenda-events">{{ fcEvents|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_QUOT'))|raw }}</script>
+
+                {# Modale d'infos affichée au clic sur un événement #}
+                <dialog id="presta-event-modal" class="modal">
+                    <div class="modal-box p-0 max-w-sm rounded-lg overflow-hidden border-t-4 border-primary">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="text-xl font-bold m-0" id="pem-title">Rendez-vous</h2>
+                                <button type="button" class="btn btn-ghost btn-sm btn-circle" id="pem-close" title="Fermer">✕</button>
+                            </div>
+                            <p class="text-sm opacity-70 mb-4" id="pem-type"></p>
+                            <ul class="m-0 p-0 list-none space-y-2">
+                                <li id="pem-client-li"><strong>Client :</strong> <span id="pem-client">—</span></li>
+                                <li id="pem-email-li"><strong>Email :</strong> <a href="#" id="pem-email" class="link link-primary"></a></li>
+                                <li id="pem-inscrits-li"><strong>Inscrits :</strong> <span id="pem-inscrits"></span></li>
+                                <li id="pem-motif-li"><strong>Motif :</strong> <span id="pem-motif"></span></li>
+                                <li><strong>Créneau :</strong> <span id="pem-creneau"></span></li>
+                                <li id="pem-note-li"><strong>Note :</strong> <span id="pem-note"></span></li>
+                            </ul>
+
+                            <div id="pem-actions" class="mt-6 flex flex-wrap gap-2">
+                                <a id="pem-edit" class="btn btn-sm btn-outline" href="#" style="display:none;">Modifier</a>
+                                <form id="pem-delete-form" method="post" style="display:none; margin:0;" onsubmit="return confirm('Supprimer définitivement ce rendez-vous ?');">
+                                    <input type="hidden" name="_token" id="pem-delete-token">
+                                    <button type="submit" class="btn btn-sm btn-error btn-outline">Supprimer</button>
+                                </form>
+                                <form id="pem-cancel-form" method="post" style="display:none; margin:0;" onsubmit="return confirm('Annuler cette réservation ?');">
+                                    <input type="hidden" name="_token" id="pem-cancel-token">
+                                    <button type="submit" class="btn btn-sm btn-warning btn-outline">Annuler la réservation</button>
+                                </form>
+                                <form id="pem-unblock-form" method="post" style="display:none; margin:0;" onsubmit="return confirm('Débloquer ce créneau ?');">
+                                    <input type="hidden" name="_token" id="pem-unblock-token">
+                                    <button type="submit" class="btn btn-sm btn-neutral btn-outline">Débloquer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog>
+                <style>
+                    #presta-agenda-fc {
+                        --fc-button-bg-color:            var(--fallback-p,oklch(var(--p)));
+                        --fc-button-border-color:        var(--fallback-p,oklch(var(--p)));
+                        --fc-button-hover-bg-color:      var(--fallback-pf,oklch(var(--pf)));
+                        --fc-button-hover-border-color:  var(--fallback-pf,oklch(var(--pf)));
+                        --fc-button-active-bg-color:     var(--fallback-pf,oklch(var(--pf)));
+                        --fc-button-active-border-color: var(--fallback-pf,oklch(var(--pf)));
+                        --fc-button-text-color:          var(--fallback-pc,oklch(var(--pc)));
+                        --fc-today-bg-color:             var(--fallback-b2,oklch(var(--b2)));
+                        --fc-now-indicator-color:        var(--fallback-er,oklch(var(--er)));
+                    }
+                </style>
+                <div id="presta-agenda-fc" class="min-h-[600px] mt-4"></div>
             </div>
-            {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    function applyFilters() {
+        const search = document.getElementById('agenda-search');
+        const typeSel = document.getElementById('agenda-type');
+        if (!search || !typeSel) return;
+
+        const q = (search.value || '').trim().toLowerCase();
+        const type = typeSel.value;
+        let visible = 0;
+
+        document.querySelectorAll('.agenda-row').forEach(function (row) {
+            const matchType = !type || row.dataset.type === type;
+            const matchText = !q || (row.dataset.libelle || '').includes(q);
+            const show = matchType && matchText;
+            row.classList.toggle('hidden', !show);
+            if (show) { visible++; }
+        });
+
+        const emptyRow = document.querySelector('.agenda-empty-filter');
+        if (emptyRow) { 
+            if (visible === 0) {
+                emptyRow.classList.remove('hidden');
+            } else {
+                emptyRow.classList.add('hidden');
+            }
+        }
+    }
+
+    function bindAgendaFilters() {
+        const search = document.getElementById('agenda-search');
+        const typeSel = document.getElementById('agenda-type');
+        if (!search || !typeSel) return;
+        search.addEventListener('input', applyFilters);
+        typeSel.addEventListener('change', applyFilters);
+    }
+
+    document.addEventListener('DOMContentLoaded', bindAgendaFilters);
+    document.addEventListener('turbo:load', bindAgendaFilters);
+})();
+</script>
+
+<script>
+(function () {
+    var cal = null;
+
+    function openEventModal(ev) {
+        var m = document.getElementById('presta-event-modal');
+        if (!m) return;
+        var p = ev.extendedProps || {};
+        var set = function (id, val) { var e = document.getElementById(id); if (e) e.textContent = val || '—'; };
+        var show = function (id, on) { var e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
+
+        set('pem-creneau', (p.debut || '') + (p.fin ? ' → ' + p.fin : ''));
+
+        var editA = document.getElementById('pem-edit');
+        var delForm = document.getElementById('pem-delete-form');
+        var cancelForm = document.getElementById('pem-cancel-form');
+        var unblockForm = document.getElementById('pem-unblock-form');
+
+        if (p.isAbsence) {
+            set('pem-title', 'Créneau bloqué');
+            set('pem-type', '');
+            show('pem-client-li', false);
+            show('pem-email-li', false);
+            show('pem-inscrits-li', false);
+            show('pem-note-li', false);
+            show('pem-motif-li', true);
+            set('pem-motif', p.motif || 'Aucun motif');
+
+            if (editA) editA.style.display = 'none';
+            if (delForm) delForm.style.display = 'none';
+            if (cancelForm) cancelForm.style.display = 'none';
+            if (unblockForm) {
+                unblockForm.style.display = '';
+                unblockForm.setAttribute('action', p.unblockUrl || '#');
+                document.getElementById('pem-unblock-token').value = p.unblockToken || '';
+            }
+
+            if (typeof m.showModal === 'function') m.showModal(); else m.setAttribute('open', '');
+            return;
+        }
+
+        if (unblockForm) unblockForm.style.display = 'none';
+        show('pem-motif-li', false);
+        show('pem-client-li', true);
+        set('pem-title', p.service || 'Rendez-vous');
+        set('pem-type', p.type || '');
+        set('pem-client', p.client || 'Non renseigné');
+
+        var emailLi = document.getElementById('pem-email-li');
+        var emailA = document.getElementById('pem-email');
+        if (p.email) { emailLi.style.display = ''; emailA.textContent = p.email; emailA.setAttribute('href', 'mailto:' + p.email); }
+        else { emailLi.style.display = 'none'; }
+
+        show('pem-inscrits-li', !!p.inscrits);
+        if (p.inscrits) set('pem-inscrits', p.inscrits);
+
+        show('pem-note-li', !!p.note);
+        if (p.note) set('pem-note', p.note);
+
+        if (editA) {
+            if (p.editUrl) { editA.style.display = ''; editA.setAttribute('href', p.editUrl); }
+            else { editA.style.display = 'none'; }
+        }
+        if (delForm) {
+            if (p.deleteUrl) { delForm.style.display = ''; delForm.setAttribute('action', p.deleteUrl); document.getElementById('pem-delete-token').value = p.deleteToken || ''; }
+            else { delForm.style.display = 'none'; }
+        }
+        if (cancelForm) {
+            if (p.cancelUrl) { cancelForm.style.display = ''; cancelForm.setAttribute('action', p.cancelUrl); document.getElementById('pem-cancel-token').value = p.cancelToken || ''; }
+            else { cancelForm.style.display = 'none'; }
+        }
+
+        if (typeof m.showModal === 'function') m.showModal(); else m.setAttribute('open', '');
+    }
+
+    function bindModalClose() {
+        var m = document.getElementById('presta-event-modal');
+        var btn = document.getElementById('pem-close');
+        if (btn && m) btn.addEventListener('click', function () { m.close(); });
+    }
+
+    function buildCalendar() {
+        var el = document.getElementById('presta-agenda-fc');
+        if (!el || typeof FullCalendar === 'undefined') return;
+        var raw = document.getElementById('presta-agenda-events');
+        var events = raw ? JSON.parse(raw.textContent || '[]') : [];
+
+        function hexToRgb(hex) {
+            if (!hex || hex[0] !== '#' || hex.length < 7) return null;
+            return {
+                r: parseInt(hex.substr(1, 2), 16),
+                g: parseInt(hex.substr(3, 2), 16),
+                b: parseInt(hex.substr(5, 2), 16)
+            };
+        }
+        events.forEach(function (e) {
+            var rgb = hexToRgb(e.color);
+            if (rgb) {
+                e.backgroundColor = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.18)';
+                e.borderColor = e.color;   
+                e.textColor = '#161616';   
+            }
+        });
+
+        cal = new FullCalendar.Calendar(el, {
+            initialView: localStorage.getItem('presta-agenda-fcview') || 'timeGridWeek',
+            locale: 'fr',
+            firstDay: 1,
+            height: 'auto',
+            slotMinTime: '06:00:00',
+            slotMaxTime: '22:00:00',
+            scrollTime: '08:00:00',
+            nowIndicator: true,
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+            buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', day: 'Jour', list: 'Liste' },
+            views: {
+                timeGridWeek: { displayEventTime: false },
+                timeGridDay:  { displayEventTime: false }
+            },
+            dayMaxEvents: 3,
+            eventMaxStack: 3,
+            moreLinkText: function (n) { return '+' + n + ' de plus'; },
+            datesSet: function (info) { try { localStorage.setItem('presta-agenda-fcview', info.view.type); } catch (e) {} },
+            eventDidMount: function (info) {
+                info.el.setAttribute('title', info.event.title);
+                if (info.event.borderColor) {
+                    info.el.style.borderLeft = '4px solid ' + info.event.borderColor;
+                }
+            },
+            eventClick: function (info) { info.jsEvent.preventDefault(); openEventModal(info.event); },
+            eventDrop: function(info) {
+                if (info.event.extendedProps.isAbsence) {
+                    info.revert();
+                    return;
+                }
+                if (!confirm("Confirmez-vous le déplacement de ce rendez-vous ?")) {
+                    info.revert();
+                    return;
+                }
+                
+                var startStr = info.event.start.toISOString();
+                var endStr = info.event.end ? info.event.end.toISOString() : null;
+                
+                fetch('/presta/provider/agenda/session/' + info.event.id + '/move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({start: startStr, end: endStr})
+                }).then(res => res.json()).then(data => {
+                    if (data.error) {
+                        alert("Erreur : " + data.error);
+                        info.revert();
+                    }
+                }).catch(err => {
+                    alert("Erreur de connexion.");
+                    info.revert();
+                });
+            },
+            events: events
+        });
+        cal.render();
+    }
+
+    function showView(view) {
+        var list = document.getElementById('agenda-list');
+        var calEl = document.getElementById('agenda-calendar');
+        var listBtn = document.getElementById('view-list-btn');
+        var calBtn = document.getElementById('view-cal-btn');
+        if (!list || !calEl) return;
+
+        try { localStorage.setItem('presta-agenda-view', view); } catch (e) {}
+
+        if (view === 'calendar') {
+            list.style.display = 'none';
+            calEl.style.display = '';
+            if (listBtn) { listBtn.classList.add('btn-outline'); }
+            if (calBtn) { calBtn.classList.remove('btn-outline'); }
+            if (!cal) { buildCalendar(); }
+            else { setTimeout(function () { cal.updateSize(); }, 30); }
+            if (cal) { setTimeout(function () { cal.updateSize(); }, 30); }
+        } else {
+            calEl.style.display = 'none';
+            list.style.display = '';
+            if (calBtn) { calBtn.classList.add('btn-outline'); }
+            if (listBtn) { listBtn.classList.remove('btn-outline'); }
+        }
+    }
+
+    function bindToggle() {
+        if (cal) { try { cal.destroy(); } catch (e) {} cal = null; }
+        var listBtn = document.getElementById('view-list-btn');
+        var calBtn = document.getElementById('view-cal-btn');
+        if (!listBtn || !calBtn) return;
+        listBtn.addEventListener('click', function () { showView('list'); });
+        calBtn.addEventListener('click', function () { showView('calendar'); });
+        bindModalClose();
+        var pref = null;
+        try { pref = localStorage.getItem('presta-agenda-view'); } catch (e) {}
+        if (pref === 'calendar') { showView('calendar'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', bindToggle);
+    document.addEventListener('turbo:load', bindToggle);
+})();
+</script>
 {% endblock %}

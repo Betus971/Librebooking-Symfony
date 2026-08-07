@@ -8,25 +8,27 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class BlackoutInstanceRepository extends ServiceEntityRepository
 {
+
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, BlackoutInstance::class);
     }
 
-    //    public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
-    //    {
-    //        $dql = 'SELECT r.id AS rid, bi.startDate AS s, bi.endDate AS e
-    //            FROM App\Entity\BlackoutInstance bi
-    //            JOIN bi.series bs
-    //            JOIN bs.resource r
-    //            WHERE r.id IN (:ids) AND bi.startDate < :end AND bi.endDate > :start';
-    //        return $this->getEntityManager()
-    //            ->createQuery($dql)
-    //            ->setParameter('ids', $resourceIds)
-    //            ->setParameter('start', $start)
-    //            ->setParameter('end', $end)
-    //            ->getArrayResult();
-    //    }
+//    public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
+//    {
+//        $dql = 'SELECT r.id AS rid, bi.startDate AS s, bi.endDate AS e
+//            FROM App\Entity\BlackoutInstance bi
+//            JOIN bi.series bs
+//            JOIN bs.resource r
+//            WHERE r.id IN (:ids) AND bi.startDate < :end AND bi.endDate > :start';
+//        return $this->getEntityManager()
+//            ->createQuery($dql)
+//            ->setParameter('ids', $resourceIds)
+//            ->setParameter('start', $start)
+//            ->setParameter('end', $end)
+//            ->getArrayResult();
+//    }
 
     public function busyIntervalsForResourcesBetween(array $resourceIds, \DateTimeInterface $start, \DateTimeInterface $end): array
     {
@@ -36,7 +38,7 @@ class BlackoutInstanceRepository extends ServiceEntityRepository
         }
 
         return $this->createQueryBuilder('bi')
-            ->select('r.id AS rid, bi.startDate AS s, bi.endDate AS e')
+            ->select('r.id AS rid, bi.startDate AS s, bi.endDate AS e, bs.title AS title')
             ->join('bi.series', 'bs')
             ->join('bs.resource', 'r')
             ->where('r.id IN (:ids)')
@@ -47,6 +49,24 @@ class BlackoutInstanceRepository extends ServiceEntityRepository
             ->setParameter('end', $end)
             ->getQuery()
             ->getArrayResult();
+    }
+
+    /**
+     * @return BlackoutInstance[]
+     */
+    public function findUpcomingBlackouts(?\DateTimeInterface $now = null, int $limit = 5): array
+    {
+        $now ??= new \DateTime();
+        return $this->createQueryBuilder('bi')
+            ->select('bi', 'bs', 'r')
+            ->join('bi.series', 'bs')
+            ->join('bs.resource', 'r')
+            ->where('bi.endDate >= :now')
+            ->setParameter('now', $now)
+            ->orderBy('bi.startDate', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 
 

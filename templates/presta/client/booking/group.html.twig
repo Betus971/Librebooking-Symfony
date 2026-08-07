@@ -1,96 +1,191 @@
+{# templates/presta/client/booking/group.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.sessions_title'|trans({'%service%': service.libelle}) }}{% endblock %}
+{% block title %}Séances : {{ service.libelle }}{% endblock %}
+
+{% set moisFr = {'January':'janvier','February':'février','March':'mars','April':'avril','May':'mai','June':'juin','July':'juillet','August':'août','September':'septembre','October':'octobre','November':'novembre','December':'décembre'} %}
+{% set joursCourt = {'Mon':'Lun','Tue':'Mar','Wed':'Mer','Thu':'Jeu','Fri':'Ven','Sat':'Sam','Sun':'Dim'} %}
 
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    .gcal-week { display:grid; grid-template-columns:repeat(7,1fr); gap:.5rem; margin-top:1rem; }
-    .gcal-day { border:1px solid var(--fallback-b3,#ddd); border-radius:8px; padding:.5rem; min-height:120px; }
-    .gcal-day__head { text-align:center; font-weight:700; padding:.4rem; margin-bottom:.5rem; border-radius:4px; background:var(--fallback-b2,#f6f6f6); }
-    .gcal-day__head small { display:block; font-weight:400; opacity:.6; }
-    .gsession { border:1px solid #eee; border-left-width:4px; border-radius:6px; padding:.5rem; margin-bottom:.5rem; font-size:.8125rem; }
-    .gsession--free { border-left-color:#18753c; background:rgba(24,117,60,.10); }
-    .gsession--full { border-left-color:#ce0500; background:rgba(206,5,0,.10); }
-    .gsession__time { font-weight:600; }
-    .gcal-empty { text-align:center; opacity:.5; font-size:.8125rem; padding:1.25rem 0; }
-    @media (max-width:768px){ .gcal-week{ grid-template-columns:repeat(2,1fr);} }
-    @media (max-width:480px){ .gcal-week{ grid-template-columns:1fr;} }
+    .gcal-week { display:grid; grid-template-columns:repeat(7, 1fr); gap: 0.75rem; margin-top:1.5rem; }
+    .gcal-day {
+        border:1px solid hsl(var(--bc) / 0.1); border-radius: 0.75rem; padding: 0.75rem;
+        background: hsl(var(--b1)); min-height: 140px;
+        transition: box-shadow 0.2s;
+    }
+    .gcal-day:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .gcal-day__head {
+        text-align:center; font-weight:700; padding: 0.75rem; margin-bottom: 0.75rem; border-radius: 0.5rem;
+        background: hsl(var(--b2)); color: hsl(var(--bc));
+    }
+    .gcal-day__head small { display:block; font-weight:500; color: hsl(var(--bc) / 0.6); margin-top: 0.25rem; }
+    .gcal-day.is-today { border-color: hsl(var(--p)); border-width: 2px; }
+    .gcal-day.is-today .gcal-day__head { background: hsl(var(--p) / 0.1); color: hsl(var(--p)); }
+    .gcal-day.is-today .gcal-day__head small { color: hsl(var(--p)); }
+    
+    .gsession {
+        border:1px solid hsl(var(--bc) / 0.1); border-left-width: 4px;
+        border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background: hsl(var(--b1));
+    }
+    .gsession:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+    .gsession--free { border-left-color: hsl(var(--su)); background: hsl(var(--su) / 0.1); }
+    .gsession--full { border-left-color: hsl(var(--er)); background: hsl(var(--er) / 0.1); opacity: 0.7; }
+    .gsession__time { font-weight:700; color: hsl(var(--bc)); font-size: 0.9rem; }
+    .gsession__cap { font-size: 0.8rem; margin-top: 0.25rem; font-weight: 500; }
+    .gsession__cap--free { color: hsl(var(--su)); }
+    .gsession__cap--full { color: hsl(var(--er)); }
+    .gcal-empty { text-align:center; color: hsl(var(--bc) / 0.4); font-size: 0.85rem; padding: 2rem 0; font-style: italic; }
+    @media (max-width:1024px){ .gcal-week{ grid-template-columns:repeat(4,1fr); } }
+    @media (max-width:768px){ .gcal-week{ grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:480px){ .gcal-week{ grid-template-columns:1fr; } }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="max-w-5xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
-            <li><a href="{{ path('app_presta_client_prestataire_show', {'id': service.prestataire.id}) }}">{{ service.prestataire.prenom }} {{ service.prestataire.nom }}</a></li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_client_categorie_index') }}">Prendre rendez-vous</a></li>
             <li>{{ service.libelle }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-1">{{ 'presta.sessions_title'|trans({'%service%': service.libelle}) }}</h1>
-    <p class="text-base-content/60 mb-4">{{ 'presta.group_subtitle'|trans({'%min%': service.dureeMinutes, '%count%': service.capaciteMax}) }}</p>
+    <h1 class="text-3xl font-bold mb-2">Prochaines séances : {{ service.libelle }}</h1>
+    <p class="text-lg text-base-content/70 mb-8 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        {{ service.dureeMinutes }} min · séance de groupe (max {{ service.capaciteMax }} personnes)
+    </p>
 
-    <div role="tablist" class="tabs tabs-boxed w-fit mb-4">
-        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'list'}) }}" class="tab {{ view == 'list' ? 'tab-active' : '' }}">{{ 'presta.view_list'|trans }}</a>
-        <a role="tab" href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': currentWeekStart|date('Y-m-d')}) }}" class="tab {{ view == 'calendar' ? 'tab-active' : '' }}">{{ 'presta.view_calendar'|trans }}</a>
+    <div role="tablist" class="tabs tabs-boxed mb-8 inline-flex">
+        <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'list'}) }}" 
+           role="tab" 
+           class="tab {{ view == 'list' ? 'tab-active' : '' }}">Vue Liste</a>
+        <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': currentWeekStart|date('Y-m-d')}) }}" 
+           role="tab" 
+           class="tab {{ view == 'calendar' ? 'tab-active' : '' }}">Vue Calendrier</a>
     </div>
 
+    {# ============================== VUE LISTE ============================== #}
     {% if view == 'list' %}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for session in sessions %}
             {% set complet = session.nbInscrits >= service.capaciteMax %}
             {% set restantes = service.capaciteMax - session.nbInscrits %}
-            <div class="card bg-base-200 border border-base-300 shadow-sm">
+            <div class="card bg-base-100 shadow-md {{ complet ? 'opacity-70' : 'hover:-translate-y-1 hover:shadow-lg transition-all duration-200' }}">
                 <div class="card-body">
-                    <h2 class="card-title text-base">{{ session.dateDebut|format_datetime(pattern='EEE d MMMM', locale=app.request.locale)|capitalize }}</h2>
-                    <p class="font-semibold">{{ session.dateDebut|date('H:i') }} – {{ session.dateFin|date('H:i') }}</p>
-                    {% if complet %}<span class="badge badge-error badge-sm">{{ 'presta.full'|trans }}</span>{% else %}<span class="badge badge-success badge-sm">{{ 'presta.spots_left'|trans({'%count%': restantes}) }}</span>{% endif %}
-                    <div class="card-actions justify-end mt-2">
+                    <p class="font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {{ session.dateDebut|date('H:i') }} – {{ session.dateFin|date('H:i') }}
+                    </p>
+                    {% if complet %}
+                        <div class="badge badge-error gap-1 mb-2">Complet</div>
+                    {% else %}
+                        <div class="badge badge-success gap-1 mb-2">{{ restantes }} place{{ restantes > 1 ? 's' : '' }} dispo</div>
+                    {% endif %}
+                    <h3 class="card-title text-lg mt-2">
+                        {{ (joursCourt[session.dateDebut|date('D')] ?? session.dateDebut|date('D'))|capitalize }}
+                        {{ session.dateDebut|date('j') }} {{ moisFr[session.dateDebut|date('F')] ?? session.dateDebut|date('F') }}
+                    </h3>
+                    <div class="card-actions justify-end mt-4">
                         {% if complet %}
-                            <button class="btn btn-disabled btn-sm">{{ 'presta.session_full_btn'|trans }}</button>
+                            <button class="btn btn-disabled btn-sm">Séance complète</button>
                         {% else %}
-                            <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_register_session'|trans({'%date%': session.dateDebut|date('d/m/Y'), '%time%': session.dateDebut|date('H:i')})|e('js') }}');">
+                            <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" class="m-0"
+                                  onsubmit="return confirm('Confirmez-vous votre inscription à la séance du {{ session.dateDebut|date('d/m/Y') }} à {{ session.dateDebut|date('H:i') }} ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
-                                <button type="submit" class="btn btn-primary btn-sm">{{ 'presta.register'|trans }}</button>
+                                <button type="submit" class="btn btn-primary btn-sm gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    S'inscrire
+                                </button>
                             </form>
                         {% endif %}
                     </div>
                 </div>
             </div>
         {% else %}
-            <div class="md:col-span-3"><div class="alert alert-info"><span>{{ 'presta.no_session'|trans }}</span></div></div>
+            <div class="col-span-full">
+                <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Aucune séance n'est programmée pour le moment pour cette prestation.</span>
+                </div>
+            </div>
         {% endfor %}
     </div>
+
+    {# ============================ VUE CALENDRIER =========================== #}
     {% else %}
-    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
-        <div class="flex items-center justify-between mb-3">
-            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': prevWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_week'|trans }}</a>
-            <h2 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': currentWeekStart|date('d/m'), '%end%': (currentWeekStart|date_modify('+6 days'))|date('d/m/Y')}) }}</h2>
-            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': nextWeek|date('Y-m-d')}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_week'|trans }}</a>
+    <div>
+        <div class="flex items-center justify-between bg-base-200 p-4 rounded-xl mb-6">
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': prevWeek|date('Y-m-d')}) }}"
+               class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                Semaine précédente
+            </a>
+            
+            <h2 class="text-xl font-bold m-0 text-center">
+                Semaine du {{ currentWeekStart|date('j') }} {{ moisFr[currentWeekStart|date('F')] ?? currentWeekStart|date('F') }} {{ currentWeekStart|date('Y') }}
+            </h2>
+            
+            <a href="{{ path('app_presta_client_booking_group', {'id': service.id, 'view': 'calendar', 'week': nextWeek|date('Y-m-d')}) }}"
+               class="btn btn-outline btn-sm">
+                Semaine suivante
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
         </div>
-        <div class="gcal-week">
-            {% for day in daysOfWeek %}
-                <div class="gcal-day">
-                    <div class="gcal-day__head">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}<small>{{ day|date('d/m') }}</small></div>
-                    {% set daySessions = sessionsByDay[day|date('Y-m-d')] %}
-                    {% if daySessions|length > 0 %}{% for session in daySessions %}
-                        {% set complet = session.nbInscrits >= service.capaciteMax %}
-                        <div class="gsession {{ complet ? 'gsession--full' : 'gsession--free' }}">
-                            <div class="gsession__time">{{ session.dateDebut|date('H:i') }}–{{ session.dateFin|date('H:i') }}</div>
-                            <div class="text-xs">{% if complet %}{{ 'presta.full'|trans }}{% else %}{{ 'presta.spots'|trans({'%count%': service.capaciteMax - session.nbInscrits}) }}{% endif %}</div>
-                            {% if not complet %}
-                                <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_register'|trans|e('js') }}');" class="mt-1">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
-                                    <button type="submit" class="btn btn-primary btn-xs w-full">{{ 'presta.register'|trans }}</button>
-                                </form>
-                            {% endif %}
+
+        {# Légende #}
+        <div class="flex gap-4 mb-4 text-sm items-center">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-success"></span> Places dispo</div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-error"></span> Complet</div>
+        </div>
+
+        {% set hasSessions = false %}
+        {% for daySessions in sessionsByDay %}{% if daySessions|length > 0 %}{% set hasSessions = true %}{% endif %}{% endfor %}
+
+        {% if not hasSessions %}
+            <div class="alert alert-info mt-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Aucune séance programmée cette semaine. Essayez une autre semaine.</span>
+            </div>
+        {% else %}
+            <div class="gcal-week">
+                {% for day in daysOfWeek %}
+                    <div class="gcal-day">
+                        <div class="gcal-day__head">
+                            {{ joursCourt[day|date('D')] ?? day|date('D') }}
+                            <small>{{ day|date('d/m') }}</small>
                         </div>
-                    {% endfor %}{% else %}<div class="gcal-empty">—</div>{% endif %}
-                </div>
-            {% endfor %}
-        </div>
+
+                        {% set daySessions = sessionsByDay[day|date('Y-m-d')] %}
+                        {% if daySessions|length > 0 %}
+                            {% for session in daySessions %}
+                                {% set complet = session.nbInscrits >= service.capaciteMax %}
+                                <div class="gsession {{ complet ? 'gsession--full' : 'gsession--free' }}">
+                                    <div class="gsession__time">{{ session.dateDebut|date('H:i') }}–{{ session.dateFin|date('H:i') }}</div>
+                                    <div class="gsession__cap {{ complet ? 'gsession__cap--full' : 'gsession__cap--free' }}">
+                                        {% if complet %}Complet{% else %}{{ service.capaciteMax - session.nbInscrits }} place(s){% endif %}
+                                    </div>
+                                    {% if not complet %}
+                                        <form method="post" action="{{ path('app_presta_client_booking_group_book', {'id': session.id}) }}" class="mt-2"
+                                              onsubmit="return confirm('Confirmez-vous votre inscription à cette séance ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('book_session' ~ session.id) }}">
+                                            <button type="submit" class="btn btn-xs btn-primary w-full">S'inscrire</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="gcal-empty">—</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
     {% endif %}
 </div>

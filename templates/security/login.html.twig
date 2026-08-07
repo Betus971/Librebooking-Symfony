@@ -3,6 +3,19 @@
 {% block title %}{{ 'login.title'|trans }} - Librebooking{% endblock %}
 
 {% block body %}
+{% if 'demo' in app.request.host %}
+    {% set isFr = app.request.locale == 'fr' %}
+    <div class="max-w-2xl mx-auto mb-8">
+        <div class="alert alert-info shadow-sm flex-col items-start gap-1 text-sm">
+            <p class="font-bold">{{ isFr ? 'Démo publique de Librebooking.' : 'Public demo of Librebooking.' }}</p>
+            <p>{{ isFr ? "N'entrez pas de données personnelles ou sensibles." : 'Please do not enter personal or sensitive data.' }}</p>
+            <ul class="mt-2 space-y-1">
+                <li><span class="font-semibold">{{ isFr ? 'Accès admin' : 'Admin login' }} :</span> <code>admin@example.com</code> / <code>admin</code></li>
+                <li><span class="font-semibold">{{ isFr ? 'Accès utilisateur' : 'User login' }} :</span> <code>user@example.com</code> / <code>user</code></li>
+            </ul>
+        </div>
+    </div>
+{% endif %}
 <div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div class="flex justify-center mb-6">

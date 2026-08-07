@@ -30,15 +30,21 @@ class ResourceGroup
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'resourceGroups')]
     private Collection $users;
 
+    /**
+     * Administrateurs DÉSIGNÉS de ce groupe : personnes autorisées à gérer le
+     * groupe lui-même (membres, ressources) sans être super-admin.
+     *
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'resource_group_admin')]
+    private Collection $admins;
+
     public function __construct()
     {
         $this->resources = new ArrayCollection();
         $this->users = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        return $this->name ?? '';
+        $this->admins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -114,5 +120,34 @@ class ResourceGroup
         $this->users->removeElement($user);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getAdmins(): Collection
+    {
+        return $this->admins;
+    }
+
+    public function addAdmin(User $user): static
+    {
+        if (!$this->admins->contains($user)) {
+            $this->admins->add($user);
+        }
+
+        return $this;
+    }
+
+    public function removeAdmin(User $user): static
+    {
+        $this->admins->removeElement($user);
+
+        return $this;
+    }
+
+    public function isAdministeredBy(User $user): bool
+    {
+        return $this->admins->contains($user);
     }
 }

@@ -1,10 +1,12 @@
 <?php
-
 namespace App\Presta\Entity;
 
+use App\Presta\Repository\ServiceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ServiceRepository::class)]
 #[ORM\Table(name: 'presta_service')]
 class Service
 {
@@ -37,6 +39,27 @@ class Service
 
     #[ORM\Column(options: ['default' => true])]
     private bool $isActive = true;
+
+    /**
+     * Approbation requise : si vrai, une réservation de cette prestation est
+     * créée « en attente » (PENDING) et doit être validée par le prestataire
+     * avant d'être confirmée. Sinon, la réservation est confirmée immédiatement.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $requiresApproval = false;
+
+    /**
+     * Couleur d'affichage de la prestation dans l'agenda (hex, ex. « #6E445A »),
+     * choisie par le prestataire dans la palette DSFR. NULL = couleur par défaut.
+     */
+    #[ORM\Column(length: 7, nullable: true)]
+    private ?string $couleur = null;
+
+    // Catégorie (TIR, CCPM, Coiffure…) créée par le super-admin. Nullable pour
+    // les prestations existantes ; on rend le champ requis côté formulaire.
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?PrestaCategorie $categorie = null;
 
     public function getId(): ?int
     {
@@ -95,7 +118,7 @@ class Service
     public function setType(string $type): static
     {
         if (!in_array($type, [self::TYPE_INDIVIDUEL, self::TYPE_GROUPE])) {
-            throw new \InvalidArgumentException('Invalid type');
+            throw new \InvalidArgumentException("Invalid type");
         }
         $this->type = $type;
         return $this;
@@ -121,5 +144,44 @@ class Service
     {
         $this->isActive = $isActive;
         return $this;
+    }
+
+    public function getCategorie(): ?PrestaCategorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?PrestaCategorie $categorie): static
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function isRequiresApproval(): bool
+    {
+        return $this->requiresApproval;
+    }
+
+    public function setRequiresApproval(bool $requiresApproval): static
+    {
+        $this->requiresApproval = $requiresApproval;
+        return $this;
+    }
+
+    public function getCouleur(): ?string
+    {
+        return $this->couleur;
+    }
+
+    public function setCouleur(?string $couleur): static
+    {
+        $this->couleur = $couleur;
+        return $this;
+    }
+
+    /** Couleur d'affichage effective (couleur choisie ou défaut Bleu France). */
+    public function getCouleurAffichage(): string
+    {
+        return $this->couleur ?: '#000091';
     }
 }

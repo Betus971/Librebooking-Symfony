@@ -94,7 +94,10 @@ class ReservationWorkflow
         if (in_array($action, ['approve', 'reject'], true)) {
             $now = new \DateTimeImmutable();
 
-            if (!$this->instances->hasUpcoming($series, $now)) {
+            // Requête encapsulée dans le repository (RF-4).
+            $hasUpcoming = $this->instances->hasUpcoming($series, $now);
+
+            if (!$hasUpcoming) {
                 throw new \DomainException('Action impossible : la réservation est déjà passée.');
             }
         }
@@ -103,15 +106,25 @@ class ReservationWorkflow
         if (!$this->can($action, $series)) {
             throw new \DomainException(match ($action) {
                 'approve' => "Action impossible : la réservation n'est pas en attente.",
-                'reject'  => 'Action impossible : seule une réservation en attente peut être refusée.',
+                'reject'  => "Action impossible : seule une réservation en attente peut être refusée.",
                 'cancel'  => "Action impossible : statut incompatible avec l'annulation.",
                 default   => "Transition interdite: $action",
             });
         }
 
         // 3) Règle spécifique : approve ne s'applique que si la ressource l'exige
-        if ($action === 'approve' && !$this->seriesRepo->requiresApproval($series)) {
+        if ($action === 'approve' && !$this->seriesRequiresApproval($series)) {
             throw new \DomainException("Cette réservation n'exige pas d'approbation.");
         }
+    }
+
+    /**
+     * Une série requiert une approbation si au moins une ressource liée
+     * a `requires_approval = true`.
+     */
+    private function seriesRequiresApproval(ReservationSeries $series): bool
+    {
+        // Requête encapsulée dans le repository (RF-5).
+        return $this->seriesRepo->requiresApproval($series);
     }
 }

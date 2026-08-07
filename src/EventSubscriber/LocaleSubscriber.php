@@ -8,6 +8,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
+    /** Locales autorisées (liste blanche, doit rester alignée avec framework.enabled_locales). */
+    private const SUPPORTED_LOCALES = ['fr', 'en'];
+
     private string $defaultLocale;
 
     public function __construct(string $defaultLocale = 'fr')
@@ -22,8 +25,9 @@ class LocaleSubscriber implements EventSubscriberInterface
             return;
         }
 
-        // if the user provided _locale via query parameter, set it in session
-        if ($locale = $request->query->get('_locale')) {
+        // Si l'utilisateur fournit _locale en query, on ne l'accepte que si elle est autorisée.
+        $locale = $request->query->get('_locale');
+        if ($locale && \in_array($locale, self::SUPPORTED_LOCALES, true)) {
             $request->getSession()->set('_locale', $locale);
         }
 

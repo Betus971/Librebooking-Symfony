@@ -24,6 +24,8 @@ security:
                 check_path: app_login
                 enable_csrf: true
                 csrf_token_id: authenticate
+                username_parameter: email
+                password_parameter: password
             logout:
                 path: app_logout
 

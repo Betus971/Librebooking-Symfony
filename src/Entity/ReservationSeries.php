@@ -1,20 +1,21 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\ReservationSeriesRepository;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: ReservationSeriesRepository::class)]
+#[ORM\Entity (repositoryClass: ReservationSeriesRepository::class)]
 #[ORM\Table(name: 'reservation_series')]
 class ReservationSeries
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\Column( type: 'integer', options: ['unsigned' => true])]
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
@@ -26,6 +27,22 @@ class ReservationSeries
 
     #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     private ?string $description = null;
+
+    // Nombre de participants annoncé pour la réservation. Obligatoire seulement
+    // pour les ressources qui l'exigent (amphis/salles) ; null pour le matériel.
+    #[ORM\Column(name: 'nombre_participants', type: 'integer', nullable: true, options: ['unsigned' => true])]
+    private ?int $nombreParticipants = null;
+
+    public function getNombreParticipants(): ?int
+    {
+        return $this->nombreParticipants;
+    }
+
+    public function setNombreParticipants(?int $nombreParticipants): static
+    {
+        $this->nombreParticipants = $nombreParticipants;
+        return $this;
+    }
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'owner_id', nullable: false, onDelete: 'CASCADE')]
@@ -72,6 +89,15 @@ class ReservationSeries
     #[ORM\OneToMany(targetEntity: ReservationAttachment::class, mappedBy: 'series')]
     private Collection $reservationAttachments;
 
+    /**
+     * Accessoires (matériel mobile) demandés pour cette réservation, avec la
+     * quantité pour chacun. Permet au gestionnaire de savoir quoi préparer.
+     *
+     * @var Collection<int, ReservationAccessoire>
+     */
+    #[ORM\OneToMany(mappedBy: 'series', targetEntity: ReservationAccessoire::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $reservationAccessoires;
+
     public function __construct()
     {
         $this->uuid = Uuid::v4();
@@ -81,11 +107,7 @@ class ReservationSeries
         $this->dateCreated = $now;
         $this->lastModified = $now;
         $this->reservationAttachments = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        return $this->title ?? '#' . ($this->id ?? '?');
+        $this->reservationAccessoires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -313,6 +335,31 @@ class ReservationSeries
     }
 
     /**
+     * Retourne la dernière instance déjà passée (la plus récente parmi celles
+     * dont la date de début est <= maintenant). Utile sur l'écran « Mes
+     * réservations » pour afficher quand a eu lieu une résa terminée plutôt
+     * qu'un label générique « Terminée / Passée ».
+     */
+    public function getLastReservation(): ?ReservationInstance
+    {
+        $now = new \DateTime();
+        $bestCandidate = null;
+
+        foreach ($this->instances as $instance) {
+            $date = $instance->getStartDate();
+
+            if ($date <= $now) {
+                // Garder la plus RÉCENTE (date la plus proche de maintenant)
+                if ($bestCandidate === null || $date > $bestCandidate->getStartDate()) {
+                    $bestCandidate = $instance;
+                }
+            }
+        }
+
+        return $bestCandidate;
+    }
+
+    /**
      * @return Collection<int, ReservationAttachment>
      */
     public function getReservationAttachments(): Collection
@@ -352,6 +399,41 @@ class ReservationSeries
         $this->legacyid = $legacyid;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ReservationAccessoire>
+     */
+    public function getReservationAccessoires(): Collection
+    {
+        return $this->reservationAccessoires;
+    }
+
+    public function addReservationAccessoire(ReservationAccessoire $reservationAccessoire): static
+    {
+        if (!$this->reservationAccessoires->contains($reservationAccessoire)) {
+            $this->reservationAccessoires->add($reservationAccessoire);
+            $reservationAccessoire->setSeries($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservationAccessoire(ReservationAccessoire $reservationAccessoire): static
+    {
+        if ($this->reservationAccessoires->removeElement($reservationAccessoire)) {
+            if ($reservationAccessoire->getSeries() === $this) {
+                $reservationAccessoire->setSeries(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** Y a-t-il au moins un accessoire demandé ? (affichage conditionnel) */
+    public function hasAccessoires(): bool
+    {
+        return !$this->reservationAccessoires->isEmpty();
     }
 
 }

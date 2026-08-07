@@ -1,56 +1,122 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.my_availability'|trans }}{% endblock %}
+{% block title %}Mes disponibilités types{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
-    <div class="text-sm breadcrumbs mb-6">
+<div class="container mx-auto px-4 mt-8 mb-16">
+    <div class="breadcrumbs text-sm mb-6" aria-label="vous êtes ici :">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li>{{ 'presta.availability_breadcrumb'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><span aria-current="page">Disponibilités</span></li>
         </ul>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <aside class="md:col-span-1">{{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'schedule' }) }}</aside>
+        <div class="md:col-span-1">
+            {{ include('presta/provider/_sidemenu.html.twig', { current_menu: 'schedule' }) }}
+        </div>
         <div class="md:col-span-3">
-            <div class="flex items-center justify-between mb-2">
-                <h1 class="text-2xl font-bold">{{ 'presta.my_week'|trans }}</h1>
-                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-primary btn-sm">{{ 'presta.add_slot'|trans }}</a>
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold">Ma semaine type (Disponibilités)</h1>
+                    <p class="text-sm opacity-70 mt-2">Définissez vos horaires d'ouverture récurrents pour les prestations de type "Individuel".</p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-2">
+                        {% if plages|length > 0 %}
+                            <form method="post" action="{{ path('app_presta_provider_schedule_delete_all') }}"
+                                  onsubmit="return confirm('Supprimer TOUTES vos plages horaires ({{ plages|length }}) ? Cette action est irréversible.');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_all_plages') }}">
+                                <button type="submit" class="btn btn-outline btn-error">
+                                    <i class="fr-icon-delete-line mr-2"></i> Tout supprimer
+                                </button>
+                            </form>
+                        {% endif %}
+                        <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-primary">
+                            <i class="fr-icon-add-line mr-2"></i> Ajouter une plage horaire
+                        </a>
+                    </div>
+                </div>
             </div>
-            <p class="text-sm text-base-content/60 mb-4">{{ 'presta.availability_subtitle'|trans }}</p>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="table">
-                        <thead><tr><th>{{ 'presta.th_day'|trans }}</th><th>{{ 'presta.th_start'|trans }}</th><th>{{ 'presta.th_end'|trans }}</th><th class="text-right">{{ 'common.actions'|trans }}</th></tr></thead>
-                        <tbody>
-                        {% set jourKeys = {1:'monday',2:'tuesday',3:'wednesday',4:'thursday',5:'friday',6:'saturday',7:'sunday'} %}
-                        {% for plage in plages %}
-                            <tr>
-                                <td class="font-semibold">{{ ('common.weekday.' ~ jourKeys[plage.jourSemaine])|trans }}</td>
-                                <td>{{ plage.heureDebut|date('H:i') }}</td>
-                                <td>{{ plage.heureFin|date('H:i') }}</td>
-                                <td class="text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ path('app_presta_provider_schedule_edit', {'id': plage.id}) }}" class="btn btn-ghost btn-xs" title="{{ 'common.edit'|trans }}">✎</a>
-                                        <form method="post" action="{{ path('app_presta_provider_schedule_delete', {'id': plage.id}) }}" onsubmit="return confirm('{{ 'presta.confirm_delete_slot'|trans|e('js') }}');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ plage.id) }}">
-                                            <button class="btn btn-ghost btn-xs text-error" title="{{ 'common.delete'|trans }}">🗑</button>
-                                        </form>
-                                    </div>
-                                </td>
+            {% set jours = {1: 'Lundi', 2: 'Mardi', 3: 'Mercredi', 4: 'Jeudi', 5: 'Vendredi', 6: 'Samedi', 7: 'Dimanche'} %}
+
+            {% if plages|length > 0 %}
+                {# Colonnes = plages horaires distinctes, triées #}
+                {% set slotKeys = [] %}
+                {% set slotLabel = {} %}
+                {% for p in plages %}
+                    {% set key = p.heureDebut|date('H:i') ~ '-' ~ p.heureFin|date('H:i') %}
+                    {% if key not in slotKeys %}
+                        {% set slotKeys = slotKeys|merge([key]) %}
+                        {% set slotLabel = slotLabel|merge({ (key): p.heureDebut|date('H:i') ~ '–' ~ p.heureFin|date('H:i') }) %}
+                    {% endif %}
+                {% endfor %}
+                {% set slotKeys = slotKeys|sort %}
+
+                {# Map "jour|plage" -> id de la plage (pour lien d'édition) #}
+                {% set cellId = {} %}
+                {% for p in plages %}
+                    {% set key = p.heureDebut|date('H:i') ~ '-' ~ p.heureFin|date('H:i') %}
+                    {% set cellId = cellId|merge({ (p.jourSemaine ~ '|' ~ key): p.id }) %}
+                {% endfor %}
+
+                <div class="overflow-x-auto bg-base-100 rounded-box shadow">
+                    <table class="table w-full">
+                        <thead>
+                            <tr class="bg-base-200">
+                                <th>Jour \ Plage</th>
+                                {% for key in slotKeys %}<th class="text-center">{{ slotLabel[key] }}</th>{% endfor %}
                             </tr>
-                        {% else %}
-                            <tr><td colspan="4" class="text-center py-8 text-base-content/60">
-                                {{ 'presta.no_slot_defined'|trans }}<br>
-                                <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-sm btn-primary mt-3">{{ 'presta.add_my_hours'|trans }}</a>
-                            </td></tr>
+                        </thead>
+                        <tbody>
+                        {% for d in 1..7 %}
+                            <tr>
+                                <th class="font-semibold bg-base-200/50">{{ jours[d] }}</th>
+                                {% for key in slotKeys %}
+                                    {% set id = cellId[d ~ '|' ~ key]|default(null) %}
+                                    {% if id %}
+                                        <td class="text-center bg-success/10 hover:bg-success/20 transition-colors">
+                                            <a href="{{ path('app_presta_provider_schedule_edit', {'id': id}) }}" title="Ouvert — modifier cette plage" aria-label="Ouvert, modifier" class="text-success flex items-center justify-center w-full h-full p-2">
+                                                <i class="fr-icon-check-line text-xl" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                    {% else %}
+                                        {# Case blanche = plage fermée → clic pour la RÉACTIVER #}
+                                        {% set parts = key|split('-') %}
+                                        <td class="text-center bg-base-100 hover:bg-base-200 transition-colors p-0">
+                                            <form method="post" action="{{ path('app_presta_provider_schedule_activate') }}" class="m-0 h-full w-full">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('activate_plage') }}">
+                                                <input type="hidden" name="jour" value="{{ d }}">
+                                                <input type="hidden" name="start" value="{{ parts[0] }}">
+                                                <input type="hidden" name="end" value="{{ parts[1] }}">
+                                                <button type="submit" title="Fermé — cliquer pour réactiver cette plage" aria-label="Réactiver cette plage"
+                                                        class="w-full h-full min-h-[3rem] bg-transparent border-none cursor-pointer text-base-content/30 hover:text-base-content/60 text-xl font-bold flex items-center justify-center">
+                                                    +
+                                                </button>
+                                            </form>
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div>
+            {% else %}
+                <div class="alert alert-info shadow-lg mt-4">
+                    <div>
+                        <i class="fr-icon-information-line text-2xl"></i>
+                        <div>
+                            <h3 class="font-bold">Aucune plage horaire définie</h3>
+                            <div class="text-sm">Ajoutez vos horaires d'ouverture pour que les clients puissent réserver.</div>
+                        </div>
+                    </div>
+                    <div class="flex-none">
+                        <a href="{{ path('app_presta_provider_schedule_new') }}" class="btn btn-sm btn-primary">Ajouter mes horaires</a>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

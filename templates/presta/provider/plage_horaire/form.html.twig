@@ -1,31 +1,120 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }} {{ 'presta.a_slot'|trans }}{% endblock %}
+{% block title %}{{ is_edit ? 'Modifier' : 'Ajouter' }} une plage horaire{% endblock %}
 
 {% block body %}
-<div class="max-w-xl mx-auto">
-    <div class="text-sm breadcrumbs mb-6">
+<div class="container mx-auto px-4 mt-8 mb-16">
+    <div class="breadcrumbs text-sm mb-6" aria-label="vous êtes ici :">
         <ul>
-            <li><a href="{{ path('app_presta_provider_schedule_index') }}">{{ 'presta.my_availability'|trans }}</a></li>
-            <li>{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }}</li>
+            <li><a href="{{ path('app_presta_provider_schedule_index') }}">Mes disponibilités</a></li>
+            <li><span aria-current="page">{{ is_edit ? 'Modifier' : 'Ajouter' }}</span></li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4">{{ is_edit ? 'presta.edit_word'|trans : 'presta.add_word'|trans }} {{ 'presta.a_slot'|trans }}</h1>
+    <div class="flex justify-center">
+        <div class="w-full md:w-3/4 lg:w-2/3">
 
-    <div class="card bg-base-100 border border-base-300 shadow-sm">
-        <div class="card-body">
-            {{ form_start(form) }}
-            {{ form_row(form.jourSemaine, {attr:{class:'select select-bordered w-full'}}) }}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>{{ form_row(form.heureDebut, {attr:{class:'input input-bordered w-full'}}) }}</div>
-                <div>{{ form_row(form.heureFin, {attr:{class:'input input-bordered w-full'}}) }}</div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                <div>
+                    <h1 class="text-2xl font-bold mb-0">{{ is_edit ? 'Modifier' : 'Ajouter' }} une plage horaire</h1>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-outline btn-sm">
+                        <i class="fr-icon-arrow-left-line mr-2"></i> Retour
+                    </a>
+                </div>
             </div>
-            <div class="flex gap-3 mt-4">
-                <button type="submit" class="btn btn-primary">{{ is_edit ? 'common.save'|trans : 'common.create'|trans }}</button>
-                <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-ghost">{{ 'common.cancel'|trans }}</a>
+            <p class="text-sm opacity-70 mb-8">
+                Définissez une plage d'ouverture récurrente pour les prestations de type « Individuel ».
+            </p>
+
+            <div class="bg-base-200 p-8 rounded-box shadow-sm">
+                {{ form_start(form) }}
+
+                {# ── Jour(s) ─────────────────────────────────────────── #}
+                <h2 class="text-lg font-semibold mb-4">{{ is_edit ? 'Jour' : 'Jours concernés' }}</h2>
+
+                {% if is_edit %}
+                    <div class="form-control w-full mb-4">
+                        {{ form_row(form.jourSemaine) }}
+                    </div>
+                {% else %}
+                    <p class="text-sm opacity-70 mb-4">
+                        Cochez tous les jours auxquels s'applique cette plage horaire.
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% for child in form.joursSemaine %}
+                            <div class="form-control">
+                                <label class="label cursor-pointer justify-start gap-3">
+                                    {{ form_widget(child, {'attr': {'class': 'checkbox checkbox-primary checkbox-sm'}}) }}
+                                    <span class="label-text">{{ form_label(child) }}</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.joursSemaine.vars.errors|length > 0 %}
+                        <div class="alert alert-error mt-4 shadow-sm text-sm p-3">
+                            {{ form_errors(form.joursSemaine) }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="divider my-6"></div>
+
+                {# ── Horaires ────────────────────────────────────────── #}
+                <h2 class="text-lg font-semibold mb-4">Horaires</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control w-full">
+                        {{ form_row(form.heureDebut) }}
+                    </div>
+                    <div class="form-control w-full">
+                        {{ form_row(form.heureFin) }}
+                    </div>
+                </div>
+
+                <div class="divider my-6"></div>
+
+                {# ── Période de validité (optionnel) ─────────────────── #}
+                <h2 class="text-lg font-semibold mb-2">Période de validité <span class="text-sm opacity-60 font-normal">(optionnel)</span></h2>
+                <p class="text-sm opacity-70 mb-4">
+                    Laissez vide pour une plage récurrente permanente. Renseignez des dates pour
+                    limiter la plage à une période précise (remplacement, planning temporaire…).
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control w-full">
+                        {{ form_row(form.dateDebut) }}
+                    </div>
+                    <div class="form-control w-full">
+                        {{ form_row(form.dateFin) }}
+                    </div>
+                </div>
+
+                {# ── Actions ─────────────────────────────────────────── #}
+                <div class="flex flex-wrap gap-4 mt-8">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fr-icon-checkbox-circle-line mr-2"></i> {{ is_edit ? 'Enregistrer (ouvert)' : 'Créer' }}
+                    </button>
+                    <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-ghost">Annuler</a>
+                </div>
+
+                {{ form_end(form) }}
+
+                {# ── Bloquer le créneau (= supprimer la plage) ──────────── #}
+                {% if is_edit %}
+                <div class="divider my-8"></div>
+                <p class="text-sm opacity-70 mb-4">
+                    Vous ne souhaitez plus ouvrir ce créneau ? Bloquez-le : il disparaîtra de votre semaine type.
+                </p>
+                <form method="post"
+                      action="{{ path('app_presta_provider_schedule_delete', {'id': plage.id}) }}"
+                      onsubmit="return confirm('Bloquer ce créneau ? La plage sera retirée de votre semaine type.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ plage.id) }}">
+                    <button type="submit" class="btn btn-outline btn-error">
+                        <i class="fr-icon-close-circle-line mr-2"></i> Bloquer ce créneau
+                    </button>
+                </form>
+                {% endif %}
             </div>
-            {{ form_end(form) }}
         </div>
     </div>
 </div>

@@ -1,33 +1,51 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.directory_title'|trans }}{% endblock %}
+{% block title %}Annuaire des professionnels{% endblock %}
 
 {% block body %}
-<div class="max-w-6xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_dashboard') }}">{{ 'presta.home'|trans }}</a></li>
-            <li>{{ 'presta.book_appointment'|trans }}</li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li>Prendre rendez-vous</li>
         </ul>
     </div>
 
-    <h1 class="text-3xl font-extrabold mb-2">{{ 'presta.directory_title'|trans }}</h1>
-    <p class="text-base-content/60 mb-6">{{ 'presta.directory_subtitle'|trans }}</p>
+    <h1 class="text-3xl font-bold mb-4">Annuaire des professionnels</h1>
+    <p class="text-lg text-base-content/70 mb-8">Sélectionnez le professionnel ou le service de votre choix pour prendre rendez-vous.</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for presta in prestataires %}
-            <a href="{{ path('app_presta_client_prestataire_show', {'id': presta.id}) }}" class="card bg-base-100 border border-base-300 shadow-sm hover:border-primary/40 transition-all overflow-hidden">
+            <div class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow duration-300">
                 {% if presta.photo %}
-                    <figure class="h-40"><img src="{{ presta.photo }}" alt="{{ presta.prenom }} {{ presta.nom }}" class="w-full h-full object-cover"></figure>
+                    <figure>
+                        <img src="{{ presta.photo }}" alt="Photo de {{ presta.prenom }} {{ presta.nom }}" class="w-full h-48 object-cover" />
+                    </figure>
                 {% endif %}
                 <div class="card-body">
-                    <h3 class="card-title text-primary">{{ presta.prenom }} {{ presta.nom }}</h3>
-                    <p class="text-sm text-base-content/70 line-clamp-3">{{ presta.description|default('presta.no_description'|trans) }}</p>
-                    <div class="card-actions justify-end mt-2"><span class="text-sm text-primary font-medium">{{ 'presta.see_services'|trans }}</span></div>
+                    <h3 class="card-title">
+                        <a href="{{ path('app_presta_client_prestataire_show', {'id': presta.id}) }}" class="hover:text-primary transition-colors">
+                            {{ presta.prenom }} {{ presta.nom }}
+                        </a>
+                    </h3>
+                    <p class="text-base-content/70 my-2">{{ presta.description|default('Aucune description disponible.') }}</p>
+                    <div class="card-actions justify-end mt-4">
+                        <a href="{{ path('app_presta_client_prestataire_show', {'id': presta.id}) }}" class="btn btn-primary btn-sm gap-2">
+                            Voir les prestations
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
-            </a>
+            </div>
         {% else %}
-            <div class="md:col-span-3"><div class="alert alert-info"><span>{{ 'presta.no_provider'|trans }}</span></div></div>
+            <div class="col-span-full">
+                <div class="alert alert-info shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Aucun prestataire n'est enregistré pour le moment.</span>
+                </div>
+            </div>
         {% endfor %}
     </div>
 </div>

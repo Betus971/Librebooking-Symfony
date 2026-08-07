@@ -3,8 +3,8 @@
 namespace App\Presta\Controller\Client;
 
 use App\Presta\Entity\Prestataire;
-use App\Presta\Entity\Service;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Presta\Repository\PrestataireRepository;
+use App\Presta\Repository\ServiceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,32 +13,23 @@ use Symfony\Component\Routing\Annotation\Route;
 class PrestataireController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(EntityManagerInterface $em): Response
+    public function index(PrestataireRepository $prestataires): Response
     {
-        // On récupère tous les prestataires ACTIFS pour l'annuaire
-        $prestataires = $em->getRepository(Prestataire::class)->findBy(['isActive' => true]);
-
         return $this->render('presta/client/prestataire/index.html.twig', [
-            'prestataires' => $prestataires,
+            'prestataires' => $prestataires->findActive(),
         ]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Prestataire $prestataire, EntityManagerInterface $em): Response
+    public function show(Prestataire $prestataire, ServiceRepository $services): Response
     {
         if (!$prestataire->isActive()) {
             throw $this->createNotFoundException('Ce prestataire est actuellement inactif.');
         }
 
-        // On récupère les services ACTIFS du prestataire
-        $services = $em->getRepository(Service::class)->findBy([
-            'prestataire' => $prestataire,
-            'isActive' => true,
-        ]);
-
         return $this->render('presta/client/prestataire/show.html.twig', [
             'prestataire' => $prestataire,
-            'services' => $services,
+            'services' => $services->findActiveByPrestataire($prestataire),
         ]);
     }
 }

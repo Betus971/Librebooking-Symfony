@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Déclarer une absence{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 my-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="breadcrumbs text-sm mb-8">
+            <ul>
+                <li><a href="{{ path('app_presta_provider_profile_edit') }}">Espace Prestataire</a></li>
+                <li><a href="{{ path('app_presta_provider_absence_index') }}">Mes Indisponibilités</a></li>
+                <li><span class="text-base-content/70">Déclarer</span></li>
+            </ul>
+        </div>
+
+        <h1 class="text-3xl font-bold mb-8">Déclarer une absence ou un congé</h1>
+
+        <div class="alert alert-warning mb-8 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <div>
+                <p>
+                    Les créneaux de cette période seront automatiquement retirés des propositions de rendez-vous individuels pour les clients. 
+                    <br>
+                    <strong>Attention :</strong> Cela n'annule pas automatiquement les séances de groupe déjà programmées ni les rendez-vous existants sur cette période.
+                </p>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-xl border border-base-200">
+            <div class="card-body">
+                {{ form_start(form) }}
+                    <div class="form-control w-full mb-4">
+                        {{ form_label(form.dateDebut, null, { 'label_attr': {'class': 'label-text font-medium mb-1 block'} }) }}
+                        {{ form_widget(form.dateDebut, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        <div class="text-error text-sm mt-1">
+                            {{ form_errors(form.dateDebut) }}
+                        </div>
+                    </div>
+
+                    <div class="form-control w-full mb-4">
+                        {{ form_label(form.dateFin, null, { 'label_attr': {'class': 'label-text font-medium mb-1 block'} }) }}
+                        {{ form_widget(form.dateFin, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        <div class="text-error text-sm mt-1">
+                            {{ form_errors(form.dateFin) }}
+                        </div>
+                    </div>
+
+                    <div class="form-control w-full mb-6">
+                        {{ form_label(form.motif, null, { 'label_attr': {'class': 'label-text font-medium mb-1 block'} }) }}
+                        {{ form_widget(form.motif, {'attr': {'class': 'input input-bordered w-full'}}) }}
+                        <div class="text-error text-sm mt-1">
+                            {{ form_errors(form.motif) }}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 mt-8">
+                        <button type="submit" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            Enregistrer l'absence
+                        </button>
+                        <a href="{{ path('app_presta_provider_absence_index') }}" class="btn btn-ghost">
+                            Annuler
+                        </a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

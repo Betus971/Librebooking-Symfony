@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Resource;
 use App\Entity\ResourceGroup;
+use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -17,7 +18,7 @@ class ResourceGroupType extends AbstractType
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom de l\'équipe (ex: Logistique, Amphi...)',
-                'attr' => ['class' => 'fr-input'],
+                'attr' => ['class' => 'fr-input']
             ])
 
             ->add('resources', EntityType::class, [
@@ -28,9 +29,12 @@ class ResourceGroupType extends AbstractType
                 'required' => false,      // Ce n'est pas obligatoire d'affecter des salles tout de suite
                 'label' => 'Salles / Véhicules gérés par cette équipe',
                 'by_reference' => false,  // ⚠️ TRÈS IMPORTANT : Force Doctrine à utiliser addResource() pour bien lier la salle !
-                'attr' => ['class' => 'fr-checkbox-group fr-mt-3w'],
+                'attr' => ['class' => 'fr-checkbox-group fr-mt-3w']
             ])
-        ;
+            // NB : les MEMBRES de l'équipe ne sont pas gérés ici (une liste de
+            // cases à cocher ne passe pas à l'échelle, ex. 1000 agents). Ils sont
+            // gérés par un widget de recherche + ajout dans le template, et
+            // synchronisés dans ResourceGroupController via le champ member_ids[].
         ;
     }
 

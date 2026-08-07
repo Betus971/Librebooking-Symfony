@@ -1,102 +1,255 @@
+{# templates/presta/client/booking/individual.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'presta.book_appointment'|trans }} : {{ service.libelle }}{% endblock %}
+{% block title %}Rendez-vous : {{ service.libelle }}{% endblock %}
 
+{% set joursFr = {'Monday':'lundi','Tuesday':'mardi','Wednesday':'mercredi','Thursday':'jeudi','Friday':'vendredi','Saturday':'samedi','Sunday':'dimanche'} %}
+{% set joursCourt = {'Mon':'Lun','Tue':'Mar','Wed':'Mer','Thu':'Jeu','Fri':'Ven','Sat':'Sam','Sun':'Dim'} %}
+{% set moisFr = {'January':'janvier','February':'février','March':'mars','April':'avril','May':'mai','June':'juin','July':'juillet','August':'août','September':'septembre','October':'octobre','November':'novembre','December':'décembre'} %}
+
+{# Une pastille = un créneau réellement disponible (cliquable). #}
 {% macro slot(c, service, jourLabel) %}
-    <form method="post" action="{{ path('app_presta_client_booking_individual_book', {'id': service.id}) }}" class="slot"
-          onsubmit="return confirm('{{ 'presta.confirm_appointment'|trans({'%time%': c.start|date('H:i')})|e('js') }}');">
+    <form method="post"
+          action="{{ path('app_presta_client_booking_individual_book', {'id': service.id}) }}"
+          class="slot"
+          onsubmit="return confirm('Confirmez-vous ce rendez-vous{{ jourLabel ? ' ' ~ jourLabel : '' }} à {{ c.start|date('H:i') }} ?');">
         <input type="hidden" name="_token" value="{{ csrf_token('book_individual' ~ service.id) }}">
         <input type="hidden" name="time" value="{{ c.startStr }}">
         <button type="submit" class="slot__btn">{{ c.start|date('H:i') }}</button>
     </form>
 {% endmacro %}
+
 {% import _self as ui %}
 
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    .slot-picker { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:.5rem; }
-    .slot { margin:0; }
-    .slot__btn { width:100%; min-height:2.75rem; cursor:pointer; border:1px solid #18753c; background:rgba(24,117,60,.12); color:#18753c; border-radius:6px; font-size:.9375rem; font-weight:600; transition:filter .15s; }
-    .slot__btn:hover { filter:brightness(.95); }
-    .slot-group-title { font-size:.8125rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; opacity:.6; margin:1.25rem 0 .5rem; }
-    .week-scroll { overflow-x:auto; }
-    .week-days { display:grid; grid-template-columns:repeat(7,minmax(116px,1fr)); gap:.5rem; min-width:720px; }
-    .week-day { border:1px solid var(--fallback-b3,#ddd); border-radius:6px; display:flex; flex-direction:column; overflow:hidden; }
-    .week-day__head { text-align:center; padding:.5rem .25rem; font-weight:700; font-size:.8125rem; background:var(--fallback-b2,#f5f5fe); }
-    .week-day__head small { display:block; font-weight:400; opacity:.6; }
-    .week-day__slots { display:flex; flex-direction:column; gap:.35rem; padding:.5rem; }
-    .week-day__slots .slot__btn { min-height:2.25rem; font-size:.875rem; }
-    .week-day__empty { text-align:center; opacity:.5; font-size:.8125rem; padding:1rem 0; }
+    .booking-nav__title { margin: 0; font-weight: 700; color: hsl(var(--bc)); }
+
+    /* Grille de créneaux disponibles (vue Jour) */
+    .slot-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; }
+    .slot { margin: 0; }
+    .slot__btn {
+        width: 100%; min-height: 3rem; cursor: pointer;
+        border: 1px solid hsl(var(--su));
+        background: hsl(var(--su) / 0.1);
+        color: hsl(var(--su));
+        border-radius: 0.5rem; font-size: 1rem; font-weight: 600;
+        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .slot__btn:hover { 
+        background: hsl(var(--su));
+        color: hsl(var(--su-content));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px hsl(var(--su) / 0.2);
+    }
+    .slot__btn:focus-visible { outline: 2px solid hsl(var(--su)); outline-offset: 2px; }
+
+    .slot-group-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        color: hsl(var(--bc) / 0.6); margin: 1.5rem 0 1rem; display: flex; align-items: center;}
+    .slot-group-title::after { content: ''; flex: 1; height: 1px; background: hsl(var(--bc) / 0.2); margin-left: 1rem; }
+    .slot-group-title:first-of-type { margin-top: 0.5rem; }
+
+    /* Vue Semaine : une colonne par jour, créneaux disponibles uniquement */
+    .week-scroll { overflow-x: auto; padding-bottom: 1rem; }
+    .week-scroll::-webkit-scrollbar { height: 8px; }
+    .week-scroll::-webkit-scrollbar-track { background: hsl(var(--b2)); border-radius: 4px; }
+    .week-scroll::-webkit-scrollbar-thumb { background: hsl(var(--p)); border-radius: 4px; }
+    
+    .week-days { display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); gap: 0.75rem; min-width: 900px; }
+    .week-day { border: 1px solid hsl(var(--bc) / 0.1); border-radius: 0.75rem; display: flex; flex-direction: column; overflow: hidden; background: hsl(var(--b1)); transition: box-shadow 0.2s; }
+    .week-day:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .week-day__head {
+        text-align: center; padding: 1rem 0.5rem; font-weight: 700; font-size: 0.9rem;
+        background: hsl(var(--b2));
+        border-bottom: 1px solid hsl(var(--bc) / 0.1);
+        color: hsl(var(--bc));
+    }
+    .week-day__head small { display: block; font-weight: 500; color: hsl(var(--bc) / 0.6); margin-top: 0.25rem; }
+    .week-day.is-today { border-color: hsl(var(--p)); border-width: 2px; }
+    .week-day.is-today .week-day__head { background: hsl(var(--p) / 0.1); color: hsl(var(--p)); }
+    .week-day.is-today .week-day__head small { color: hsl(var(--p)); }
+    .week-day__slots { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; }
+    .week-day__slots .slot__btn { min-height: 2.5rem; font-size: 0.9rem; border-width: 1px; }
+    .week-day__empty { text-align: center; color: hsl(var(--bc) / 0.4); font-size: 0.85rem; padding: 2rem 0; font-style: italic; }
+    .week-day__count { font-weight: 600; color: hsl(var(--p)); background: hsl(var(--p) / 0.1); padding: 0.1rem 0.4rem; border-radius: 10px; font-size: 0.75rem; }
+    
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+    .month-day { border: 1px solid hsl(var(--bc) / 0.1); border-radius: 0.5rem; min-height: 100px; padding: 0.5rem; background: hsl(var(--b1)); transition: box-shadow 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+    .month-day:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); border-color: hsl(var(--p)); }
+    .month-day.is-outside { background: hsl(var(--b2)); opacity: 0.5; }
+    .month-day.is-today { border-color: hsl(var(--p)); border-width: 2px; }
+    .month-day__number { font-weight: 700; color: hsl(var(--bc)); font-size: 1.1rem; }
+    .month-day__count { margin-top: auto; padding: 0.25rem; font-size: 0.8rem; font-weight: 600; text-align: center; border-radius: 4px; }
+    .month-day__count--available { background: hsl(var(--su) / 0.2); color: hsl(var(--su)); }
+    .month-day__count--full { background: hsl(var(--bc) / 0.1); color: hsl(var(--bc) / 0.6); }
+    .month-head { text-align: center; font-weight: 700; color: hsl(var(--bc)); font-size: 0.9rem; padding: 0.5rem; }
+
+    @media (max-width: 576px) { .slot-picker { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); } }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="max-w-5xl mx-auto">
+<div class="container mx-auto px-4 mt-8 mb-16">
     <div class="text-sm breadcrumbs mb-6">
         <ul>
-            <li><a href="{{ path('app_presta_client_prestataire_index') }}">{{ 'presta.directory'|trans }}</a></li>
-            <li><a href="{{ path('app_presta_client_prestataire_show', {'id': service.prestataire.id}) }}">{{ service.prestataire.prenom }} {{ service.prestataire.nom }}</a></li>
+            <li><a href="{{ path('app_presta_dashboard') }}">Accueil Presta</a></li>
+            <li><a href="{{ path('app_presta_client_categorie_index') }}">Prendre rendez-vous</a></li>
             <li>{{ service.libelle }}</li>
         </ul>
     </div>
 
-    <h1 class="text-2xl font-bold mb-1">{{ 'presta.book_title'|trans({'%service%': service.libelle}) }}</h1>
-    <p class="text-base-content/60 mb-4">{{ 'presta.duration_select'|trans({'%min%': service.dureeMinutes}) }}</p>
+    <h1 class="text-3xl font-bold mb-2">Prendre rendez-vous : {{ service.libelle }}</h1>
+    <p class="text-lg text-base-content/70 mb-8 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        Durée : {{ service.dureeMinutes }} minutes — sélectionnez un créneau pour réserver.
+    </p>
 
-    <div role="tablist" class="tabs tabs-boxed w-fit mb-4">
-        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'day'}) }}" class="tab {{ view == 'day' ? 'tab-active' : '' }}">{{ 'presta.view_by_day'|trans }}</a>
-        <a role="tab" href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'week'}) }}" class="tab {{ view == 'week' ? 'tab-active' : '' }}">{{ 'presta.view_by_week'|trans }}</a>
+    <div role="tablist" class="tabs tabs-boxed mb-6 inline-flex">
+        <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'day'}) }}"
+           role="tab" 
+           class="tab {{ view == 'day' ? 'tab-active' : '' }}">Vue par Jour</a>
+        <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'week'}) }}"
+           role="tab" 
+           class="tab {{ view == 'week' ? 'tab-active' : '' }}">Vue par Semaine</a>
+        <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'month'}) }}"
+           role="tab" 
+           class="tab {{ view == 'month' ? 'tab-active' : '' }}">Vue par Mois</a>
     </div>
 
+    {% if view in ['day', 'week'] and creneaux|default([])|length > 0 or creneauxByDay|default([])|length > 0 %}
+    <div class="flex items-center gap-3 mb-6">
+        <span class="text-sm font-bold">Filtrer :</span>
+        <button type="button" class="btn btn-sm btn-outline filter-btn btn-active" data-filter="all">Tous</button>
+        <button type="button" class="btn btn-sm btn-outline filter-btn" data-filter="morning">Matin</button>
+        <button type="button" class="btn btn-sm btn-outline filter-btn" data-filter="afternoon">Après-midi</button>
+    </div>
+    {% endif %}
+
+    {# ================================ VUE JOUR ================================ #}
     {% if view == 'day' %}
-    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
-        <div class="flex items-center justify-between mb-3 gap-2">
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_day'|trans }}</a>
-            <h2 class="font-semibold text-center">{{ currentDate|format_datetime(pattern='EEEE d MMMM y', locale=app.request.locale)|capitalize }}</h2>
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextDate|date('Y-m-d'), 'view': 'day'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_day'|trans }}</a>
+    <div class="bg-base-200 p-6 md:p-8 rounded-2xl">
+        <div class="flex items-center justify-between mb-8">
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevDate|date('Y-m-d'), 'view': 'day'}) }}"
+               class="btn btn-outline btn-sm" title="Jour précédent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                <span class="hidden md:inline">Jour précédent</span>
+            </a>
+            
+            <h2 class="text-xl font-bold m-0 text-center">
+                {{ (joursFr[currentDate|date('l')] ?? currentDate|date('l'))|capitalize }}
+                {{ currentDate|date('j') }} {{ moisFr[currentDate|date('F')] ?? currentDate|date('F') }} {{ currentDate|date('Y') }}
+            </h2>
+            
+            {% if nextDate|date('Y-m-d') <= maxDate|date('Y-m-d') %}
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextDate|date('Y-m-d'), 'view': 'day'}) }}"
+                   class="btn btn-outline btn-sm" title="Jour suivant">
+                    <span class="hidden md:inline">Jour suivant</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            {% else %}
+                <button type="button" class="btn btn-outline btn-sm btn-disabled" title="Réservations ouvertes jusqu'au {{ maxDate|date('d/m/Y') }}">
+                    <span class="hidden md:inline">Jour suivant</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            {% endif %}
         </div>
 
         {% if creneaux|length == 0 %}
             <div class="alert alert-info">
-                <span>{{ 'presta.no_slot_day'|trans }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <h3 class="font-bold">Aucun créneau disponible ce jour</h3>
+                    <div class="text-sm">Essayez un autre jour, ou affichez la semaine complète pour repérer les disponibilités d'un coup d'œil.</div>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': currentDate|date('Y-m-d'), 'view': 'week'}) }}"
+                   class="btn btn-sm btn-outline">Voir la semaine</a>
+                {% if nextAvailableDate %}
+                    <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextAvailableDate|date('Y-m-d'), 'view': 'day'}) }}"
+                       class="btn btn-sm btn-primary">Prochaine dispo le {{ nextAvailableDate|date('d/m/Y') }}</a>
+                {% endif %}
             </div>
         {% else %}
             {% set matin = creneaux|filter(c => (c.start|date('G')) < 12) %}
             {% set aprem = creneaux|filter(c => (c.start|date('G')) >= 12) %}
-            <p class="text-sm opacity-60 mb-1">{{ 'presta.slots_available'|trans({'%count%': creneaux|length}) }}</p>
+
+            <p class="text-sm text-base-content/60 mb-2">{{ creneaux|length }} créneau(x) disponible(s)</p>
+
             {% if matin|length > 0 %}
-                <h3 class="slot-group-title">{{ 'presta.morning'|trans }}</h3>
+                <h3 class="slot-group-title">Matin</h3>
                 <div class="slot-picker">{% for c in matin %}{{ ui.slot(c, service) }}{% endfor %}</div>
             {% endif %}
             {% if aprem|length > 0 %}
-                <h3 class="slot-group-title">{{ 'presta.afternoon'|trans }}</h3>
+                <h3 class="slot-group-title">Après-midi</h3>
                 <div class="slot-picker">{% for c in aprem %}{{ ui.slot(c, service) }}{% endfor %}</div>
             {% endif %}
         {% endif %}
     </div>
-    {% else %}
-    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
-        <div class="flex items-center justify-between mb-3 gap-2">
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.prev_week'|trans }}</a>
-            <h2 class="font-semibold text-center">{{ 'presta.week_range'|trans({'%start%': daysOfWeek[0]|date('d/m'), '%end%': daysOfWeek[6]|date('d/m/Y')}) }}</h2>
-            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextWeek|date('Y-m-d'), 'view': 'week'}) }}" class="btn btn-ghost btn-sm">{{ 'presta.next_week'|trans }}</a>
+
+    {# ============================== VUE SEMAINE =============================== #}
+    {% elseif view == 'week' %}
+    <div class="bg-base-200 p-6 md:p-8 rounded-2xl">
+        <div class="flex items-center justify-between mb-8">
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevWeek|date('Y-m-d'), 'view': 'week'}) }}"
+               class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                <span class="hidden md:inline">Semaine précédente</span>
+            </a>
+            
+            <h2 class="text-xl font-bold m-0 text-center">
+                Semaine du {{ daysOfWeek[0]|date('j') }} {{ moisFr[daysOfWeek[0]|date('F')] ?? daysOfWeek[0]|date('F') }}
+                au {{ daysOfWeek[6]|date('j') }} {{ moisFr[daysOfWeek[6]|date('F')] ?? daysOfWeek[6]|date('F') }} {{ daysOfWeek[6]|date('Y') }}
+            </h2>
+            
+            {% if nextWeek|date('Y-m-d') <= maxDate|date('Y-m-d') %}
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextWeek|date('Y-m-d'), 'view': 'week'}) }}"
+                   class="btn btn-outline btn-sm">
+                    <span class="hidden md:inline">Semaine suivante</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            {% else %}
+                <button type="button" class="btn btn-outline btn-sm btn-disabled" title="Réservations ouvertes jusqu'au {{ maxDate|date('d/m/Y') }}">
+                    <span class="hidden md:inline">Semaine suivante</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            {% endif %}
         </div>
 
         {% set totalCreneaux = 0 %}
         {% for dayCreneaux in creneauxByDay %}{% set totalCreneaux = totalCreneaux + dayCreneaux|length %}{% endfor %}
 
         {% if totalCreneaux == 0 %}
-            <div class="alert alert-info"><span>{{ 'presta.no_slot_week'|trans }}</span></div>
+            <div class="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <h3 class="font-bold">Aucun créneau cette semaine</h3>
+                    <div class="text-sm">Essayez une autre semaine, ou contactez directement le prestataire.</div>
+                </div>
+            </div>
+            {% if nextAvailableDate %}
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextAvailableDate|date('Y-m-d'), 'view': 'week'}) }}"
+                   class="btn btn-sm btn-primary mt-4">Prochaine dispo le {{ nextAvailableDate|date('d/m/Y') }}</a>
+            {% endif %}
         {% else %}
             <div class="week-scroll">
                 <div class="week-days">
                     {% for day in daysOfWeek %}
                         {% set dayCreneaux = creneauxByDay[day|date('Y-m-d')] %}
-                        <div class="week-day">
-                            <div class="week-day__head">{{ day|format_datetime(pattern='EEE', locale=app.request.locale)|capitalize }}<small>{{ day|date('d/m') }}{% if dayCreneaux|length > 0 %} · {{ dayCreneaux|length }}{% endif %}</small></div>
+                        {% set jourLabel = (joursFr[day|date('l')] ?? day|date('l')) ~ ' ' ~ day|date('d/m') %}
+                        <div class="week-day {{ day|date('Y-m-d') == 'now'|date('Y-m-d') ? 'is-today' : '' }}">
+                            <div class="week-day__head">
+                                {{ joursCourt[day|date('D')] ?? day|date('D') }}
+                                <small>{{ day|date('d/m') }}{% if dayCreneaux|length > 0 %} · <span class="week-day__count">{{ dayCreneaux|length }}</span>{% endif %}</small>
+                            </div>
                             {% if dayCreneaux|length > 0 %}
-                                <div class="week-day__slots">{% for c in dayCreneaux %}{{ ui.slot(c, service) }}{% endfor %}</div>
+                                <div class="week-day__slots">
+                                    {% for c in dayCreneaux %}{{ ui.slot(c, service, jourLabel) }}{% endfor %}
+                                </div>
                             {% else %}
                                 <div class="week-day__empty">—</div>
                             {% endif %}
@@ -106,6 +259,97 @@
             </div>
         {% endif %}
     </div>
+
+    {# ============================== VUE MOIS =============================== #}
+    {% elseif view == 'month' %}
+    <div class="bg-base-200 p-6 md:p-8 rounded-2xl">
+        <div class="flex items-center justify-between mb-8">
+            <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': prevMonth|date('Y-m-d'), 'view': 'month'}) }}"
+               class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                <span class="hidden md:inline">Mois précédent</span>
+            </a>
+            
+            <h2 class="text-xl font-bold m-0 text-center">
+                {{ moisFr[currentDate|date('F')] ?? currentDate|date('F')|capitalize }} {{ currentDate|date('Y') }}
+            </h2>
+            
+            {% if nextMonth|date('Y-m-d') <= maxDate|date('Y-m-d') %}
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': nextMonth|date('Y-m-d'), 'view': 'month'}) }}"
+                   class="btn btn-outline btn-sm">
+                    <span class="hidden md:inline">Mois suivant</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            {% else %}
+                <button type="button" class="btn btn-outline btn-sm btn-disabled" title="Réservations ouvertes jusqu'au {{ maxDate|date('d/m/Y') }}">
+                    <span class="hidden md:inline">Mois suivant</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="month-grid">
+            <div class="month-head">Lun</div>
+            <div class="month-head">Mar</div>
+            <div class="month-head">Mer</div>
+            <div class="month-head">Jeu</div>
+            <div class="month-head">Ven</div>
+            <div class="month-head">Sam</div>
+            <div class="month-head">Dim</div>
+
+            {% for day in calendarDays %}
+                {% set count = creneauxByMonthDay[day|date('Y-m-d')] ?? 0 %}
+                {% set isOutside = day|date('m') != currentDate|date('m') %}
+                {% set isToday = day|date('Y-m-d') == 'now'|date('Y-m-d') %}
+                <a href="{{ path('app_presta_client_booking_individual', {'id': service.id, 'date': day|date('Y-m-d'), 'view': 'day'}) }}"
+                   class="month-day {{ isOutside ? 'is-outside' : '' }} {{ isToday ? 'is-today' : '' }}">
+                    <span class="month-day__number">{{ day|date('j') }}</span>
+                    {% if count > 0 %}
+                        <span class="month-day__count month-day__count--available">{{ count }} dispo.</span>
+                    {% else %}
+                        <span class="month-day__count month-day__count--full">-</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    if (!filterBtns.length) return;
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('btn-active'));
+            btn.classList.add('btn-active');
+
+            const filter = btn.dataset.filter;
+            
+            document.querySelectorAll('.slot').forEach(form => {
+                const timeStr = form.querySelector('.slot__btn').textContent.trim();
+                const hour = parseInt(timeStr.split(':')[0], 10);
+                
+                if (filter === 'all') {
+                    form.style.display = 'block';
+                } else if (filter === 'morning') {
+                    form.style.display = hour < 12 ? 'block' : 'none';
+                } else if (filter === 'afternoon') {
+                    form.style.display = hour >= 12 ? 'block' : 'none';
+                }
+            });
+
+            document.querySelectorAll('.slot-group-title').forEach(title => {
+                const picker = title.nextElementSibling;
+                if (picker && picker.classList.contains('slot-picker')) {
+                    const visibleSlots = Array.from(picker.querySelectorAll('.slot')).filter(s => s.style.display !== 'none');
+                    title.style.display = visibleSlots.length > 0 ? 'flex' : 'none';
+                }
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
