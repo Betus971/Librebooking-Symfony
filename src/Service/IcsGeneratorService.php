@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Visitor;
 use App\Presta\Entity\Session as PrestaSession;
 
 /**
@@ -15,14 +14,6 @@ use App\Presta\Entity\Session as PrestaSession;
 final class IcsGeneratorService
 {
     /**
-     * Construit le flux ICS complet pour une liste de visiteurs.
-     *
-     * @param iterable<Visitor> $visitors
-     */
-    public function generateForVisitors(iterable $visitors): string
-    {
-        $ics  = "BEGIN:VCALENDAR\r\n";
-        $ics .= "VERSION:2.0\r\n";
      * Construit le flux ICS complet pour une liste de réservations.
      *
      * @param iterable<\App\Entity\ReservationInstance> $reservations
