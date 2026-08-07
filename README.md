@@ -32,6 +32,12 @@
 - **Time layouts** — define opening slots (day, start/end time, open/closed) in the admin and assign them to schedules.
 - **iCal subscription** — every resource exposes a calendar feed (`webcal`/`.ics`) for Outlook, Google Calendar, or Thunderbird.
 
+### Prestation & Services (Booking)
+- **Service catalog** — providers can offer individual or group services with specific capacities and durations.
+- **Provider Dashboard & Agenda** — interactive drag & drop calendar for providers to manage their availability and appointments.
+- **Absence management** — block out times with automated capacity adjustments.
+- **Client portal** — a dedicated, modern interface for clients to discover services and manage their own bookings.
+
 ### Experience
 - **Admin dashboard** powered by **EasyAdmin 5**.
 - **Modern UI** built with **Tailwind CSS v4** + **DaisyUI**, with a seamless **light / dark theme** toggle.
