@@ -150,4 +150,9 @@ class ResourceGroup
     {
         return $this->admins->contains($user);
     }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
 }

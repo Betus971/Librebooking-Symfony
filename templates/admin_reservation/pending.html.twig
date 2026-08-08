@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Demandes en attente — Administration{% endblock %}
+
+{% macro badge(s) %}
+    {% if s == 1 %}<span class="badge badge-warning badge-sm">En attente</span>
+    {% elseif s == 2 %}<span class="badge badge-success badge-sm">Approuvée</span>
+    {% elseif s == 3 %}<span class="badge badge-error badge-sm">Refusée</span>
+    {% elseif s == 4 %}<span class="badge badge-ghost badge-sm">Annulée</span>
+    {% else %}<span class="badge badge-sm">Inconnu</span>{% endif %}
+{% endmacro %}
+{% import _self as ui %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto py-8">
+    <div class="flex items-center justify-between mb-6 gap-3 flex-wrap">
+        <div>
+            <h1 class="text-3xl font-extrabold text-base-content">Demandes en attente</h1>
+            <p class="text-sm text-base-content/60 mt-1">{{ total }} demande(s)</p>
+        </div>
+        <a href="{{ path('admin_reservation_index') }}" class="btn btn-ghost btn-sm">Historique complet</a>
+    </div>
+
+    <div class="overflow-x-auto card bg-base-100 border border-base-200 shadow-sm">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Titre</th><th>Demandeur</th><th>Ressource(s)</th>
+                    <th class="text-right">Créée le</th><th class="text-right">Créneau</th>
+                    <th>Statut</th><th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% set nowTs = "now"|date('U') %}
+            {% for r in rows %}
+                {% set lastEndTs = r.lastEnd ? r.lastEnd|date('U') : 0 %}
+                {% set isPast = lastEndTs <= nowTs %}
+                {% set resourceName = (r.resCount|default(0)) > 1 ? (r.resCount ~ ' ressources') : (r.oneName|default('—')) %}
+                <tr class="hover {{ r.statusId == 1 ? 'bg-warning/5' : '' }}">
+                    <td>
+                        <a href="{{ path('admin_reservation_show', {id: r.id}) }}" class="font-bold link link-hover" title="{{ r.title }}">{{ r.title|length > 40 ? r.title|slice(0, 40) ~ '...' : r.title }}</a>
+                        {% if r.attachmentCount is defined and r.attachmentCount > 0 %}<br><span class="badge badge-info badge-xs mt-1">{{ r.attachmentCount }} PJ</span>{% endif %}
+                    </td>
+                    <td><span class="text-sm font-medium" title="{{ r.ownerName ?: 'Inconnu' }}">{{ (r.ownerName ?: 'Inconnu')|slice(0, 35) }}</span></td>
+                    <td class="text-sm">{{ resourceName }}</td>
+                    <td class="text-right text-sm">{{ r.createdAt ? r.createdAt|date('d/m/Y') : '-' }}<br><span class="text-xs text-base-content/50">{{ r.createdAt ? r.createdAt|date('H:i') : '' }}</span></td>
+                    <td class="text-right text-sm"><span class="font-bold">{{ r.firstStart ? r.firstStart|date('d/m/Y') : '-' }}</span><br><span class="text-xs">{{ r.firstStart ? r.firstStart|date('H:i') : '' }} - {{ r.lastEnd ? r.lastEnd|date('H:i') : '' }}</span></td>
+                    <td>{{ ui.badge(r.statusId|default(1)) }}</td>
+                    <td class="text-right">
+                        {% if isPast %}
+                            <span class="badge badge-ghost badge-sm">Date passée</span>
+                        {% else %}
+                            <div class="flex justify-end gap-1">
+                                <form method="post" action="{{ path('admin_reservation_approve', {id: r.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ r.id) }}">
+                                    <button type="submit" class="btn btn-success btn-xs" title="Approuver">Valider</button>
+                                </form>
+                                <button type="button" class="btn btn-outline btn-error btn-xs" onclick="document.getElementById('modal-reject-{{ r.id }}').showModal()">Refuser</button>
+                            </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="7" class="text-center py-8 text-base-content/60">Aucune demande en attente.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 flex justify-center">{{ knp_pagination_render(pagination) }}</div>
+</div>
+
+{# Modales de refus / annulation (DaisyUI) #}
+{% for r in rows %}
+    <dialog id="modal-reject-{{ r.id }}" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-2">Refuser la demande</h3>
+            <p class="text-sm text-base-content/70 mb-4">Réservation : <strong>{{ r.title }}</strong></p>
+            <form method="post" action="{{ path('admin_reservation_reject', {id: r.id}) }}" class="space-y-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ r.id) }}">
+                <div class="form-control">
+                    <label class="label" for="reason-{{ r.id }}"><span class="label-text">Motif du refus (obligatoire)</span></label>
+                    <textarea class="textarea textarea-bordered w-full" id="reason-{{ r.id }}" name="reason" rows="3" required placeholder="Ex : Salle indisponible..."></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-reject-{{ r.id }}').close()">Annuler</button>
+                    <button type="submit" class="btn btn-error btn-sm">Confirmer le refus</button>
+                </div>
+            </form>
+            <div class="divider my-3 text-xs text-base-content/50">ou (bug/problème technique)</div>
+            <form method="post" action="{{ path('admin_reservation_cancel', {id: r.id}) }}" onsubmit="return confirm('Forcer l\'annulation de cette demande ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ r.id) }}">
+                <button type="submit" class="btn btn-ghost btn-xs text-error">Forcer l'annulation</button>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+{% endfor %}
+{% endblock %}

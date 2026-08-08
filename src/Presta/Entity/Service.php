@@ -184,4 +184,9 @@ class Service
     {
         return $this->couleur ?: '#000091';
     }
+
+    public function __toString(): string
+    {
+        return $this->libelle ?? '';
+    }
 }

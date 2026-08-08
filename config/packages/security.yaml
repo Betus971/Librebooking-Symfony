@@ -51,11 +51,13 @@ security:
     role_hierarchy:
             # Rôles de gestionnaires (Admins de modules)
             ROLE_ADMIN_RESSOURCE: [ ]     # "Admin Gestion Ressources" (Voitures, Salles)
+            ROLE_PRESTATAIRE: [ ]         # Gère ses prestations / agenda (espace /presta/provider)
 
             # Le Chef Suprême
             ROLE_SUPER_ADMIN:
                 - ROLE_ADMIN
                 - ROLE_ADMIN_RESSOURCE
+                - ROLE_PRESTATAIRE         # le super-admin peut aussi accéder à l'espace prestataire (test/gestion)
                 - ROLE_ALLOWED_TO_SWITCH # Optionnel : permet de se "déguiser" en un autre user pour tester
 
 when@test:

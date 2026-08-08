@@ -261,4 +261,9 @@ class Prestataire
         $this->icalToken = $icalToken;
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return trim(($this->prenom ?? '').' '.($this->nom ?? ''));
+    }
 }

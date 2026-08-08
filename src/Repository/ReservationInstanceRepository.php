@@ -296,4 +296,28 @@ class ReservationInstanceRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * Instances de réservations APPROUVÉES qui débutent dans la fenêtre [from, until]
+     * et qui n'ont pas encore reçu de rappel (reminder_sent_at IS NULL).
+     * Utilisé par SendRemindersCommand.
+     *
+     * @return ReservationInstance[]
+     */
+    public function findInstancesToRemind(\DateTimeInterface $from, \DateTimeInterface $until): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.series', 's')
+            ->join('s.status', 'st')
+            ->andWhere('i.reminderSentAt IS NULL')
+            ->andWhere('i.startDate >= :from')
+            ->andWhere('i.startDate <= :until')
+            ->andWhere('st.id = :approved')
+            ->setParameter('from', $from)
+            ->setParameter('until', $until)
+            ->setParameter('approved', ReservationStatus::APPROVED)
+            ->orderBy('i.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

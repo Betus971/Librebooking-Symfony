@@ -62,7 +62,8 @@ final class Version20260807191520 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_72003864BCF5E72D ON presta_service (categorie_id)');
         $this->addSql('ALTER TABLE presta_session ADD client_nom VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE presta_session ADD note TEXT DEFAULT NULL');
-        $this->addSql('ALTER TABLE reservation_instances DROP reminder_sent_at');
+        // NOTE: la colonne reminder_sent_at est conservée (créée par la migration baseline
+        // et utilisée par ReservationInstance::$reminderSentAt / SendRemindersCommand).
         $this->addSql('CREATE INDEX idx_start_date ON reservation_instances (start_date)');
         $this->addSql('CREATE INDEX idx_end_date ON reservation_instances (end_date)');
         $this->addSql('ALTER TABLE reservation_series ADD nombre_participants INT DEFAULT NULL');
@@ -109,8 +110,7 @@ final class Version20260807191520 extends AbstractMigration
         $this->addSql('ALTER TABLE presta_service DROP couleur');
         $this->addSql('DROP INDEX idx_start_date');
         $this->addSql('DROP INDEX idx_end_date');
-        $this->addSql('ALTER TABLE reservation_instances ADD reminder_sent_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL');
-        $this->addSql('COMMENT ON COLUMN reservation_instances.reminder_sent_at IS \'(DC2Type:datetime_immutable)\'');
+        // reminder_sent_at n'est pas touchée par cette migration (gérée par la baseline).
         $this->addSql('ALTER TABLE presta_session DROP client_nom');
         $this->addSql('ALTER TABLE presta_session DROP note');
     }

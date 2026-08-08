@@ -47,7 +47,7 @@ class AppFixtures extends Fixture
         $admin = $this->makeUser($manager, 'admin@example.com', 'Admin', 'Système', ['ROLE_SUPER_ADMIN'], 'admin');
         $manager_user = $this->makeUser($manager, 'manager@example.com', 'Marie', 'Gestion', ['ROLE_ADMIN_RESSOURCE'], 'manager');
         $this->makeUser($manager, 'user@example.com', 'Jean', 'Dupont', ['ROLE_USER'], 'user');
-        $pro = $this->makeUser($manager, 'pro@example.com', 'Camille', 'Pro', ['ROLE_USER'], 'pro');
+        $pro = $this->makeUser($manager, 'pro@example.com', 'Camille', 'Pro', ['ROLE_USER', 'ROLE_PRESTATAIRE'], 'pro');
 
         // ============================================================
         // 3. Grille horaire (Layout) + créneaux d'ouverture

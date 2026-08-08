@@ -243,4 +243,9 @@ class Layout
         $labels = array_map(fn(int $d) => $names[$d] ?? '?', $daysOpen);
         return ucfirst(implode(', ', $labels));
     }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
 }
