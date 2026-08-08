@@ -11,7 +11,7 @@
 
 @plugin "daisyui" {
   themes: dark --default, light;
-};
+}
 
 @plugin "daisyui/theme" {
   name: "dark";
