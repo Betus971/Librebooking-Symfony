@@ -2,6 +2,6 @@ symfonycasts_tailwind:
     # Specify the EXACT version of Tailwind CSS you want to use
     #binary_version: 'v4.1.11'
 
-    # By commenting this out, the bundle will automatically download and use
-    # the correct standalone binary for your OS (Windows locally, Linux on VPS).
-    # binary: 'node_modules\.bin\tailwindcss.cmd'
+    # Use our cross-platform wrapper that leverages npx and the local node_modules
+    binary: 'bin/tailwindcss'
+
