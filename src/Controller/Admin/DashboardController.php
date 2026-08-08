@@ -48,6 +48,13 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ResourceCategoryCrudController::class, new TranslatableMessage('admin.resource_category.plural'), 'fa-solid fa-tags')->setAction('index');
         yield MenuItem::linkTo(ResourceGroupCrudController::class, new TranslatableMessage('admin.resource_group.plural'), 'fa-solid fa-users-gear')->setAction('index');
 
+        yield MenuItem::section('Prestations & Services');
+        yield MenuItem::linkTo(PrestaCategorieCrudController::class, 'Catégories', 'fa-solid fa-tags')->setAction('index');
+        yield MenuItem::linkTo(PrestataireCrudController::class, 'Prestataires', 'fa-solid fa-user-tie')->setAction('index');
+        yield MenuItem::linkTo(ServiceCrudController::class, 'Services / Prestations', 'fa-solid fa-concierge-bell')->setAction('index');
+        yield MenuItem::linkTo(PrestaAbsenceCrudController::class, 'Absences', 'fa-solid fa-plane-departure')->setAction('index');
+        yield MenuItem::linkTo(SessionCrudController::class, 'Sessions (RDVs)', 'fa-solid fa-calendar-days')->setAction('index');
+
         yield MenuItem::section(new TranslatableMessage('admin.section.configuration'));
         yield MenuItem::linkTo(ScheduleCrudController::class, new TranslatableMessage('admin.schedule.plural'), 'fa-solid fa-clock')->setAction('index');
         yield MenuItem::linkTo(LayoutCrudController::class, new TranslatableMessage('admin.layout.plural'), 'fa-solid fa-table-cells')->setAction('index');
