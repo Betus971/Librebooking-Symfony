@@ -34,7 +34,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Recherche paginée d'utilisateurs par email, nom, uid ou nigend.
+     * Recherche paginée d'utilisateurs par email, nom ou identifiant (uid).
      *
      * @return array{users: User[], total: int}
      */
@@ -45,7 +45,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         if ($q !== '') {
             $qb->andWhere(
-                'LOWER(u.email) LIKE :q OR LOWER(u.lname) LIKE :q OR LOWER(u.uid) LIKE :q OR LOWER(u.nigend) LIKE :q'
+                'LOWER(u.email) LIKE :q OR LOWER(u.lname) LIKE :q OR LOWER(u.uid) LIKE :q'
             )->setParameter('q', '%' . strtolower($q) . '%');
         }
 
