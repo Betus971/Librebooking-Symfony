@@ -61,6 +61,41 @@
     </div>
 </div>
 
+{# ── Portail : choisissez un service (Ressources / Prestations) ──────────── #}
+<div class="mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {# Ressources #}
+        <a href="{{ path('app_resource_index') }}" class="card bg-base-100 border border-base-300 rounded-2xl shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all group">
+            <div class="card-body p-6 flex-row items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h2m-2 4h2m-2 4h2m4-8h2m-2 4h2m-2 4h2"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-lg font-extrabold font-outfit text-base-content">Réservation de ressources</h2>
+                    <p class="text-sm text-base-content/60 mt-0.5">Réservez une salle, un véhicule ou du matériel.</p>
+                </div>
+                <svg class="w-5 h-5 text-base-content/30 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </div>
+        </a>
+
+        {# Prestations #}
+        <a href="{{ path('app_presta_dashboard') }}" class="card bg-base-100 border border-base-300 rounded-2xl shadow-sm hover:border-secondary/40 hover:-translate-y-0.5 transition-all group">
+            <div class="card-body p-6 flex-row items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-lg font-extrabold font-outfit text-base-content">Prestations & rendez-vous</h2>
+                    <p class="text-sm text-base-content/60 mt-0.5">Prenez rendez-vous avec un professionnel.</p>
+                </div>
+                <svg class="w-5 h-5 text-base-content/30 group-hover:text-secondary group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </div>
+        </a>
+
+    </div>
+</div>
+
 {# ── Main Layout Grid ────────────────────────────────────────────────────── #}
 <div class="flex flex-col lg:flex-row gap-8 items-stretch">
 
@@ -113,7 +148,7 @@
                         <div>
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                                    {{ item.count }} {{ (item.count > 1 ? 'home.resources_plural' : 'home.resource_singular')|trans }}
+                                    {{ item.count }} {{ (item.count > 1 ? 'home.resource_plural' : 'home.resource_singular')|trans }}
                                 </span>
                             </div>
                             
