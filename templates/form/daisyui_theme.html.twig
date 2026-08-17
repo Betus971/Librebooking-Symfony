@@ -31,7 +31,10 @@
 {%- endblock choice_widget_collapsed %}
 
 {% block checkbox_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' checkbox checkbox-primary')|trim}) %}
+    {# Ne pas forcer `checkbox` si le template a déjà demandé un `toggle` DaisyUI #}
+    {% if 'toggle' not in attr.class|default('') %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' checkbox checkbox-primary')|trim}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock checkbox_widget %}
 
