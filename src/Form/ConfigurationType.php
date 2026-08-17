@@ -20,7 +20,8 @@ final class ConfigurationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         foreach (SettingDefinitions::SETTINGS as $cle => [$section, $label, $type, $default]) {
-            $builder->add($cle, match ($type) {
+            // Les noms de champs Symfony ne peuvent pas contenir de point : on encode "." en "__".
+            $builder->add(str_replace('.', '__', $cle), match ($type) {
                 'bool' => CheckboxType::class,
                 'int'  => IntegerType::class,
                 'text' => TextareaType::class,

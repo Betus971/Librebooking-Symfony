@@ -31,7 +31,7 @@
                     <h2 class="text-lg font-bold text-primary mb-4">{{ sectionLabels[section] ?? section|capitalize }}</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                         {% for cle in cles %}
-                            {% set field = form[cle] %}
+                            {% set field = form[cle|replace({'.': '__'})] %}
                             {% set isCheckbox = 'checkbox' in field.vars.block_prefixes %}
                             <div class="form-control {{ isCheckbox ? 'sm:col-span-2' : '' }}">
                                 {% if isCheckbox %}
