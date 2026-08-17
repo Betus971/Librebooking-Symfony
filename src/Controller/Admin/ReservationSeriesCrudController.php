@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Notification\ReservationNotifier;
 use App\Security\Voter\ReservationSeriesVoter;
 use App\Service\WaitlistService;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -115,6 +116,7 @@ class ReservationSeriesCrudController extends AbstractCrudController
             ->setDisabled();
     }
 
+    #[AdminRoute]
     public function approve(
         AdminContext $context,
         Request $request,
@@ -126,6 +128,7 @@ class ReservationSeriesCrudController extends AbstractCrudController
         return $this->handleTransition('approve', $context, $request, $workflow, $notifier, $urlGenerator, $waitlist);
     }
 
+    #[AdminRoute]
     public function reject(
         AdminContext $context,
         Request $request,
@@ -137,6 +140,7 @@ class ReservationSeriesCrudController extends AbstractCrudController
         return $this->handleTransition('reject', $context, $request, $workflow, $notifier, $urlGenerator, $waitlist);
     }
 
+    #[AdminRoute]
     public function cancelReservation(
         AdminContext $context,
         Request $request,

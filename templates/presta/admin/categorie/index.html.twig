@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block title %}Catégories de prestation — Administration{% endblock %}
+{% block body %}
+<div class="max-w-5xl mx-auto py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-extrabold text-base-content">Catégories de prestation</h1>
+        <a href="{{ path('app_presta_admin_categorie_new') }}" class="btn btn-primary btn-sm">+ Ajouter</a>
+    </div>
+    <div class="overflow-x-auto card bg-base-100 border border-base-200 shadow-sm">
+        <table class="table table-zebra">
+            <thead><tr><th>Nom</th><th>Description</th><th class="text-right">Actions</th></tr></thead>
+            <tbody>
+            {% for c in categories %}
+                <tr class="hover">
+                    <td class="font-semibold">{{ c.nom }}</td>
+                    <td class="text-sm text-base-content/70">{{ c.description|default('—') }}</td>
+                    <td class="text-right">
+                        <div class="flex justify-end gap-1">
+                            <a href="{{ path('app_presta_admin_categorie_edit', {id: c.id}) }}" class="btn btn-ghost btn-xs">Modifier</a>
+                            <form method="post" action="{{ path('app_presta_admin_categorie_delete', {id: c.id}) }}" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ c.id) }}">
+                                <button class="btn btn-ghost btn-xs text-error">Suppr.</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3" class="text-center py-8 text-base-content/60">Aucune catégorie.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

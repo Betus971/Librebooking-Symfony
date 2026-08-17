@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+{% block title %}Accessoires — Administration{% endblock %}
+{% block body %}
+<div class="max-w-5xl mx-auto py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-extrabold text-base-content">Accessoires</h1>
+        <a href="{{ path('app_accessoire_new') }}" class="btn btn-primary btn-sm">+ Ajouter</a>
+    </div>
+    <div class="overflow-x-auto card bg-base-100 border border-base-200 shadow-sm">
+        <table class="table table-zebra">
+            <thead><tr><th>Nom</th><th>Quantité</th><th>Actif</th><th class="text-right">Actions</th></tr></thead>
+            <tbody>
+            {% for a in accessoires %}
+                <tr class="hover">
+                    <td class="font-semibold">{{ a.nom }}</td>
+                    <td>{{ a.illimite ? '∞' : a.quantiteDisponible }}</td>
+                    <td>{% if a.actif %}<span class="badge badge-success badge-sm">Oui</span>{% else %}<span class="badge badge-ghost badge-sm">Non</span>{% endif %}</td>
+                    <td class="text-right">
+                        <div class="flex justify-end gap-1">
+                            <a href="{{ path('app_accessoire_edit', {id: a.id}) }}" class="btn btn-ghost btn-xs">Modifier</a>
+                            <form method="post" action="{{ path('app_accessoire_delete', {id: a.id}) }}" onsubmit="return confirm('Supprimer cet accessoire ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ a.id) }}">
+                                <button class="btn btn-ghost btn-xs text-error">Suppr.</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="text-center py-8 text-base-content/60">Aucun accessoire.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

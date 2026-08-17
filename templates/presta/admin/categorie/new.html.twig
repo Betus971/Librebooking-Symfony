@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ajouter une catégorie{% endblock %}
+{% block body %}
+<div class="max-w-2xl mx-auto py-8">
+    <h1 class="text-2xl font-bold mb-4">Ajouter une catégorie</h1>
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body">
+            {{ form_start(form) }}
+            {% for child in form %}
+                {% if 'checkbox' in child.vars.block_prefixes %}
+                    <div class="form-control"><label class="label cursor-pointer justify-start gap-3">{{ form_widget(child, {'attr': {'class': 'toggle toggle-primary'}}) }}<span class="label-text font-medium">{{ child.vars.label }}</span></label></div>
+                {% elseif 'textarea' in child.vars.block_prefixes %}
+                    <div class="form-control">{{ form_label(child, null, {'label_attr': {'class': 'label font-medium'}}) }}{{ form_widget(child, {'attr': {'class': 'textarea textarea-bordered w-full', 'rows': 3}}) }}</div>
+                {% else %}
+                    <div class="form-control">{{ form_label(child, null, {'label_attr': {'class': 'label font-medium'}}) }}{{ form_widget(child, {'attr': {'class': 'input input-bordered w-full'}}) }}</div>
+                {% endif %}
+            {% endfor %}
+            <div class="flex gap-3 mt-4">
+                <button type="submit" class="btn btn-primary">Créer</button>
+                <a href="{{ path('app_presta_admin_categorie_index') }}" class="btn btn-ghost">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
