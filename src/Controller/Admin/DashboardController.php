@@ -64,5 +64,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(UserCrudController::class, new TranslatableMessage('admin.user.plural'), 'fa-solid fa-users')
             ->setAction('index')
             ->setPermission('ROLE_SUPER_ADMIN');
+        yield MenuItem::linkToRoute('Configuration', 'fa-solid fa-sliders', 'admin_configuration')
+            ->setPermission('ROLE_SUPER_ADMIN');
     }
 }

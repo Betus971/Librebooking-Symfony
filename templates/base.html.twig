@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Librebooking{% endblock %}</title>
+    <title>{% block title %}{{ setting('general.app_title') }}{% endblock %}</title>
     
     {# Applique le thème avant le rendu pour éviter tout flash (clé localStorage 'theme'). #}
     <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');</script>

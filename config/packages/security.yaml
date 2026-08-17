@@ -35,6 +35,8 @@ security:
          # P0.5 — L'API JSON ne doit jamais être anonyme (défense en profondeur,
          # en plus du #[IsGranted] sur les contrôleurs Api\*).
          - { path: ^/api, roles: ROLE_USER }
+         # Page de configuration : super-admin uniquement (AVANT ^/admin car 1re règle qui matche gagne).
+         - { path: ^/admin/configuration, roles: ROLE_SUPER_ADMIN }
          - { path: ^/admin, roles: ROLE_ADMIN }
          - { path: ^/profile, roles: ROLE_USER }
 
