@@ -42,29 +42,15 @@ class ReservationSeriesRepository extends ServiceEntityRepository
         $groupIds = (isset($f['resourceGroupIds']) && is_array($f['resourceGroupIds']))
             ? $f['resourceGroupIds']
             : [];
-        $unite = $f['scopeCodeUnite'] ?? null;
 
-        $conds = [];
-        if (!empty($groupIds)) {
-            $conds[] = sprintf('IDENTITY(%s.resourceGroup) IN (:scopeGroupIds)', $resourceAlias);
-        }
-        if (null !== $unite) {
-            $conds[] = sprintf('%s.codeUnite = :scopeUnite', $resourceAlias);
-        }
-
-        if ([] === $conds) {
-            // Ni groupe ni unité connue : ne rien retourner.
+        if ([] === $groupIds) {
+            // Aucun groupe connu : le gestionnaire ne voit rien (sécurité par défaut).
             $qb->andWhere('1 = 0');
             return;
         }
 
-        $qb->andWhere('(' . implode(' OR ', $conds) . ')');
-        if (!empty($groupIds)) {
-            $qb->setParameter('scopeGroupIds', $groupIds);
-        }
-        if (null !== $unite) {
-            $qb->setParameter('scopeUnite', $unite);
-        }
+        $qb->andWhere(sprintf('IDENTITY(%s.resourceGroup) IN (:scopeGroupIds)', $resourceAlias))
+            ->setParameter('scopeGroupIds', $groupIds);
     }
 
     public function findPendingWithAgg(int $limit = 50): array

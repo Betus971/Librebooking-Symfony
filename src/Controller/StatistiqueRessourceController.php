@@ -69,7 +69,6 @@ final class StatistiqueRessourceController extends AbstractController
                 }
             }
             $scope['resourceGroupIds'] = $groupIds;
-            $scope['scopeCodeUnite']   = $user instanceof User ? $user->getCodeunite() : null;
         }
 
         $stats = $instanceRepository->resourceUsageStats($scope, $startDate, $endDate, $categoryId);
@@ -190,7 +189,6 @@ final class StatistiqueRessourceController extends AbstractController
                 }
             }
             $scope['resourceGroupIds'] = $groupIds;
-            $scope['scopeCodeUnite']   = $user instanceof User ? $user->getCodeunite() : null;
         }
 
         return [$scope, $startDate, $endDate, $categoryId];

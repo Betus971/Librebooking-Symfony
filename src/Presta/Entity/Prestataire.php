@@ -35,9 +35,6 @@ class Prestataire
     #[ORM\Column(options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $codeUnite = null;
-
     /**
      * Fenêtre glissante de réservation : les clients peuvent réserver jusqu'à
      * N jours à l'avance. « Aujourd'hui » avançant chaque jour, la fenêtre glisse
@@ -200,16 +197,6 @@ class Prestataire
         return $this;
     }
 
-    public function getCodeUnite(): ?int
-    {
-        return $this->codeUnite;
-    }
-
-    public function setCodeUnite(?int $codeUnite): static
-    {
-        $this->codeUnite = $codeUnite;
-        return $this;
-    }
 
     public function getUser(): ?User
     {

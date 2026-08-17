@@ -55,7 +55,6 @@ final class AdminReservationController extends AbstractController
         if (!$user instanceof User) {
             // Pas de user exploitable : scope vide → ne voit rien.
             $filters['resourceGroupIds'] = [];
-            $filters['scopeCodeUnite']   = null;
             return $filters;
         }
 
@@ -65,8 +64,7 @@ final class AdminReservationController extends AbstractController
                 $ids[] = $g->getId();
             }
         }
-        $filters['resourceGroupIds'] = $ids;                 // couche manuelle
-        $filters['scopeCodeUnite']   = $user->getCodeunite(); // couche SSO
+        $filters['resourceGroupIds'] = $ids;
 
         return $filters;
     }

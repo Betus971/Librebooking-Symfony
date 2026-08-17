@@ -61,19 +61,8 @@ final class ResourceVoter extends Voter
             return true;
         }
 
-        // Gestionnaire de ressource : visibilité hybride.
+        // Gestionnaire de ressource : il gère les ressources de ses groupes.
         if ($this->security->isGranted('ROLE_ADMIN_RESSOURCE')) {
-            // (a) Couche SSO automatique : même code unité. Mécanisme principal.
-            //     On exige des deux côtés une valeur non nulle pour éviter qu'un
-            //     user sans code unité (null) ne matche une ressource sans code
-            //     unité (null) — ce qui ouvrirait tout par défaut.
-            $userUnite     = $user->getCodeunite();
-            $resourceUnite = $resource->getCodeUnite();
-            if (null !== $userUnite && null !== $resourceUnite && $userUnite === $resourceUnite) {
-                return true;
-            }
-
-            // (b) Couche manuelle d'exception : rattachement explicite via groupe.
             $resGroup = $resource->getResourceGroup();
             if (null !== $resGroup && $user->getResourceGroups()->contains($resGroup)) {
                 return true;

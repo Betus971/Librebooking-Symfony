@@ -112,19 +112,6 @@ final class ResourceController extends AbstractController
             }
         }
 
-            // P3 — visibilité hybride : on tague la ressource avec le code unité
-            // du créateur s'il n'a pas déjà été fixé (et si le créateur en a un).
-            // Ainsi un gestionnaire qui crée une ressource peut la gérer
-            // immédiatement, ainsi que ses collègues de la même unité, sans
-            // aucune action manuelle. Un super-admin garde la main pour
-            // réaffecter ensuite si besoin.
-            if (null === $resource->getCodeUnite()) {
-                $creator = $this->getUser();
-                if ($creator instanceof \App\Entity\User && null !== $creator->getCodeunite()) {
-                    $resource->setCodeUnite($creator->getCodeunite());
-                }
-            }
-
             $entityManager->persist($resource);
             $entityManager->flush();
             $this->addFlash('success', 'Ressource créée avec succès !');

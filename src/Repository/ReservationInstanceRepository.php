@@ -246,26 +246,12 @@ class ReservationInstanceRepository extends ServiceEntityRepository
         if (!empty($scope['scoped'])) {
             $groupIds = (isset($scope['resourceGroupIds']) && is_array($scope['resourceGroupIds']))
                 ? $scope['resourceGroupIds'] : [];
-            $unite = $scope['scopeCodeUnite'] ?? null;
 
-            $conds = [];
-            if (!empty($groupIds)) {
-                $conds[] = 'IDENTITY(r.resourceGroup) IN (:scopeGroupIds)';
-            }
-            if (null !== $unite) {
-                $conds[] = 'r.codeUnite = :scopeUnite';
-            }
-
-            if ([] === $conds) {
-                $qb->andWhere('1 = 0'); // ni groupe ni unité → rien.
+            if ([] === $groupIds) {
+                $qb->andWhere('1 = 0'); // aucun groupe → rien.
             } else {
-                $qb->andWhere('(' . implode(' OR ', $conds) . ')');
-                if (!empty($groupIds)) {
-                    $qb->setParameter('scopeGroupIds', $groupIds);
-                }
-                if (null !== $unite) {
-                    $qb->setParameter('scopeUnite', $unite);
-                }
+                $qb->andWhere('IDENTITY(r.resourceGroup) IN (:scopeGroupIds)')
+                    ->setParameter('scopeGroupIds', $groupIds);
             }
         }
 
