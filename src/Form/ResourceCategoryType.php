@@ -16,12 +16,11 @@ class ResourceCategoryType extends AbstractType
         $builder
             ->add('name', null, [
                 'label' => 'Nom',
-                'attr' => ['class' => 'fr-input'],
             ])
             ->add('description', null, [
                 'label' => 'Description',
                 'required' => false,
-                'attr' => ['class' => 'fr-textarea', 'rows' => 4],
+                'attr' => ['rows' => 4],
             ]) ;
           }
 

@@ -27,11 +27,8 @@ class ReservationQuickType extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Titre de la réservation',
                 'attr' => [
-                    'class' => 'fr-input',
                     'placeholder' => 'Ex : Réunion d’équipe, Séance de sport…',
                 ],
-                'label_attr' => ['class' => 'fr-label'],
-                'row_attr' => ['class' => 'fr-form-group'],
             ])
             ->add('resource', EntityType::class, [
                 'label' => 'Ressource à réserver',
@@ -45,9 +42,6 @@ class ReservationQuickType extends AbstractType
                 },
                 'required' => true,
                 'placeholder' => 'Sélectionnez une ressource…',
-                'attr' => ['class' => 'fr-select'],
-                'label_attr' => ['class' => 'fr-label'],
-                'row_attr' => ['class' => 'fr-form-group'],
             ])
 
 
@@ -57,13 +51,12 @@ class ReservationQuickType extends AbstractType
                 'label' => 'Date de début',
                 'widget' => 'single_text',
                 'mapped' => false, // Virtuel
-                'attr' => ['class' => 'fr-input']
             ])
             ->add('startTime', TimeType::class, [
                 'label' => 'Heure de début',
                 'widget' => 'single_text',
                 'mapped' => false,
-                'attr' => ['class' => 'fr-input', 'step' => 1800] // 30 min
+                'attr' => ['step' => 1800] // 30 min
             ])
 
             // --- FIN (On rajoute la date de fin) ---
@@ -71,13 +64,12 @@ class ReservationQuickType extends AbstractType
                 'label' => 'Date de fin',
                 'widget' => 'single_text',
                 'mapped' => false, // Virtuel
-                'attr' => ['class' => 'fr-input']
             ])
             ->add('endTime', TimeType::class, [
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
                 'mapped' => false,
-                'attr' => ['class' => 'fr-input', 'step' => 1800]
+                'attr' => ['step' => 1800]
             ])
 
             // 👥 LISTE DES PARTICIPANTS (Collection)
@@ -118,27 +110,21 @@ class ReservationQuickType extends AbstractType
                 'label' => 'Nombre de participants',
                 'required' => false, // le caractère obligatoire dépend de la ressource (validé côté DTO)
                 'help' => 'Obligatoire pour les salles / amphithéâtres. Ignoré pour le matériel.',
-                'attr' => ['class' => 'fr-input', 'min' => 1],
-                'label_attr' => ['class' => 'fr-label'],
-                'row_attr' => ['class' => 'fr-form-group'],
+                'attr' => ['min' => 1],
             ])
 
             ->add('description', TextareaType::class, [
                 'label' => 'Description (facultatif)',
                 'required' => false,
                 'attr' => [
-                    'class' => 'fr-textarea',
                     'placeholder' => 'Précisez l’objectif ou les détails de votre réservation…',
                 ],
-                'label_attr' => ['class' => 'fr-label'],
-                'row_attr' => ['class' => 'fr-form-group'],
             ])
         ->add('attachments', FileType::class, [
         'label' => 'Pièces justificatives',
         'multiple' => true, // <--- IMPORTANT : Autorise plusieurs fichiers
         'mapped' => false,
         'required' => false,
-        'attr' => ['class' => 'fr-upload'],
         'constraints' => [
             new All([ // "All" applique la contrainte à chaque fichier envoyé
                 'constraints' => [

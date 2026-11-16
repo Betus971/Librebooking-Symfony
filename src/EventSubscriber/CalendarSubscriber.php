@@ -93,10 +93,10 @@ final class CalendarSubscriber implements EventSubscriberInterface
             $resourceNames = [];
             $color = null;
 
-            // Palette « couleurs illustratives » du DSFR (choix UX) pour les
+            // Palette de couleurs par défaut (choix UX) pour les
             // ressources sans couleur définie en base. Attribution STABLE par
             // ID (une ressource garde toujours la même couleur).
-            $dsfrPalette = [
+            $palette = [
                 '#6E445A', // Glycine
                 '#E18B76', // Macaron
                 '#009081', // Émeraude
@@ -121,8 +121,8 @@ final class CalendarSubscriber implements EventSubscriberInterface
                         }
                         // SINON, on lui attribue une couleur fixe de la palette en fonction de son ID !
                         elseif (!$color) {
-                            $colorIndex = $res->getId() % count($dsfrPalette);
-                            $color = $dsfrPalette[$colorIndex];
+                            $colorIndex = $res->getId() % count($palette);
+                            $color = $palette[$colorIndex];
                         }
                     }
                 }

@@ -4,7 +4,7 @@ namespace App\Presta\Entity;
 use App\Presta\Repository\InscriptionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
-use App\Entity\User; // Link to the generic booking-D user
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: InscriptionRepository::class)]
 #[ORM\Table(name: 'presta_inscription')]

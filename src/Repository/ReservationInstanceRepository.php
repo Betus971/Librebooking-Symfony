@@ -203,15 +203,15 @@ class ReservationInstanceRepository extends ServiceEntityRepository
      * Statistiques d'usage PAR RESSOURCE, sur les réservations ACTIVES
      * (PENDING + APPROVED) : nombre de réservations et cumul d'heures réservées.
      *
-     * Respecte le SCOPE DE VISIBILITÉ HYBRIDE : si $scope['scoped'] est vrai
+     * Respecte le SCOPE DE VISIBILITÉ : si $scope['scoped'] est vrai
      * (gestionnaire non super-admin), on ne retourne que les ressources
-     * appartenant à un de ses groupes OU portant son code unité. Sans groupe
-     * ni code unité connu → aucun résultat (sécurité par défaut).
+     * appartenant à un de ses groupes. Sans groupe → aucun résultat
+     * (sécurité par défaut).
      *
      * L'agrégation (comptage + somme des durées) est faite en PHP pour rester
      * portable (le calcul de différence de dates en DQL est spécifique au SGBD).
      *
-     * @param array{scoped?: bool, resourceGroupIds?: int[], scopeCodeUnite?: ?int} $scope
+     * @param array{scoped?: bool, resourceGroupIds?: int[]} $scope
      * @return list<array{id: int, name: string, count: int, hours: float}>
      *         trié par nombre de réservations décroissant.
      */
@@ -302,6 +302,33 @@ class ReservationInstanceRepository extends ServiceEntityRepository
             ->setParameter('from', $from)
             ->setParameter('until', $until)
             ->setParameter('approved', ReservationStatus::APPROVED)
+            ->orderBy('i.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Instances APPROUVÉES en cours (déjà commencées, pas encore terminées),
+     * non pointées, sur une ressource avec check-in + libération automatique.
+     * Utilisé par AutoReleaseCommand (le délai exact est vérifié par la commande).
+     *
+     * @return ReservationInstance[]
+     */
+    public function findCheckinCandidates(\DateTimeInterface $now): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.series', 's')
+            ->join('s.status', 'st')
+            ->join('App\Entity\ReservationResource', 'rr', 'WITH', 'rr.series = s')
+            ->join('rr.resource', 'r')
+            ->andWhere('st.id = :approved')
+            ->andWhere('i.checkinDate IS NULL')
+            ->andWhere('r.enableCheckIn = true')
+            ->andWhere('r.autoReleaseMinutes IS NOT NULL')
+            ->andWhere('i.startDate <= :now')
+            ->andWhere('i.endDate > :now')
+            ->setParameter('approved', ReservationStatus::APPROVED)
+            ->setParameter('now', $now)
             ->orderBy('i.startDate', 'ASC')
             ->getQuery()
             ->getResult();

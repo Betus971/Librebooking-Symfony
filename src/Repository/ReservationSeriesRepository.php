@@ -15,20 +15,17 @@ class ReservationSeriesRepository extends ServiceEntityRepository
     }
 
     /**
-     * Applique le SCOPE DE VISIBILITÉ HYBRIDE (P3.4) sur un QueryBuilder.
+     * Applique le SCOPE DE VISIBILITÉ sur un QueryBuilder.
      *
      * Une série est visible par un gestionnaire si AU MOINS une de ses
-     * ressources :
-     *   (a) porte le même code unité que lui (couche SSO automatique), OU
-     *   (b) appartient à un de ses ResourceGroup (couche manuelle d'exception).
+     * ressources appartient à un de ses ResourceGroup.
      *
      * Sémantique des filtres passés par le contrôleur :
      *   - $f['scoped'] absent/false  => super-admin : AUCUNE restriction.
      *   - $f['scoped'] === true      => gestionnaire : on restreint.
      *       $f['resourceGroupIds'] : int[]  (groupes de l'utilisateur)
-     *       $f['scopeCodeUnite']   : ?int   (code unité de l'utilisateur)
      *
-     * Si le gestionnaire n'a ni groupe ni code unité, il ne voit rien
+     * Si le gestionnaire n'a aucun groupe, il ne voit rien
      * (sécurité par défaut : `1 = 0`).
      *
      * @param string $resourceAlias alias DQL de la ressource (ex. 'r', 'r2')
@@ -131,7 +128,7 @@ class ReservationSeriesRepository extends ServiceEntityRepository
             $qb->andWhere('NOT EXISTS (SELECT 1 FROM App\Entity\ReservationResource rr3 JOIN rr3.resource r3 WITH r3.requiresApproval = true WHERE rr3.series = s)');
         }
 
-        // --- SCOPE DE VISIBILITÉ HYBRIDE (groupes OU code unité) ---
+        // --- SCOPE DE VISIBILITÉ (groupes) ---
         // Les ressources (alias r) sont déjà jointes ci-dessus.
         $this->applyHybridScope($qb, $f, 'r');
 
@@ -227,7 +224,7 @@ class ReservationSeriesRepository extends ServiceEntityRepository
             $qb->andWhere('IDENTITY(s.status) = :statusId')->setParameter('statusId', $f['status']);
         }
 
-        // Scope hybride (groupes OU code unité) — cf. findPendingWithFilters.
+        // Scope par groupes — cf. findPendingWithFilters.
         // Les ressources (alias r) sont déjà jointes ci-dessus.
         $this->applyHybridScope($qb, $f, 'r');
 

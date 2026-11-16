@@ -56,7 +56,7 @@ final class ReservationSeriesVoterTest extends TestCase
         $series = new ReservationSeries();
         $series->setOwner($owner);
 
-        $result = $voter->vote($this->token($owner), $series, [ReservationSeriesVoter::CANCEL]);
+        $result = $voter->vote($this->token($owner), $series, [ReservationSeriesVoter::CANCEL_OWN]);
 
         self::assertSame(VoterInterface::ACCESS_GRANTED, $result);
     }
@@ -68,7 +68,7 @@ final class ReservationSeriesVoterTest extends TestCase
         $series = new ReservationSeries();
         $series->setOwner($this->userWithId(1));
 
-        $result = $voter->vote($this->token($this->userWithId(2)), $series, [ReservationSeriesVoter::CANCEL]);
+        $result = $voter->vote($this->token($this->userWithId(2)), $series, [ReservationSeriesVoter::CANCEL_OWN]);
 
         self::assertSame(VoterInterface::ACCESS_DENIED, $result);
     }

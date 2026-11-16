@@ -92,10 +92,7 @@ By supporting both, Librebooking adapts to almost any organizational need—whet
    npm install
    ```
 
-2. **Configure your environment** — copy the example file (your secrets stay in the git-ignored `.env.local`):
-   ```bash
-   cp .env.example .env.local
-   ```
+2. **Configure your environment** — `.env` (committed) only holds defaults; put your own values in the git-ignored `.env.local`:
    ```env
    APP_SECRET=your_generated_secret
    DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/librebooking?serverVersion=16&charset=utf8"

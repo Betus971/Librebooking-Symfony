@@ -20,7 +20,7 @@
                 </div>
                 <div class="mt-4 md:mt-0">
                     <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-outline btn-sm">
-                        <i class="fr-icon-arrow-left-line mr-2"></i> Retour
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Retour
                     </a>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                 {# ── Actions ─────────────────────────────────────────── #}
                 <div class="flex flex-wrap gap-4 mt-8">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fr-icon-checkbox-circle-line mr-2"></i> {{ is_edit ? 'Enregistrer (ouvert)' : 'Créer' }}
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> {{ is_edit ? 'Enregistrer (ouvert)' : 'Créer' }}
                     </button>
                     <a href="{{ path('app_presta_provider_schedule_index') }}" class="btn btn-ghost">Annuler</a>
                 </div>
@@ -110,7 +110,7 @@
                       onsubmit="return confirm('Bloquer ce créneau ? La plage sera retirée de votre semaine type.');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ plage.id) }}">
                     <button type="submit" class="btn btn-outline btn-error">
-                        <i class="fr-icon-close-circle-line mr-2"></i> Bloquer ce créneau
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Bloquer ce créneau
                     </button>
                 </form>
                 {% endif %}

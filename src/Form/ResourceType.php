@@ -25,17 +25,13 @@ class ResourceType extends AbstractType
         $toggle = fn (string $label) => [
             'label' => $label,
             'required' => false,
-            // PAS de classe fr-toggle, PAS de data-dsfr-toggle
-            'attr' => ['class' => 'fr-checkbox'],  // ou même [] si tu veux 0 style DSFR
-            'label_attr' => ['class' => 'fr-label'],
+            'attr' => ['class' => 'toggle toggle-primary'], // interrupteur DaisyUI
         ];
 
-        // Options communes pour les inputs/textarea DSFR
+        // Options communes pour les inputs/textarea (style apporté par form/daisyui_theme.html.twig)
         $inputOptions = fn (string $label, bool $required = false, ?string $help = null) => [
             'label' => $label,
             'required' => $required,
-            'attr' => ['class' => 'fr-input'],
-            'label_attr' => ['class' => 'fr-label'],
             'help' => $help,
         ];
 
@@ -45,8 +41,6 @@ class ResourceType extends AbstractType
             'choice_label' => 'name',
             'placeholder' => $placeholder,
             'required' => $required,
-            'attr' => ['class' => 'fr-select'],
-            'label_attr' => ['class' => 'fr-label'],
             'label' => $label,
         ];
         $builder
@@ -54,7 +48,6 @@ class ResourceType extends AbstractType
                 'label' => 'Photo de la ressource (JPEG/PNG)',
                 'mapped' => false, // Important : ce n'est pas lié directement à la BDD
                 'required' => false,
-                'attr' => ['class' => 'fr-upload'], // Style DSFR si tu veux
                 'constraints' => [
                     new Image([
                         'maxSize' => '10M',
@@ -86,19 +79,16 @@ class ResourceType extends AbstractType
             ->add('contactInfo', TextType::class, $inputOptions('Informations de contact', false, 'Ex. email/téléphone du référent'))
             ->add('description', TextareaType::class, array_merge(
                 $inputOptions('Description', false),
-                ['attr' => ['class' => 'fr-textarea']]
+                []
             ))
         ->add('notes', TextareaType::class, [
             'label'      => 'Équipements & caractéristiques',
             'required'   => false,
             'attr'       => [
-                'class'       => 'fr-textarea',
                 'placeholder' => 'Rétroprojecteur, Wifi, Tableau blanc, Système audio, Vidéoconférence, Micro',
                 'rows'        => 3,
             ],
-            'label_attr' => ['class' => 'fr-label'],
             'help'       => 'Listez les équipements séparés par des virgules. Ex : Rétroprojecteur, Wifi, Tableau blanc',
-            'row_attr'   => ['class' => 'fr-input-group'],
         ])
         ->add('maxParticipants', IntegerType::class, $inputOptions('Participants maximum', false))
         ->add('isActive', CheckboxType::class, $toggle('Actif'));
@@ -114,10 +104,8 @@ class ResourceType extends AbstractType
                 'label' => 'Durée minimale',
                 'required' => false,
                 'attr' => [
-                    'class' => 'fr-input-group',
                     'data-allowed-units' => json_encode(['m', 'h', 'd']), // Ajoute cette ligne
                 ],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m', 'h', 'd'],
                 'default_unit' => 'm',
                 'help' => 'Laisser vide = pas de durée minimale (ex. 30 min / 1 h / 1 j).',
@@ -125,8 +113,6 @@ class ResourceType extends AbstractType
             ->add('minIncrement', DurationUnitType::class, [
                 'label' => 'Pas de créneau',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m', 'h'],
                 'default_unit' => 'm',
                 'help' => 'Laisser vide = aucun pas imposé (ex. 15 min ou 1 h).',
@@ -135,8 +121,6 @@ class ResourceType extends AbstractType
                 'label' => 'Durée maximale',
                 'required' => false,
                 'mapped' => true, // Active le mapping automatique via DataMapper
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m', 'h', 'd'],
                 'default_unit' => 'h',
                 'help' => 'Laisser vide = pas de durée maximale (ex. 4 h / 2 j).',
@@ -147,8 +131,6 @@ class ResourceType extends AbstractType
             ->add('bufferTime', DurationUnitType::class, [
                 'label' => 'Temps tampon entre réservations',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m','h'],
                 'default_unit' => 'm',
                 'help' => 'Délai minimal entre la fin d’une résa et le début de la suivante. Laisser vide = aucun.',
@@ -156,8 +138,6 @@ class ResourceType extends AbstractType
             ->add('autoReleaseMinutes', DurationUnitType::class, [
                 'label' => 'Libération automatique (no-show)',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m','h'],
                 'default_unit' => 'm',
                 'help' => 'Annule/libère si non démarrée après ce délai. Laisser vide = désactivé.',
@@ -169,8 +149,6 @@ class ResourceType extends AbstractType
             ->add('minNoticeTimeAdd', DurationUnitType::class, [
                 'label' => 'Préavis de création',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m','h','d'],
                 'default_unit' => 'h',
                 'help' => 'Ex. 1 j : créer au moins 1 jour avant. Laisser vide = pas de préavis.',
@@ -178,8 +156,6 @@ class ResourceType extends AbstractType
             ->add('minNoticeTimeUpdate', DurationUnitType::class, [
                 'label' => 'Préavis de modification',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m','h','d'],
                 'default_unit' => 'h',
                 'help' => 'Ex. 7 j : modifier au moins 7 jours avant. Laisser vide = pas de préavis.',
@@ -187,8 +163,6 @@ class ResourceType extends AbstractType
             ->add('minNoticeTimeDelete', DurationUnitType::class, [
                 'label' => 'Préavis d’annulation',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['m','h','d'],
                 'default_unit' => 'h',
                 'help' => 'Ex. 1 j : annuler au moins 1 jour avant. Laisser vide = pas de préavis.',
@@ -196,8 +170,6 @@ class ResourceType extends AbstractType
             ->add('maxNoticeTime', DurationUnitType::class, [
                 'label' => 'Anticipation maximale (au plus tôt)',
                 'required' => false,
-                'attr' => ['class' => 'fr-input-group'],
-                'label_attr' => ['class' => 'fr-label'],
                 'allowed_units' => ['d','h','m'],
                 'default_unit' => 'd',
                 'help' => 'Ex. 90 j : on ne peut pas réserver plus de 90 jours à l’avance. Laisser vide = illimité.',

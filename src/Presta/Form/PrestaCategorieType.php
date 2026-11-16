@@ -17,7 +17,7 @@ class PrestaCategorieType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom de la catégorie',
-                'attr'  => ['class' => 'fr-input', 'placeholder' => 'Ex. TIR, CCPM, Coiffure…'],
+                'attr'  => ['placeholder' => 'Ex. TIR, CCPM, Coiffure…'],
                 'constraints' => [
                     new Assert\NotBlank(message: 'Le nom de la catégorie est obligatoire.'),
                     new Assert\Length(max: 100),
@@ -26,7 +26,7 @@ class PrestaCategorieType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label'    => 'Description (facultatif)',
                 'required' => false,
-                'attr'     => ['class' => 'fr-input', 'rows' => 3],
+                'attr'     => ['rows' => 3],
             ])
         ;
     }

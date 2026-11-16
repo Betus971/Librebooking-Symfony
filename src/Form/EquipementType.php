@@ -17,7 +17,7 @@ class EquipementType extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => 'Nom de l\'équipement',
                 'help'  => 'Ex. : Wifi, Vidéoprojecteur, Tableau blanc. Le nom doit être unique.',
-                'attr'  => ['class' => 'fr-input', 'placeholder' => 'Ex. : Vidéoprojecteur'],
+                'attr'  => ['placeholder' => 'Ex. : Vidéoprojecteur'],
             ])
             ->add('actif', CheckboxType::class, [
                 'label'    => 'Actif (proposé au choix sur les ressources)',

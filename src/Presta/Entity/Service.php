@@ -50,7 +50,7 @@ class Service
 
     /**
      * Couleur d'affichage de la prestation dans l'agenda (hex, ex. « #6E445A »),
-     * choisie par le prestataire dans la palette DSFR. NULL = couleur par défaut.
+     * choisie par le prestataire dans la palette proposée. NULL = couleur par défaut.
      */
     #[ORM\Column(length: 7, nullable: true)]
     private ?string $couleur = null;
@@ -179,10 +179,10 @@ class Service
         return $this;
     }
 
-    /** Couleur d'affichage effective (couleur choisie ou défaut Bleu France). */
+    /** Couleur d'affichage effective (couleur choisie ou couleur primaire du thème). */
     public function getCouleurAffichage(): string
     {
-        return $this->couleur ?: '#000091';
+        return $this->couleur ?: '#6366f1';
     }
 
     public function __toString(): string

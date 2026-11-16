@@ -9,7 +9,7 @@ use Knp\Bundle\PaginatorBundle\Pagination\SlidingPagination;
  * `[rows, total]` déjà calculé par un repository (RF-9, étape 9).
  *
  * Mutualise la logique précédemment dupliquée dans AdminReservationController
- * et AdminUserController : permet de partager le rendu DSFR
+ * et AdminUserController : permet de partager le rendu de pagination
  * (`templates/_partials/_pagination.html.twig`) sans réécrire la logique de
  * count des repositories (GROUP BY non triviaux, scope par groupe).
  */

@@ -42,7 +42,7 @@ class HealthController extends AbstractController
 
         return new JsonResponse([
             'status' => $status,                 // ok | degraded
-            'application' => 'resadg',
+            'application' => 'librebooking',
             'checks' => [
                 'database' => $database,         // ok | ko
             ],

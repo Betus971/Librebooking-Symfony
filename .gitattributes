@@ -1,0 +1,3 @@
+# Les scripts shell doivent garder des fins de ligne LF pour être exécutables
+# sur le serveur Linux (un CRLF casse le shebang).
+*.sh text eol=lf

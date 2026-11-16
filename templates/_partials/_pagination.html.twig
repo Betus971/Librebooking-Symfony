@@ -1,101 +1,42 @@
 {#
- #  ═══════════════════════════════════════════════════════════════════════
- #  Template de rendu unifié pour KnpPaginatorBundle — Conforme DSFR.
+ #  Rendu de pagination unique du projet (KnpPaginatorBundle) — DaisyUI 5.
+ #  Référencé par config/packages/knp_paginator.yaml et ManualPaginationTrait.
  #
- #  Référencé dans config/packages/knp_paginator.yaml :
- #      template:
- #          pagination: '_partials/_pagination.html.twig'
- #
- #  Toutes les listes paginées du projet (admin/reservation, admin/users…) 
- #  héritent automatiquement de ce rendu.
- #  Ne pas dupliquer du markup `fr-pagination` ailleurs : tout passe par ici.
- #
- #  Variables fournies par KnpPaginator (cf. SlidingPaginationInterface) :
- #    - pageCount      (int)   nombre total de pages
- #    - current        (int)   page courante
- #    - first          (int)   première page (typiquement 1)
- #    - last           (int)   dernière page (= pageCount)
- #    - previous       (int)   page précédente (UNDEFINED si current=1)
- #    - next           (int)   page suivante  (UNDEFINED si current=last)
- #    - pagesInRange   (int[]) fenêtre glissante autour de current
- #    - route          (str)   nom de route à utiliser
- #    - query          (map)   query-string courante (filtres, tri…)
- #    - options        (map)   options paginator (pageParameterName, etc.)
- #  ═══════════════════════════════════════════════════════════════════════
+ #  Variables KnpPaginator : pageCount, current, first, last, previous, next,
+ #  pagesInRange, route, query, options.
  #}
 {% if pageCount > 1 %}
-    <nav role="navigation" class="fr-pagination" aria-label="Pagination">
-        <ul class="fr-pagination__list">
+    <nav class="flex justify-center my-6" aria-label="Pagination">
+        <div class="join">
+            {% if previous is defined %}
+                <a class="join-item btn btn-sm" rel="prev" href="{{ path(route, knp_pagination_query(query, previous, options)) }}" aria-label="Page précédente">«</a>
+            {% else %}
+                <span class="join-item btn btn-sm btn-disabled" aria-disabled="true">«</span>
+            {% endif %}
 
-            {# ---- Première page ---- #}
-            <li>
-                <a class="fr-pagination__link fr-pagination__link--first"
-                   {% if current != first %}
-                       href="{{ path(route, knp_pagination_query(query, first, options)) }}"
-                   {% else %}
-                       aria-disabled="true" role="link"
-                   {% endif %}>
-                    Première page
-                </a>
-            </li>
+            {% if first is defined and first not in pagesInRange %}
+                <a class="join-item btn btn-sm" href="{{ path(route, knp_pagination_query(query, first, options)) }}">{{ first }}</a>
+                {% if first + 1 not in pagesInRange %}<span class="join-item btn btn-sm btn-disabled">…</span>{% endif %}
+            {% endif %}
 
-            {# ---- Page précédente ---- #}
-            <li>
-                <a class="fr-pagination__link fr-pagination__link--prev"
-                   {% if previous is defined %}
-                       rel="prev"
-                       href="{{ path(route, knp_pagination_query(query, previous, options)) }}"
-                   {% else %}
-                       aria-disabled="true" role="link"
-                   {% endif %}>
-                    Page précédente
-                </a>
-            </li>
-
-            {# ---- Pages dans la fenêtre glissante ---- #}
             {% for page in pagesInRange %}
-                <li>
-                    {% if page != current %}
-                        <a class="fr-pagination__link"
-                           href="{{ path(route, knp_pagination_query(query, page, options)) }}"
-                           title="Page {{ page }}">
-                            {{ page }}
-                        </a>
-                    {% else %}
-                        {# Page courante : pas de href, aria-current obligatoire DSFR #}
-                        <a class="fr-pagination__link"
-                           aria-current="page"
-                           title="Page {{ page }}">
-                            {{ page }}
-                        </a>
-                    {% endif %}
-                </li>
+                {% if page == current %}
+                    <span class="join-item btn btn-sm btn-primary" aria-current="page">{{ page }}</span>
+                {% else %}
+                    <a class="join-item btn btn-sm" href="{{ path(route, knp_pagination_query(query, page, options)) }}">{{ page }}</a>
+                {% endif %}
             {% endfor %}
 
-            {# ---- Page suivante ---- #}
-            <li>
-                <a class="fr-pagination__link fr-pagination__link--next"
-                   {% if next is defined %}
-                       rel="next"
-                       href="{{ path(route, knp_pagination_query(query, next, options)) }}"
-                   {% else %}
-                       aria-disabled="true" role="link"
-                   {% endif %}>
-                    Page suivante
-                </a>
-            </li>
+            {% if last is defined and last not in pagesInRange %}
+                {% if last - 1 not in pagesInRange %}<span class="join-item btn btn-sm btn-disabled">…</span>{% endif %}
+                <a class="join-item btn btn-sm" href="{{ path(route, knp_pagination_query(query, last, options)) }}">{{ last }}</a>
+            {% endif %}
 
-            {# ---- Dernière page ---- #}
-            <li>
-                <a class="fr-pagination__link fr-pagination__link--last"
-                   {% if last is defined and current != last %}
-                       href="{{ path(route, knp_pagination_query(query, last, options)) }}"
-                   {% else %}
-                       aria-disabled="true" role="link"
-                   {% endif %}>
-                    Dernière page
-                </a>
-            </li>
-        </ul>
+            {% if next is defined %}
+                <a class="join-item btn btn-sm" rel="next" href="{{ path(route, knp_pagination_query(query, next, options)) }}" aria-label="Page suivante">»</a>
+            {% else %}
+                <span class="join-item btn btn-sm btn-disabled" aria-disabled="true">»</span>
+            {% endif %}
+        </div>
     </nav>
 {% endif %}

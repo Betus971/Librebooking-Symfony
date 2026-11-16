@@ -23,19 +23,19 @@ class AccessoireType extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => 'Nom de l\'accessoire',
                 'help'  => 'Ex. : Micro sans fil, Pupitre, Rallonge électrique. Le nom doit être unique.',
-                'attr'  => ['class' => 'fr-input', 'placeholder' => 'Ex. : Micro sans fil'],
+                'attr'  => ['placeholder' => 'Ex. : Micro sans fil'],
             ])
             ->add('quantiteDisponible', IntegerType::class, [
                 'label'    => 'Quantité disponible en stock',
                 'help'     => 'Laisser vide = stock illimité (∞).',
                 'required' => false,
-                'attr'     => ['class' => 'fr-input', 'min' => 0, 'placeholder' => 'Illimité si vide'],
+                'attr'     => ['min' => 0, 'placeholder' => 'Illimité si vide'],
                 'constraints' => [new PositiveOrZero(message: 'La quantité ne peut pas être négative.')],
             ])
             ->add('description', TextareaType::class, [
                 'label'    => 'Description (facultatif)',
                 'required' => false,
-                'attr'     => ['class' => 'fr-input', 'rows' => 2, 'placeholder' => 'Précisions éventuelles (modèle, emplacement…)'],
+                'attr'     => ['rows' => 2, 'placeholder' => 'Précisions éventuelles (modèle, emplacement…)'],
             ])
             ->add('resources', EntityType::class, [
                 'label'         => 'Ressources concernées',

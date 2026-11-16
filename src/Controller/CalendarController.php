@@ -110,9 +110,8 @@ final class CalendarController extends AbstractController
     {
         // Aucun événement pour l'instant (cf. TODO ci-dessous) : on expose un
         // calendrier vide mais valide. Lorsque les réservations seront publiées
-        // dans le flux, construire ici le tableau d'événements et le passer à
-        // $icsGenerator->generate($events).
-        $icsContent = $icsGenerator->generate();
+        // dans le flux, passer les réservations à generateForReservations().
+        $icsContent = $icsGenerator->generateForReservations([]);
 
         return new Response($icsContent, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',

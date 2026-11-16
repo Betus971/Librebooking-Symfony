@@ -31,7 +31,7 @@ final class AdminUserController extends AbstractController
         $result = $userRepository->searchPaginated($q, $page, $perPage);
 
         // Pagination manuelle mutualisée (étape 9 — ManualPaginationTrait) :
-        // total déjà calculé par le repo, rendu DSFR unifié.
+        // total déjà calculé par le repo, rendu de pagination unifié.
         $pagination = $this->buildPagination(
             $result['users'],
             (int) $result['total'],

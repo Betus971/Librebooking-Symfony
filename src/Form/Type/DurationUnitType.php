@@ -24,7 +24,7 @@ final class DurationUnitType extends AbstractType implements DataMapperInterface
             ->add('value', IntegerType::class, [
                 'required' => false,
                 'empty_data' => '',
-                'attr' => ['min' => 0, 'step' => 1, 'class' => 'fr-input'],
+                'attr' => ['min' => 0, 'step' => 1],
                 'label' => false,
             ])
             ->add('unit', ChoiceType::class, [
@@ -35,10 +35,7 @@ final class DurationUnitType extends AbstractType implements DataMapperInterface
                 'data'       => $options['default_unit'],
                 'empty_data' => $options['default_unit'],
                 'label'      => false,
-                // 👇 ON RETIRE LE BOUTON "None" INUTILE
-                'placeholder' => false,
-                // 👇 ON AJOUTE LA CLASSE DSFR POUR LE DESIGN
-                'attr'       => ['class' => 'fr-select'],
+                'placeholder' => false, // pas d'option « None »
             ])
             ->setDataMapper($this);
         // ----- Pré-remplissage en édition (minutes -> value + unit) -----

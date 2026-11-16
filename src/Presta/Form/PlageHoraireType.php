@@ -31,7 +31,6 @@ class PlageHoraireType extends AbstractType
                     'Samedi' => 6,
                     'Dimanche' => 7,
                 ],
-                'attr' => ['class' => 'fr-checkbox-group']
             ]);
         } else {
             $builder->add('jourSemaine', ChoiceType::class, [
@@ -45,7 +44,6 @@ class PlageHoraireType extends AbstractType
                     'Samedi' => 6,
                     'Dimanche' => 7,
                 ],
-                'attr' => ['class' => 'fr-select']
             ]);
         }
 
@@ -53,26 +51,22 @@ class PlageHoraireType extends AbstractType
             ->add('heureDebut', TimeType::class, [
                 'label' => 'Heure de début',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input']
             ])
             ->add('heureFin', TimeType::class, [
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'fr-input']
             ])
             ->add('dateDebut', DateType::class, [
                 'label' => 'Valable à partir du (optionnel)',
                 'required' => false,
                 'widget' => 'single_text',
                 'help' => 'Laissez vide pour une plage récurrente sans limite de dates.',
-                'attr' => ['class' => 'fr-input'],
             ])
             ->add('dateFin', DateType::class, [
                 'label' => 'Valable jusqu\'au (optionnel)',
                 'required' => false,
                 'widget' => 'single_text',
                 'help' => 'Laissez vide pour une plage sans date de fin.',
-                'attr' => ['class' => 'fr-input'],
             ])
         ;
     }

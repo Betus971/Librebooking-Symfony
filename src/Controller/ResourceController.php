@@ -134,8 +134,7 @@ final class ResourceController extends AbstractController
     #[Route('/{id}/edit', name: 'app_resource_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Resource $resource, EntityManagerInterface $entityManager, SluggerInterface $slugger, FileUploadService $uploader): Response
     {
-        // P3 — visibilité hybride : super-admin OU même code unité OU groupe manuel.
-        // Remplace l'ancien check qui ne regardait QUE le ResourceGroup.
+        // Visibilité : super-admin OU membre d'un groupe gestionnaire de la ressource (cf. ResourceVoter).
         $this->denyAccessUnlessGranted(ResourceVoter::MANAGE, $resource);
 
         $form = $this->createForm(ResourceType::class, $resource);

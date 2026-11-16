@@ -137,7 +137,7 @@ final class AdminReservationController extends AbstractController
             'status'   => $statusRaw !== '' ? (int) $statusRaw : null,
         ];
 
-        // Scope de visibilité hybride (groupes OU code unité). Super-admin : aucun filtre.
+        // Scope de visibilité par groupes. Super-admin : aucun filtre.
         $filters = $this->applyScope($filters);
 
         // Appel au repository (méthode globale)
@@ -178,7 +178,7 @@ final class AdminReservationController extends AbstractController
     ): Response {
         // Plus de filtre sur cette page : on liste TOUTES les demandes en attente
         // (le filtrage détaillé est sur l'Historique). On ne garde que le scope
-        // de visibilité hybride (groupes OU code unité ; super-admin = tout).
+        // de visibilité par groupes ; super-admin = tout).
         $filters = $this->applyScope([]);
 
         $page   = max(1, $request->query->getInt('page', 1));

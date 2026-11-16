@@ -22,7 +22,7 @@ final class IcsGeneratorService
     {
         $ics  = "BEGIN:VCALENDAR\r\n";
         $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//MonApp//GestionRessources//FR\r\n";
+        $ics .= "PRODID:-//Librebooking//Reservations//FR\r\n";
         $ics .= "CALSCALE:GREGORIAN\r\n";
         $ics .= "METHOD:PUBLISH\r\n";
 
@@ -114,7 +114,7 @@ final class IcsGeneratorService
     {
         $ics  = "BEGIN:VCALENDAR\r\n";
         $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//MonApp//GestionRessources//FR\r\n";
+        $ics .= "PRODID:-//Librebooking//Reservations//FR\r\n";
         $ics .= "CALSCALE:GREGORIAN\r\n";
         $ics .= "METHOD:PUBLISH\r\n";
 
@@ -169,7 +169,7 @@ final class IcsGeneratorService
     {
         $ics  = "BEGIN:VCALENDAR\r\n";
         $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//MonApp//GestionRessources//FR\r\n";
+        $ics .= "PRODID:-//Librebooking//Reservations//FR\r\n";
         $ics .= "CALSCALE:GREGORIAN\r\n";
         $ics .= "METHOD:PUBLISH\r\n";
 

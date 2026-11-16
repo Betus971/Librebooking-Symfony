@@ -32,7 +32,6 @@ class TimeBlockType extends AbstractType
                       'Samedi' => 6, 'Dimanche' => 0,
                   ],
                   // Pas de valeur par défaut ici : le contrôleur gère le fallback (semaine entière)
-                  'label_attr' => ['class' => 'fr-label'],
               ]);
 
 
@@ -56,8 +55,7 @@ class TimeBlockType extends AbstractType
                 'input' => 'datetime_immutable',
                 'model_timezone' => $tz,
                 'view_timezone'  => $tz,
-                'attr' => ['class' => 'fr-input', 'step' => 60], // pas de 1 min
-                'label_attr' => ['class' => 'fr-label'],
+                'attr' => ['step' => 60], // pas de 1 min
             ])
 
             ->add('endTime', TimeType::class, [
@@ -68,48 +66,43 @@ class TimeBlockType extends AbstractType
                 'input' => 'datetime_immutable',
                 'model_timezone' => $tz,
                 'view_timezone'  => $tz,
-                'attr' => ['class' => 'fr-input', 'step' => 60],
-                'label_attr' => ['class' => 'fr-label'],
+                'attr' => ['step' => 60],
             ])
             ->add('slotDuration', IntegerType::class, [
                 'label'   => 'Durée des créneaux (minutes)',
                 'mapped'  => false,
                 'required'=> false,
-                'attr'    => ['class' => 'fr-input', 'placeholder' => 'Ex: 30', 'min' => 1, 'step' => 1],
+                'attr'    => ['placeholder' => 'Ex: 30', 'min' => 1, 'step' => 1],
             ])
             ->add('availabilityCode', ChoiceType::class, [
                 'label' => 'Disponibilité',
                 'choices' => ['Disponible' => 1, 'Fermé' => 0],
                 'expanded' => true,
-                'label_attr' => ['class' => 'fr-label'],
-                'choice_attr' => fn() => ['class' => 'fr-radio-group'],
             ])
 
             ->add('label', TextType::class, [
                 'label' => 'Libellé (optionnel)',
                 'required' => false,
-                'attr' => ['class' => 'fr-input', 'placeholder' => 'Ex : matin, après-midi…'],
-                'label_attr' => ['class' => 'fr-label'],
+                'attr' => ['placeholder' => 'Ex : matin, après-midi…'],
             ])
 
             ->add('endLabel', TextType::class, [
                 'label' => 'Libellé fin (optionnel)',
                 'required' => false,
-                'attr' => ['class' => 'fr-input', 'placeholder' => 'Ex : pause, fin de journée…'],
-                'label_attr' => ['class' => 'fr-label'],
+                'attr' => ['placeholder' => 'Ex : pause, fin de journée…'],
             ])
 
             ->add('clear', SubmitType::class, [
                 'label' => 'Vider jours sélectionnés',
-                'attr'  => ['class' => 'fr-btn fr-btn--secondary'],
+                'attr'  => ['class' => 'btn btn-outline'],
             ])
             ->add('generate', SubmitType::class, [
                 'label' => 'Générer les créneaux',
-                'attr'  => ['class' => 'fr-btn'],
+                'attr'  => ['class' => 'btn'],
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer (unitaire)',
-                'attr'  => ['class' => 'fr-btn fr-btn--primary'],
+                'attr'  => ['class' => 'btn btn-primary'],
             ])
 
 

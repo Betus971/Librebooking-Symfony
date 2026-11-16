@@ -85,7 +85,7 @@ final class StatistiqueRessourceController extends AbstractController
             'labels' => array_map(static fn (array $r) => $r['name'], $top),
             'datasets' => [[
                 'label' => 'Nombre de réservations',
-                'backgroundColor' => '#000091', // Bleu France DSFR
+                'backgroundColor' => '#6366f1', // couleur primaire du thème (indigo)
                 'data' => array_map(static fn (array $r) => $r['count'], $top),
             ]],
         ]);

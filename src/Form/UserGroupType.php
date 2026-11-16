@@ -20,7 +20,6 @@ class UserGroupType extends AbstractType
                 'multiple' => true,
                 'expanded' => true, // true = cases à cocher (checkboxes)
                 'label' => 'Équipes / Groupes assignés à cet utilisateur',
-                'attr' => ['class' => 'fr-checkbox-group'], // Style optionnel si tu utilises le DSFR
             ])
         ;
     }

@@ -186,8 +186,8 @@ final class CreneauGenerator
      */
     public function findNextAvailableDate(Service $service, \DateTimeInterface $from): ?\DateTimeInterface
     {
-        $maxBooking = clone $service->getPrestataire()->getMaxBookingDate();
-        $maxBooking->setTime(23, 59, 59);
+        // getMaxBookingDate() renvoie déjà la fin de journée (23:59:59), immuable.
+        $maxBooking = $service->getPrestataire()->getMaxBookingDate();
         $cursor = (clone $from)->modify('+1 day')->setTime(0, 0, 0);
 
         if ($cursor > $maxBooking) {

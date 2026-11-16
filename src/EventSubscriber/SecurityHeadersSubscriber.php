@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Choix de CSP : application en réseau fermé (air-gap), toutes les ressources
  * sont auto-hébergées → `default-src 'self'` bloque tout chargement externe
  * (aucun script/style/image tiers ne peut être injecté). On autorise
- * `'unsafe-inline'` sur script/style car le DSFR et plusieurs vues utilisent
+ * `'unsafe-inline'` sur script/style car plusieurs vues utilisent
  * des styles et scripts inline ; passer à des nonces est une amélioration
  * future (cf. docs/07).
  */

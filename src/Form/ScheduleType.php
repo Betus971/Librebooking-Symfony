@@ -32,8 +32,6 @@ class ScheduleType extends AbstractType
                 'placeholder' => 'Choisir un fuseau',
                 'preferred_choices' => ['Europe/Paris'],
                 'data' => $options['layout_timezone'],     // 👈 injecté par le contrôleur
-                'attr' => ['class' => 'fr-select'],
-                'label_attr' => ['class' => 'fr-label'],
             ])
             ->add('published', CheckboxType::class, ['required' => false, 'label' => 'Publié'])
             ->add('allowCalendarSubscription', CheckboxType::class, ['required' => false, 'label' => 'Abonnement iCal'])
